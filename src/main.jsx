@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { supabase } from './supabase'
-import { LogOut, Users, Dumbbell, ClipboardList, UserRound, ShieldCheck, PlusCircle, CalendarDays, Pencil, Trash2, X, Languages, LockKeyhole, Search } from 'lucide-react'
+import { LogOut, Users, Dumbbell, ClipboardList, UserRound, ShieldCheck, PlusCircle, CalendarDays, Pencil, Trash2, X, Languages, LockKeyhole, Search, UserCog, Save } from 'lucide-react'
 import './styles.css'
 
 const TEXT = {
@@ -9,7 +9,7 @@ const TEXT = {
     loginTitle: 'Gym Zaman', loginSub: 'نظام إدارة داخلي', staffOnly: 'دخول مخصص للموظفين فقط',
     email: 'الإيميل', password: 'الباسورد', login: 'دخول', logging: 'جاري الدخول...',
     loggedInAs: 'مسجل دخول باسم', dashboard: 'الرئيسية', clients: 'العملاء', logs: 'تقارير اليوم', programs: 'برامج PT',
-    owner: 'لوحة الأونر', director: 'لوحة المدير', trainer: 'لوحة المدرب',
+    staffManagement: 'إدارة الفريق', owner: 'لوحة الأونر', director: 'لوحة المدير', trainer: 'لوحة المدرب',
     hero: 'سيستم داخلي آمن لمتابعة تقارير المدربين وبرامج التدريب الشخصي.',
     todayLogs: 'تقارير اليوم', rotationToday: 'Rotation اليوم', ptToday: 'PT اليوم', freeToday: 'Free Service اليوم',
     myClients: 'عملائي', myLogs: 'تقاريري', myPrograms: 'برامجي',
@@ -23,13 +23,16 @@ const TEXT = {
     control: 'تحكم', edit: 'تعديل', delete: 'حذف', save: 'حفظ التعديل', logout: 'خروج', noData: 'لا توجد بيانات.',
     adminNote: 'تحكم الإدارة: اختار مدرب بالإيميل لعرض عملائه وتقاريره وبرامجه فقط، أو اعرض الكل.',
     trainerNote: 'صفحة المدرب: تظهر بياناتك أنت فقط حسب صلاحيات قاعدة البيانات.',
-    filterByTrainer: 'اختيار المدرب بالإيميل', allTrainers: 'كل المدربين', trainerEmail: 'إيميل المدرب'
+    filterByTrainer: 'اختيار المدرب بالإيميل', allTrainers: 'كل المدربين', trainerEmail: 'إيميل المدرب',
+    staffNote: 'إدارة الفريق: تعديل الدور، الفرع، والحالة. تظهر فقط للأونر والديركتور.',
+    fullName: 'الاسم', branch: 'الفرع', role: 'الدور', saveStaff: 'حفظ بيانات المدرب', savedStaff: 'تم حفظ بيانات المدرب.',
+    active: 'active', inactive: 'inactive'
   },
   en: {
     loginTitle: 'Gym Zaman', loginSub: 'Internal Management System', staffOnly: 'Staff access only',
     email: 'Email', password: 'Password', login: 'Login', logging: 'Signing in...',
     loggedInAs: 'Logged in as', dashboard: 'Dashboard', clients: 'Clients', logs: 'Daily Logs', programs: 'PT Programs',
-    owner: 'Owner Dashboard', director: 'Fitness Director Dashboard', trainer: 'Trainer Dashboard',
+    staffManagement: 'Staff Management', owner: 'Owner Dashboard', director: 'Fitness Director Dashboard', trainer: 'Trainer Dashboard',
     hero: 'Secure internal system for coach reports and PT program tracking.',
     todayLogs: "Today's Logs", rotationToday: 'Rotation Today', ptToday: 'PT Today', freeToday: 'Free Service Today',
     myClients: 'My Clients', myLogs: 'My Logs', myPrograms: 'My Programs',
@@ -43,9 +46,15 @@ const TEXT = {
     control: 'Control', edit: 'Edit', delete: 'Delete', save: 'Save Changes', logout: 'Logout', noData: 'No data found.',
     adminNote: 'Admin control: choose a trainer by email to view only their clients, logs, and programs, or view all.',
     trainerNote: 'Trainer view: only your own data appears based on database security.',
-    filterByTrainer: 'Filter by Trainer Email', allTrainers: 'All Trainers', trainerEmail: 'Trainer Email'
+    filterByTrainer: 'Filter by Trainer Email', allTrainers: 'All Trainers', trainerEmail: 'Trainer Email',
+    staffNote: 'Staff Management: update role, branch, and status. Visible only for Owner and Director.',
+    fullName: 'Full Name', branch: 'Branch', role: 'Role', saveStaff: 'Save Staff Data', savedStaff: 'Staff data saved.',
+    active: 'active', inactive: 'inactive'
   }
 }
+
+const ROLE_OPTIONS = ['trainer', 'senior', 'head_coach', 'fitness_director', 'owner']
+const STATUS_OPTIONS = ['active', 'inactive']
 
 function StatCard({ title, value, icon }) {
   return <div className="card stat"><div><p className="muted">{title}</p><h2>{value}</h2></div><div className="icon">{icon}</div></div>
@@ -96,7 +105,7 @@ function Layout({ profile, children, lang, setLang }) {
     <div className="app" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       <aside>
         <div className="side-brand"><div className="brand-mark small">GZ</div><div><h3>Gym Zaman</h3><p>{roleLabel}</p></div></div>
-        <nav><a><ShieldCheck size={18}/>{t.dashboard}</a><a><Users size={18}/>{t.clients}</a><a><Dumbbell size={18}/>{t.logs}</a><a><ClipboardList size={18}/>{t.programs}</a></nav>
+        <nav><a><ShieldCheck size={18}/>{t.dashboard}</a><a><Users size={18}/>{t.clients}</a><a><Dumbbell size={18}/>{t.logs}</a><a><ClipboardList size={18}/>{t.programs}</a><a><UserCog size={18}/>{t.staffManagement}</a></nav>
         <LanguageButton lang={lang} setLang={setLang}/>
         <button className="logout" onClick={()=>supabase.auth.signOut()}><LogOut size={18}/>{t.logout}</button>
       </aside>
@@ -170,11 +179,93 @@ function TrainerFilter({ trainers, selectedTrainerId, setSelectedTrainerId, t })
   return <div className="card filter-card"><h3><Search size={18}/>{t.filterByTrainer}</h3><select value={selectedTrainerId} onChange={e=>setSelectedTrainerId(e.target.value)}><option value="all">{t.allTrainers}</option>{trainers.map(tr=><option key={tr.id} value={tr.id}>{tr.email} — {tr.full_name}</option>)}</select></div>
 }
 
+function StaffManagement({ staff, branches, onSaved, t }) {
+  const [rows, setRows] = useState(staff)
+  const [savingId, setSavingId] = useState('')
+  const [message, setMessage] = useState('')
+
+  useEffect(() => setRows(staff), [staff])
+
+  function updateRow(id, field, value) {
+    setRows(prev => prev.map(row => row.id === id ? { ...row, [field]: value } : row))
+  }
+
+  async function saveRow(row) {
+    setSavingId(row.id)
+    setMessage('')
+    const payload = {
+      full_name: row.full_name,
+      email: row.email,
+      role: row.role,
+      branch_id: row.branch_id || null,
+      status: row.status || 'active'
+    }
+    const { error } = await supabase.from('profiles').update(payload).eq('id', row.id)
+    if (error) setMessage(error.message)
+    else {
+      setMessage(t.savedStaff)
+      onSaved()
+    }
+    setSavingId('')
+  }
+
+  return (
+    <div className="card staff-card">
+      <h3><UserCog size={18}/>{t.staffManagement}</h3>
+      <p className="muted">{t.staffNote}</p>
+      {message && <div className={message === t.savedStaff ? 'success' : 'error'}>{message}</div>}
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>{t.fullName}</th>
+              <th>{t.email}</th>
+              <th>{t.role}</th>
+              <th>{t.branch}</th>
+              <th>{t.status}</th>
+              <th>{t.control}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(row => (
+              <tr key={row.id}>
+                <td><input className="table-input" value={row.full_name || ''} onChange={e => updateRow(row.id, 'full_name', e.target.value)} /></td>
+                <td><input className="table-input" value={row.email || ''} onChange={e => updateRow(row.id, 'email', e.target.value)} /></td>
+                <td>
+                  <select className="table-select" value={row.role || 'trainer'} onChange={e => updateRow(row.id, 'role', e.target.value)}>
+                    {ROLE_OPTIONS.map(role => <option key={role} value={role}>{role}</option>)}
+                  </select>
+                </td>
+                <td>
+                  <select className="table-select" value={row.branch_id || ''} onChange={e => updateRow(row.id, 'branch_id', e.target.value)}>
+                    <option value="">---</option>
+                    {branches.map(branch => <option key={branch.id} value={branch.id}>{branch.name}</option>)}
+                  </select>
+                </td>
+                <td>
+                  <select className="table-select" value={row.status || 'active'} onChange={e => updateRow(row.id, 'status', e.target.value)}>
+                    {STATUS_OPTIONS.map(status => <option key={status} value={status}>{status}</option>)}
+                  </select>
+                </td>
+                <td>
+                  <button className="small-action save" onClick={() => saveRow(row)} disabled={savingId === row.id}>
+                    <Save size={14}/>{savingId === row.id ? 'Saving...' : t.save}
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
 function Dashboard({ profile, lang }) {
   const t=TEXT[lang]
-  const [clients,setClients]=useState([]), [logs,setLogs]=useState([]), [branches,setBranches]=useState([]), [programs,setPrograms]=useState([]), [trainers,setTrainers]=useState([])
+  const [clients,setClients]=useState([]), [logs,setLogs]=useState([]), [branches,setBranches]=useState([]), [programs,setPrograms]=useState([]), [staff,setStaff]=useState([])
   const [loading,setLoading]=useState(true), [notice,setNotice]=useState(''), [edit,setEdit]=useState(null), [selectedTrainerId,setSelectedTrainerId]=useState('all')
-  const isAdmin=profile.role==='owner'||profile.role==='fitness_director', isTrainer=profile.role==='trainer'
+  const isAdmin=profile.role==='owner'||profile.role==='fitness_director', isTrainer=profile.role==='trainer', isSenior=profile.role==='senior', isHeadCoach=profile.role==='head_coach'
 
   async function load(){
     setLoading(true)
@@ -184,11 +275,11 @@ function Dashboard({ profile, lang }) {
       supabase.from('branches').select('*').order('name'),
       supabase.from('pt_programs').select('*').order('created_at',{ascending:false})
     ]
-    if (isAdmin) calls.push(supabase.from('profiles').select('id, full_name, email, role, branch_id, status').in('role',['trainer','head_coach']).order('email'))
+    if (isAdmin || isHeadCoach) calls.push(supabase.from('profiles').select('id, full_name, email, role, branch_id, status').order('email'))
     const res = await Promise.all(calls)
-    const [c,l,b,p,tr] = res
-    if(c.error)setNotice(c.error.message); if(p.error)setNotice(p.error.message); if(tr?.error)setNotice(tr.error.message)
-    setClients(c.data||[]); setLogs(l.data||[]); setBranches(b.data||[]); setPrograms(p.data||[]); setTrainers(tr?.data||[])
+    const [c,l,b,p,s] = res
+    if(c.error)setNotice(c.error.message); if(p.error)setNotice(p.error.message); if(s?.error)setNotice(s.error.message)
+    setClients(c.data||[]); setLogs(l.data||[]); setBranches(b.data||[]); setPrograms(p.data||[]); setStaff(s?.data||[])
     setLoading(false)
   }
 
@@ -196,8 +287,9 @@ function Dashboard({ profile, lang }) {
 
   async function del(table,row,label){ if(!confirm(`Delete ${label}?`)) return; const {error}=await supabase.from(table).delete().eq('id',row.id); if(error)alert(error.message); else load() }
 
+  const trainers = staff.filter(s => ['trainer','senior','head_coach'].includes(s.role))
   const clientMapAll = Object.fromEntries(clients.map(c=>[c.id,c.full_name]))
-  const trainerMap = Object.fromEntries(trainers.map(tr=>[tr.id,tr.email]))
+  const trainerMap = Object.fromEntries(staff.map(tr=>[tr.id,tr.email]))
 
   const visibleClients = isAdmin && selectedTrainerId !== 'all' ? clients.filter(c=>c.assigned_trainer_id===selectedTrainerId) : clients
   const visibleLogs = isAdmin && selectedTrainerId !== 'all' ? logs.filter(l=>l.trainer_id===selectedTrainerId) : logs
@@ -215,6 +307,7 @@ function Dashboard({ profile, lang }) {
     {isAdmin && <TrainerFilter trainers={trainers} selectedTrainerId={selectedTrainerId} setSelectedTrainerId={setSelectedTrainerId} t={t}/>}
     <section className="stats-grid"><StatCard title={isAdmin?t.todayLogs:t.myLogs} value={totals.logs} icon={<CalendarDays/>}/><StatCard title={isAdmin?t.rotationToday:t.myClients} value={isAdmin?totals.rotation:visibleClients.length} icon={<Users/>}/><StatCard title={isAdmin?t.ptToday:t.myPrograms} value={isAdmin?totals.pt:visiblePrograms.length} icon={<Dumbbell/>}/><StatCard title={t.freeToday} value={totals.free} icon={<ClipboardList/>}/></section>
     <div className="card note"><b>{isAdmin?t.adminNote:t.trainerNote}</b></div>
+    {isAdmin && <StaffManagement staff={staff} branches={branches} onSaved={load} t={t}/>}
     {(isTrainer||isAdmin)&&<AddClientForm profile={profile} branches={branches} onSaved={load} lang={lang}/>}
     {isTrainer&&<DailyLogForm profile={profile} onSaved={load} lang={lang}/>}
     {isTrainer&&<PTProgramForm profile={profile} clients={visibleClients} onSaved={load} lang={lang}/>}
