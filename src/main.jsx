@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { supabase } from './supabase'
-import { LogOut, Users, Dumbbell, ClipboardList, UserRound, ShieldCheck, PlusCircle, CalendarDays, Pencil, Trash2, X, Languages, LockKeyhole } from 'lucide-react'
+import { LogOut, Users, Dumbbell, ClipboardList, UserRound, ShieldCheck, PlusCircle, CalendarDays, Pencil, Trash2, X, Languages, LockKeyhole, Search } from 'lucide-react'
 import './styles.css'
 
 const TEXT = {
@@ -21,8 +21,9 @@ const TEXT = {
     addProgram: 'إضافة برنامج PT', selectClient: 'اختر العميل', programName: 'اسم البرنامج', duration: 'المدة بالأسابيع',
     exercises: 'التمارين / الخطة', saveProgram: 'حفظ البرنامج', programSaved: 'تم حفظ البرنامج بنجاح.',
     control: 'تحكم', edit: 'تعديل', delete: 'حذف', save: 'حفظ التعديل', logout: 'خروج', noData: 'لا توجد بيانات.',
-    adminNote: 'تحكم الإدارة: تعديل وحذف العملاء والتقارير وبرامج التدريب.',
-    trainerNote: 'صفحة المدرب: إضافة تقرير يومي، عميل، وبرنامج تدريب للعملاء الخاصين به فقط.'
+    adminNote: 'تحكم الإدارة: اختار مدرب بالإيميل لعرض عملائه وتقاريره وبرامجه فقط، أو اعرض الكل.',
+    trainerNote: 'صفحة المدرب: تظهر بياناتك أنت فقط حسب صلاحيات قاعدة البيانات.',
+    filterByTrainer: 'اختيار المدرب بالإيميل', allTrainers: 'كل المدربين', trainerEmail: 'إيميل المدرب'
   },
   en: {
     loginTitle: 'Gym Zaman', loginSub: 'Internal Management System', staffOnly: 'Staff access only',
@@ -40,8 +41,9 @@ const TEXT = {
     addProgram: 'Add PT Program', selectClient: 'Select Client', programName: 'Program Name', duration: 'Duration Weeks',
     exercises: 'Exercises / Plan', saveProgram: 'Save Program', programSaved: 'PT program saved successfully.',
     control: 'Control', edit: 'Edit', delete: 'Delete', save: 'Save Changes', logout: 'Logout', noData: 'No data found.',
-    adminNote: 'Admin control: edit and delete clients, logs, and PT programs.',
-    trainerNote: 'Trainer view: add daily log, client, and PT program for your own clients only.'
+    adminNote: 'Admin control: choose a trainer by email to view only their clients, logs, and programs, or view all.',
+    trainerNote: 'Trainer view: only your own data appears based on database security.',
+    filterByTrainer: 'Filter by Trainer Email', allTrainers: 'All Trainers', trainerEmail: 'Trainer Email'
   }
 }
 
@@ -164,26 +166,61 @@ function PTProgramForm({ profile, clients, onSaved, lang }) {
   return <div className="card compact-card"><h3><PlusCircle size={18}/>{t.addProgram}</h3><form className="grid-form simple-form" onSubmit={submit}><div><label>{t.selectClient}</label><select required value={form.client_id} onChange={e=>f('client_id',e.target.value)}><option value="">---</option>{clients.map(c=><option key={c.id} value={c.id}>{c.full_name}</option>)}</select></div><div><label>{t.programName}</label><input value={form.program_name} onChange={e=>f('program_name',e.target.value)}/></div><div><label>{t.goal}</label><input value={form.goal} onChange={e=>f('goal',e.target.value)}/></div><div><label>{t.duration}</label><input type="number" value={form.duration_weeks} onChange={e=>f('duration_weeks',e.target.value)}/></div><div className="full"><label>{t.exercises}</label><textarea value={form.exercises} onChange={e=>f('exercises',e.target.value)} placeholder={'Day 1: Chest + Triceps\nDay 2: Back + Biceps'}/></div><div className="full"><label>{t.notes}</label><textarea value={form.notes} onChange={e=>f('notes',e.target.value)}/></div>{msg && <div className="success full">{msg}</div>}<button>{t.saveProgram}</button></form></div>
 }
 
+function TrainerFilter({ trainers, selectedTrainerId, setSelectedTrainerId, t }) {
+  return <div className="card filter-card"><h3><Search size={18}/>{t.filterByTrainer}</h3><select value={selectedTrainerId} onChange={e=>setSelectedTrainerId(e.target.value)}><option value="all">{t.allTrainers}</option>{trainers.map(tr=><option key={tr.id} value={tr.id}>{tr.email} — {tr.full_name}</option>)}</select></div>
+}
+
 function Dashboard({ profile, lang }) {
-  const t=TEXT[lang]; const [clients,setClients]=useState([]), [logs,setLogs]=useState([]), [branches,setBranches]=useState([]), [programs,setPrograms]=useState([]), [loading,setLoading]=useState(true), [notice,setNotice]=useState(''), [edit,setEdit]=useState(null)
+  const t=TEXT[lang]
+  const [clients,setClients]=useState([]), [logs,setLogs]=useState([]), [branches,setBranches]=useState([]), [programs,setPrograms]=useState([]), [trainers,setTrainers]=useState([])
+  const [loading,setLoading]=useState(true), [notice,setNotice]=useState(''), [edit,setEdit]=useState(null), [selectedTrainerId,setSelectedTrainerId]=useState('all')
   const isAdmin=profile.role==='owner'||profile.role==='fitness_director', isTrainer=profile.role==='trainer'
-  async function load(){setLoading(true); const [c,l,b,p]=await Promise.all([supabase.from('clients').select('*').order('created_at',{ascending:false}),supabase.from('trainer_daily_logs').select('*').order('created_at',{ascending:false}),supabase.from('branches').select('*').order('name'),supabase.from('pt_programs').select('*').order('created_at',{ascending:false})]); if(c.error)setNotice(c.error.message); if(p.error)setNotice(p.error.message); setClients(c.data||[]);setLogs(l.data||[]);setBranches(b.data||[]);setPrograms(p.data||[]);setLoading(false)}
+
+  async function load(){
+    setLoading(true)
+    const calls = [
+      supabase.from('clients').select('*').order('created_at',{ascending:false}),
+      supabase.from('trainer_daily_logs').select('*').order('created_at',{ascending:false}),
+      supabase.from('branches').select('*').order('name'),
+      supabase.from('pt_programs').select('*').order('created_at',{ascending:false})
+    ]
+    if (isAdmin) calls.push(supabase.from('profiles').select('id, full_name, email, role, branch_id, status').in('role',['trainer','head_coach']).order('email'))
+    const res = await Promise.all(calls)
+    const [c,l,b,p,tr] = res
+    if(c.error)setNotice(c.error.message); if(p.error)setNotice(p.error.message); if(tr?.error)setNotice(tr.error.message)
+    setClients(c.data||[]); setLogs(l.data||[]); setBranches(b.data||[]); setPrograms(p.data||[]); setTrainers(tr?.data||[])
+    setLoading(false)
+  }
+
   useEffect(()=>{load()},[])
+
   async function del(table,row,label){ if(!confirm(`Delete ${label}?`)) return; const {error}=await supabase.from(table).delete().eq('id',row.id); if(error)alert(error.message); else load() }
-  const today=new Date().toISOString().slice(0,10), todayLogs=logs.filter(x=>x.log_date===today), rows=isAdmin?todayLogs:logs
+
+  const clientMapAll = Object.fromEntries(clients.map(c=>[c.id,c.full_name]))
+  const trainerMap = Object.fromEntries(trainers.map(tr=>[tr.id,tr.email]))
+
+  const visibleClients = isAdmin && selectedTrainerId !== 'all' ? clients.filter(c=>c.assigned_trainer_id===selectedTrainerId) : clients
+  const visibleLogs = isAdmin && selectedTrainerId !== 'all' ? logs.filter(l=>l.trainer_id===selectedTrainerId) : logs
+  const visibleProgramsRaw = isAdmin && selectedTrainerId !== 'all' ? programs.filter(p=>p.trainer_id===selectedTrainerId) : programs
+  const visiblePrograms = visibleProgramsRaw.map(p=>({...p,client_name:clientMapAll[p.client_id]||'-', trainer_email: trainerMap[p.trainer_id] || '-'}))
+  const visibleClientsRows = visibleClients.map(c=>({...c, trainer_email: trainerMap[c.assigned_trainer_id] || '-'}))
+  const visibleLogsRows = visibleLogs.map(l=>({...l, trainer_email: trainerMap[l.trainer_id] || '-'}))
+
+  const today=new Date().toISOString().slice(0,10), todayLogs=visibleLogs.filter(x=>x.log_date===today), rows=isAdmin?todayLogs:visibleLogs
   const totals={logs:rows.length,rotation:rows.reduce((s,r)=>s+Number(r.rotation_count||0),0),pt:rows.reduce((s,r)=>s+Number(r.pt_sessions_count||0),0),free:rows.reduce((s,r)=>s+Number(r.free_service_count||0),0)}
   const title=profile.role==='owner'?t.owner:profile.role==='fitness_director'?t.director:profile.role==='trainer'?t.trainer:t.dashboard
-  const clientMap=Object.fromEntries(clients.map(c=>[c.id,c.full_name])); const programRows=programs.map(p=>({...p,client_name:clientMap[p.client_id]||'-'}))
+
   if(loading)return <div className="card">Loading...</div>
   return <><section className="hero simple-hero"><h2>{title}</h2><p>{t.hero}</p></section>{notice&&<div className="error">{notice}</div>}
-    <section className="stats-grid"><StatCard title={isAdmin?t.todayLogs:t.myLogs} value={totals.logs} icon={<CalendarDays/>}/><StatCard title={isAdmin?t.rotationToday:t.myClients} value={isAdmin?totals.rotation:clients.length} icon={<Users/>}/><StatCard title={isAdmin?t.ptToday:t.myPrograms} value={isAdmin?totals.pt:programs.length} icon={<Dumbbell/>}/><StatCard title={t.freeToday} value={totals.free} icon={<ClipboardList/>}/></section>
+    {isAdmin && <TrainerFilter trainers={trainers} selectedTrainerId={selectedTrainerId} setSelectedTrainerId={setSelectedTrainerId} t={t}/>}
+    <section className="stats-grid"><StatCard title={isAdmin?t.todayLogs:t.myLogs} value={totals.logs} icon={<CalendarDays/>}/><StatCard title={isAdmin?t.rotationToday:t.myClients} value={isAdmin?totals.rotation:visibleClients.length} icon={<Users/>}/><StatCard title={isAdmin?t.ptToday:t.myPrograms} value={isAdmin?totals.pt:visiblePrograms.length} icon={<Dumbbell/>}/><StatCard title={t.freeToday} value={totals.free} icon={<ClipboardList/>}/></section>
     <div className="card note"><b>{isAdmin?t.adminNote:t.trainerNote}</b></div>
     {(isTrainer||isAdmin)&&<AddClientForm profile={profile} branches={branches} onSaved={load} lang={lang}/>}
     {isTrainer&&<DailyLogForm profile={profile} onSaved={load} lang={lang}/>}
-    {isTrainer&&<PTProgramForm profile={profile} clients={clients} onSaved={load} lang={lang}/>}
-    <Table title={isTrainer?t.myClients:t.clients} rows={clients} canManage={isAdmin} onEdit={r=>setEdit({type:'client',row:r})} onDelete={r=>del('clients',r,r.full_name)} t={t} columns={[{key:'full_name',label:t.clientName},{key:'phone',label:t.phone},{key:'goal',label:t.goal},{key:'level',label:t.level},{key:'status',label:t.status}]}/>
-    <Table title={isTrainer?t.myLogs:t.logs} rows={logs} canManage={isAdmin} onEdit={r=>setEdit({type:'log',row:r})} onDelete={r=>del('trainer_daily_logs',r,r.log_date)} t={t} columns={[{key:'log_date',label:t.date},{key:'shift',label:t.shift},{key:'rotation_count',label:t.rotation},{key:'pt_sessions_count',label:t.ptSessions},{key:'free_service_count',label:t.freeService},{key:'notes',label:t.notes}]}/>
-    <Table title={isTrainer?t.myPrograms:t.programs} rows={programRows} canManage={isAdmin} onEdit={r=>setEdit({type:'program',row:r})} onDelete={r=>del('pt_programs',r,r.program_name)} t={t} columns={[{key:'client_name',label:t.clientName},{key:'program_name',label:t.programName},{key:'goal',label:t.goal},{key:'duration_weeks',label:t.duration},{key:'status',label:t.status}]}/>
+    {isTrainer&&<PTProgramForm profile={profile} clients={visibleClients} onSaved={load} lang={lang}/>}
+    <Table title={isTrainer?t.myClients:t.clients} rows={visibleClientsRows} canManage={isAdmin} onEdit={r=>setEdit({type:'client',row:r})} onDelete={r=>del('clients',r,r.full_name)} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'full_name',label:t.clientName},{key:'phone',label:t.phone},{key:'goal',label:t.goal},{key:'level',label:t.level},{key:'status',label:t.status}]}/>
+    <Table title={isTrainer?t.myLogs:t.logs} rows={visibleLogsRows} canManage={isAdmin} onEdit={r=>setEdit({type:'log',row:r})} onDelete={r=>del('trainer_daily_logs',r,r.log_date)} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'log_date',label:t.date},{key:'shift',label:t.shift},{key:'rotation_count',label:t.rotation},{key:'pt_sessions_count',label:t.ptSessions},{key:'free_service_count',label:t.freeService},{key:'notes',label:t.notes}]}/>
+    <Table title={isTrainer?t.myPrograms:t.programs} rows={visiblePrograms} canManage={isAdmin} onEdit={r=>setEdit({type:'program',row:r})} onDelete={r=>del('pt_programs',r,r.program_name)} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'client_name',label:t.clientName},{key:'program_name',label:t.programName},{key:'goal',label:t.goal},{key:'duration_weeks',label:t.duration},{key:'status',label:t.status}]}/>
     {edit&&<EditForm type={edit.type} row={edit.row} onClose={()=>setEdit(null)} onSaved={load} lang={lang}/>}
   </>
 }
