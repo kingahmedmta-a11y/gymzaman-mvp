@@ -40,7 +40,10 @@ const TEXT = {
     attendance: 'الحضور والانصراف', addAttendance: 'تسجيل حضور وانصراف', attendanceSaved: 'تم حفظ الحضور والانصراف بنجاح.',
     expectedIn: 'ميعاد الحضور الرسمي', expectedOut: 'ميعاد الانصراف الرسمي', lateMinutes: 'دقائق التأخير', overtimeMinutes: 'دقائق الأوفر تايم',
     finalScore: 'النتيجة النهائية', grade: 'التقدير', recommendation: 'التوصية', excellent: 'Excellent', good: 'Good', needsImprovement: 'Needs Improvement',
-    performanceDashboard: 'لوحة الأداء', topBySessions: 'أعلى مدرب سيشنز', topByFreeService: 'أعلى مدرب Free Service', trainersNoReport: 'مدربين بدون تقرير اليوم', activeCoaches: 'مدربين نشطين', totalClients: 'إجمالي العملاء'
+    performanceDashboard: 'لوحة الأداء', topBySessions: 'أعلى مدرب سيشنز', topByFreeService: 'أعلى مدرب Free Service', trainersNoReport: 'مدربين بدون تقرير اليوم', activeCoaches: 'مدربين نشطين', totalClients: 'إجمالي العملاء',
+    monthlyReport: 'التقرير الشهري للمدربين', reportMonth: 'شهر التقرير', totalLogs: 'عدد التقارير', totalLate: 'إجمالي التأخير', totalOvertime: 'إجمالي الأوفر تايم', avgEvaluation: 'متوسط التقييم',
+    branchComparison: 'مقارنة الفروع', alerts: 'تنبيهات وملاحظات', alertType: 'نوع التنبيه', alertDetails: 'التفاصيل', noAlerts: 'لا توجد تنبيهات حاليًا',
+    branchName: 'اسم الفرع', totalRotation: 'إجمالي Rotation', totalFreeService: 'إجمالي Free Service', totalPrograms: 'إجمالي البرامج', unresolvedProblems: 'مشاكل غير محلولة'
   },
   en: {
     loginTitle: 'Gym Zaman', loginSub: 'Internal Management System', staffOnly: 'Staff access only',
@@ -77,7 +80,10 @@ const TEXT = {
     attendance: 'Attendance', addAttendance: 'Add Attendance', attendanceSaved: 'Attendance saved successfully.',
     expectedIn: 'Expected In', expectedOut: 'Expected Out', lateMinutes: 'Late Minutes', overtimeMinutes: 'Overtime Minutes',
     finalScore: 'Final Score', grade: 'Grade', recommendation: 'Recommendation', excellent: 'Excellent', good: 'Good', needsImprovement: 'Needs Improvement',
-    performanceDashboard: 'Performance Dashboard', topBySessions: 'Top Trainer by Sessions', topByFreeService: 'Top Trainer by Free Service', trainersNoReport: 'Trainers with No Report Today', activeCoaches: 'Active Coaches', totalClients: 'Total Clients'
+    performanceDashboard: 'Performance Dashboard', topBySessions: 'Top Trainer by Sessions', topByFreeService: 'Top Trainer by Free Service', trainersNoReport: 'Trainers with No Report Today', activeCoaches: 'Active Coaches', totalClients: 'Total Clients',
+    monthlyReport: 'Monthly Trainer Report', reportMonth: 'Report Month', totalLogs: 'Total Logs', totalLate: 'Total Late', totalOvertime: 'Total Overtime', avgEvaluation: 'Avg Evaluation',
+    branchComparison: 'Branch Comparison', alerts: 'Alerts & Notes', alertType: 'Alert Type', alertDetails: 'Details', noAlerts: 'No alerts currently',
+    branchName: 'Branch Name', totalRotation: 'Total Rotation', totalFreeService: 'Total Free Service', totalPrograms: 'Total Programs', unresolvedProblems: 'Unresolved Problems'
   }
 }
 
@@ -784,6 +790,139 @@ function CoachEvaluationForm({ profile, targetTrainerId, eligibleTrainers, onSav
   )
 }
 
+
+function monthOf(dateValue) {
+  return String(dateValue || '').slice(0, 7)
+}
+
+function avg(values) {
+  const nums = values.map(Number).filter(v => !Number.isNaN(v))
+  if (!nums.length) return 0
+  return Math.round(nums.reduce((a,b) => a + b, 0) / nums.length)
+}
+
+function AlertsPanel({ staff, logs, attendanceLogs, seniorReports, evaluations, t }) {
+  const today = new Date().toISOString().slice(0,10)
+  const activeCoaches = staff.filter(s => ['trainer','senior','head_coach'].includes(s.role) && s.status === 'active')
+  const todayLogIds = new Set(logs.filter(l => l.log_date === today).map(l => l.trainer_id))
+  const todayAttendance = attendanceLogs.filter(a => a.attendance_date === today)
+  const alerts = []
+
+  activeCoaches.forEach(coach => {
+    if (!todayLogIds.has(coach.id)) alerts.push({ type: t.trainersNoReport, details: `${coach.full_name} — ${coach.email}` })
+  })
+
+  todayAttendance.filter(a => Number(a.late_minutes || 0) > 0).forEach(a => {
+    const coach = staff.find(s => s.id === a.trainer_id)
+    alerts.push({ type: t.lateMinutes, details: `${coach?.full_name || a.trainer_id}: ${a.late_minutes} min` })
+  })
+
+  seniorReports.filter(r => r.resolved === false).forEach(r => {
+    const senior = staff.find(s => s.id === r.senior_id)
+    alerts.push({ type: t.unresolvedProblems, details: `${senior?.full_name || '-'}: ${r.problem_description || r.client_issues || '-'}` })
+  })
+
+  evaluations.forEach(ev => {
+    const score = Math.round((Number(ev.technical_score||0)+Number(ev.behavior_score||0)+Number(ev.leadership_score||0)+Number(ev.service_score||0))/4)
+    if (score < 70) {
+      const coach = staff.find(s => s.id === ev.trainer_id)
+      alerts.push({ type: t.needsImprovement, details: `${coach?.full_name || '-'}: ${score}%` })
+    }
+  })
+
+  return (
+    <div className="card alerts-card">
+      <h3><ShieldCheck size={18}/>{t.alerts}</h3>
+      {alerts.length === 0 ? <p className="muted">{t.noAlerts}</p> : (
+        <div className="table-wrap">
+          <table>
+            <thead><tr><th>{t.alertType}</th><th>{t.alertDetails}</th></tr></thead>
+            <tbody>{alerts.slice(0, 20).map((a, i) => <tr key={i}><td>{a.type}</td><td>{a.details}</td></tr>)}</tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function BranchComparisonDashboard({ branches, staff, clients, logs, programs, attendanceLogs, seniorReports, headReports, t }) {
+  const rows = branches.map(branch => {
+    const branchStaff = staff.filter(s => s.branch_id === branch.id && ['trainer','senior','head_coach'].includes(s.role))
+    const branchLogs = logs.filter(l => l.branch_id === branch.id)
+    return {
+      id: branch.id,
+      branch_name: branch.name,
+      active_coaches: branchStaff.filter(s => s.status === 'active').length,
+      clients_count: clients.filter(c => c.branch_id === branch.id).length,
+      logs_count: branchLogs.length,
+      total_sessions: branchLogs.reduce((s,r)=>s+Number(r.pt_sessions_count||0),0),
+      total_free: branchLogs.reduce((s,r)=>s+Number(r.free_service_count||0),0),
+      total_rotation: branchLogs.reduce((s,r)=>s+Number(r.rotation_count||0),0),
+      programs_count: programs.filter(p => p.branch_id === branch.id).length,
+      late_minutes: attendanceLogs.filter(a => a.branch_id === branch.id).reduce((s,r)=>s+Number(r.late_minutes||0),0),
+      unresolved: seniorReports.filter(r => r.branch_id === branch.id && r.resolved === false).length,
+      head_reports: headReports.filter(r => r.branch_id === branch.id).length
+    }
+  })
+
+  return (
+    <div className="card branch-comparison-card">
+      <h3><Users size={18}/>{t.branchComparison}</h3>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr><th>{t.branchName}</th><th>{t.activeCoaches}</th><th>{t.totalClients}</th><th>{t.totalLogs}</th><th>{t.ptSessions}</th><th>{t.totalFreeService}</th><th>{t.totalRotation}</th><th>{t.totalPrograms}</th><th>{t.totalLate}</th><th>{t.unresolvedProblems}</th><th>{t.headCoachReport}</th></tr>
+          </thead>
+          <tbody>
+            {rows.map(r => <tr key={r.id}><td>{r.branch_name}</td><td>{r.active_coaches}</td><td>{r.clients_count}</td><td>{r.logs_count}</td><td>{r.total_sessions}</td><td>{r.total_free}</td><td>{r.total_rotation}</td><td>{r.programs_count}</td><td>{r.late_minutes}</td><td>{r.unresolved}</td><td>{r.head_reports}</td></tr>)}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+function MonthlyTrainerReport({ staff, clients, logs, programs, attendanceLogs, evaluations, t }) {
+  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0,7))
+  const coaches = staff.filter(s => ['trainer','senior','head_coach'].includes(s.role))
+  const rows = coaches.map(coach => {
+    const monthLogs = logs.filter(l => l.trainer_id === coach.id && monthOf(l.log_date) === selectedMonth)
+    const monthAttendance = attendanceLogs.filter(a => a.trainer_id === coach.id && monthOf(a.attendance_date) === selectedMonth)
+    const coachEvaluations = evaluations.filter(e => e.trainer_id === coach.id && monthOf(e.evaluation_date || e.created_at) === selectedMonth)
+    const evalScores = coachEvaluations.map(e => (Number(e.technical_score||0)+Number(e.behavior_score||0)+Number(e.leadership_score||0)+Number(e.service_score||0))/4)
+    const finalScore = avg(evalScores)
+    return {
+      id: coach.id,
+      trainer_email: coach.email,
+      full_name: coach.full_name,
+      role: coach.role,
+      clients_count: clients.filter(c => c.assigned_trainer_id === coach.id).length,
+      programs_count: programs.filter(p => p.trainer_id === coach.id).length,
+      total_logs: monthLogs.length,
+      pt_sessions: monthLogs.reduce((s,r)=>s+Number(r.pt_sessions_count||0),0),
+      free_service: monthLogs.reduce((s,r)=>s+Number(r.free_service_count||0),0),
+      rotation: monthLogs.reduce((s,r)=>s+Number(r.rotation_count||0),0),
+      late_minutes: monthAttendance.reduce((s,r)=>s+Number(r.late_minutes||0),0),
+      overtime_minutes: monthAttendance.reduce((s,r)=>s+Number(r.overtime_minutes||0),0),
+      avg_evaluation: finalScore,
+      grade: finalScore ? gradeFromScore(finalScore, t) : '-'
+    }
+  })
+
+  return (
+    <div className="card monthly-report-card">
+      <h3><ClipboardList size={18}/>{t.monthlyReport}</h3>
+      <div className="month-control"><label>{t.reportMonth}</label><input type="month" value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} /></div>
+      <div className="table-wrap">
+        <table>
+          <thead><tr><th>{t.fullName}</th><th>{t.trainerEmail}</th><th>{t.role}</th><th>{t.clients}</th><th>{t.programs}</th><th>{t.totalLogs}</th><th>{t.ptSessions}</th><th>{t.freeService}</th><th>{t.rotation}</th><th>{t.totalLate}</th><th>{t.totalOvertime}</th><th>{t.avgEvaluation}</th><th>{t.grade}</th></tr></thead>
+          <tbody>{rows.map(r => <tr key={r.id}><td>{r.full_name}</td><td>{r.trainer_email}</td><td>{r.role}</td><td>{r.clients_count}</td><td>{r.programs_count}</td><td>{r.total_logs}</td><td>{r.pt_sessions}</td><td>{r.free_service}</td><td>{r.rotation}</td><td>{r.late_minutes}</td><td>{r.overtime_minutes}</td><td>{r.avg_evaluation || '-'}</td><td>{r.grade}</td></tr>)}</tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
 function Dashboard({ profile, lang }) {
   const t=TEXT[lang]
   const [clients,setClients]=useState([]), [logs,setLogs]=useState([]), [attendanceLogs,setAttendanceLogs]=useState([]), [branches,setBranches]=useState([]), [programs,setPrograms]=useState([]), [staff,setStaff]=useState([]), [seniorReports,setSeniorReports]=useState([]), [headReports,setHeadReports]=useState([]), [evaluations,setEvaluations]=useState([])
@@ -849,6 +988,9 @@ function Dashboard({ profile, lang }) {
     <section className="stats-grid"><StatCard title={isAdmin?t.todayLogs:t.myLogs} value={totals.logs} icon={<CalendarDays/>}/><StatCard title={isAdmin?t.rotationToday:t.myClients} value={isAdmin?totals.rotation:visibleClients.length} icon={<Users/>}/><StatCard title={isAdmin?t.ptToday:t.myPrograms} value={isAdmin?totals.pt:visiblePrograms.length} icon={<Dumbbell/>}/><StatCard title={t.freeToday} value={totals.free} icon={<ClipboardList/>}/></section>
     <div className="card note"><b>{isAdmin?t.adminNote:t.trainerNote}</b></div>
     {isAdmin && <PerformanceDashboard staff={staff} clients={clients} logs={logs} attendanceLogs={attendanceLogs} t={t}/>} 
+    {isAdmin && <AlertsPanel staff={staff} logs={logs} attendanceLogs={attendanceLogs} seniorReports={seniorReports} evaluations={evaluations} t={t}/>} 
+    {isAdmin && <BranchComparisonDashboard branches={branches} staff={staff} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} seniorReports={seniorReports} headReports={headReports} t={t}/>} 
+    {isAdmin && <MonthlyTrainerReport staff={staff} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} evaluations={evaluations} t={t}/>} 
     {isAdmin && <StaffManagement staff={staff} branches={branches} onSaved={load} t={t}/>}
     {(isTrainer||isAdmin)&&<AddClientForm profile={profile} branches={branches} onSaved={load} lang={lang}/>}
     {(isTrainer || isSenior || isHeadCoach)&&<AttendanceForm profile={profile} onSaved={load} lang={lang}/>}
