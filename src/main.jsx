@@ -47,7 +47,10 @@ const TEXT = {
     tabOverview: 'Overview', tabTrainerData: 'بيانات المدربين', tabInputs: 'إدخال البيانات', tabReports: 'التقارير', tabStaff: 'إدارة الفريق',
     searchPlaceholder: 'بحث بالاسم / الإيميل / الهاتف / الملاحظات...', exportCsv: 'تصدير CSV', auditLog: 'سجل التعديلات',
     clientFollowup: 'متابعة العميل', lastContactDate: 'آخر تواصل', nextFollowupDate: 'ميعاد المتابعة القادم', followupNotes: 'ملاحظات المتابعة', needDirectorSupport: 'يحتاج تدخل المدير؟',
-    entityType: 'نوع البيانات', action: 'الإجراء', changedBy: 'تم بواسطة', changedAt: 'وقت التعديل'
+    entityType: 'نوع البيانات', action: 'الإجراء', changedBy: 'تم بواسطة', changedAt: 'وقت التعديل',
+    notifications: 'الإشعارات', clientProfile: 'ملف العميل', chooseClient: 'اختيار العميل', print: 'طباعة', backupData: 'نسخة احتياطية', exportBackup: 'تصدير نسخة احتياطية',
+    programBuilder: 'Program Builder', day1: 'اليوم الأول', day2: 'اليوم الثاني', day3: 'اليوم الثالث', warmup: 'الإحماء', cooldown: 'التهدئة',
+    clientPrograms: 'برامج العميل', clientLogs: 'تقارير العميل', clientFollowupAlert: 'عملاء محتاجين متابعة', dataSafetyNote: 'استخدم التصدير كنسخة احتياطية دورية قبل أي تعديلات كبيرة.'
   },
   en: {
     loginTitle: 'Gym Zaman', loginSub: 'Internal Management System', staffOnly: 'Staff access only',
@@ -91,7 +94,10 @@ const TEXT = {
     tabOverview: 'Overview', tabTrainerData: 'Trainer Data', tabInputs: 'Data Entry', tabReports: 'Reports', tabStaff: 'Staff Management',
     searchPlaceholder: 'Search by name / email / phone / notes...', exportCsv: 'Export CSV', auditLog: 'Audit Log',
     clientFollowup: 'Client Follow-up', lastContactDate: 'Last Contact', nextFollowupDate: 'Next Follow-up', followupNotes: 'Follow-up Notes', needDirectorSupport: 'Need Director Support?',
-    entityType: 'Entity Type', action: 'Action', changedBy: 'Changed By', changedAt: 'Changed At'
+    entityType: 'Entity Type', action: 'Action', changedBy: 'Changed By', changedAt: 'Changed At',
+    notifications: 'Notifications', clientProfile: 'Client Profile', chooseClient: 'Choose Client', print: 'Print', backupData: 'Backup Data', exportBackup: 'Export Backup',
+    programBuilder: 'Program Builder', day1: 'Day 1', day2: 'Day 2', day3: 'Day 3', warmup: 'Warm-up', cooldown: 'Cooldown',
+    clientPrograms: 'Client Programs', clientLogs: 'Client Logs', clientFollowupAlert: 'Clients Need Follow-up', dataSafetyNote: 'Use export as a periodic backup before major changes.'
   }
 }
 
@@ -139,6 +145,35 @@ function exportRowsToCsv(filename, rows) {
 function ExportButton({ rows, filename, t }) {
   return <button className="export-btn" type="button" onClick={() => exportRowsToCsv(filename, rows)}>{t.exportCsv}</button>
 }
+
+
+function PrintButton({ t }) {
+  return <button className="export-btn print-btn" type="button" onClick={() => window.print()}>{t.print}</button>
+}
+
+function exportJson(filename, data) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+function BackupPanel({ data, t }) {
+  return (
+    <div className="card backup-card">
+      <h3><ShieldCheck size={18}/>{t.backupData}</h3>
+      <p className="muted">{t.dataSafetyNote}</p>
+      <div className="table-actions">
+        <button className="export-btn" type="button" onClick={() => exportJson(`gymzaman-backup-${new Date().toISOString().slice(0,10)}.json`, data)}>{t.exportBackup}</button>
+        <PrintButton t={t}/>
+      </div>
+    </div>
+  )
+}
+
 
 function SearchBox({ value, onChange, t }) {
   return (
@@ -1082,6 +1117,69 @@ function AuditLogPanel({ auditLogs, staff, t }) {
   )
 }
 
+
+function ClientProfilePanel({ clients, programs, logs, staff, t }) {
+  const [selectedClientId, setSelectedClientId] = useState(clients[0]?.id || '')
+  useEffect(() => {
+    if (!selectedClientId && clients[0]?.id) setSelectedClientId(clients[0].id)
+  }, [clients, selectedClientId])
+
+  const client = clients.find(c => c.id === selectedClientId)
+  if (!client) return null
+
+  const trainer = staff.find(s => s.id === client.assigned_trainer_id)
+  const clientPrograms = programs.filter(p => p.client_id === client.id)
+  const trainerLogs = logs.filter(l => l.trainer_id === client.assigned_trainer_id).slice(0, 10)
+
+  return (
+    <div className="card client-profile-card">
+      <h3><UserRound size={18}/>{t.clientProfile}</h3>
+      <div className="client-profile-top">
+        <label>{t.chooseClient}</label>
+        <select value={selectedClientId} onChange={e => setSelectedClientId(e.target.value)}>
+          {clients.map(c => <option key={c.id} value={c.id}>{c.full_name} — {c.phone || '-'}</option>)}
+        </select>
+        <PrintButton t={t}/>
+      </div>
+      <div className="profile-grid">
+        <div><span>{t.clientName}</span><b>{client.full_name || '-'}</b></div>
+        <div><span>{t.phone}</span><b>{client.phone || '-'}</b></div>
+        <div><span>{t.goal}</span><b>{client.goal || '-'}</b></div>
+        <div><span>{t.level}</span><b>{client.level || '-'}</b></div>
+        <div><span>{t.status}</span><b>{client.status || '-'}</b></div>
+        <div><span>{t.trainerEmail}</span><b>{trainer?.email || '-'}</b></div>
+        <div><span>{t.lastContactDate}</span><b>{client.last_contact_date || '-'}</b></div>
+        <div><span>{t.nextFollowupDate}</span><b>{client.next_followup_date || '-'}</b></div>
+        <div><span>{t.needDirectorSupport}</span><b>{String(client.need_director_support ?? false)}</b></div>
+      </div>
+      <div className="profile-section">
+        <h4>{t.followupNotes}</h4>
+        <p>{client.followup_notes || '-'}</p>
+      </div>
+      <div className="profile-section">
+        <h4>{t.clientPrograms}</h4>
+        {clientPrograms.length === 0 ? <p className="muted">{t.noData}</p> : clientPrograms.map(p => (
+          <div className="mini-card" key={p.id}>
+            <b>{p.program_name}</b>
+            <p>{p.goal} — {p.duration_weeks} weeks</p>
+            <pre>{p.exercises}</pre>
+          </div>
+        ))}
+      </div>
+      <div className="profile-section">
+        <h4>{t.clientLogs}</h4>
+        {trainerLogs.length === 0 ? <p className="muted">{t.noData}</p> : trainerLogs.map(l => (
+          <div className="mini-card" key={l.id}>
+            <b>{l.log_date} — {l.shift}</b>
+            <p>PT: {l.pt_sessions_count || 0} | Free: {l.free_service_count || 0} | Rotation: {l.rotation_count || 0}</p>
+            <p>{l.notes || '-'}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function Dashboard({ profile, lang }) {
   const t=TEXT[lang]
   const [clients,setClients]=useState([]), [logs,setLogs]=useState([]), [attendanceLogs,setAttendanceLogs]=useState([]), [branches,setBranches]=useState([]), [programs,setPrograms]=useState([]), [staff,setStaff]=useState([]), [seniorReports,setSeniorReports]=useState([]), [headReports,setHeadReports]=useState([]), [evaluations,setEvaluations]=useState([]), [auditLogs,setAuditLogs]=useState([])
@@ -1176,7 +1274,8 @@ function Dashboard({ profile, lang }) {
       {isAdmin && selectedTrainer && <TrainerProfilePanel trainer={selectedTrainer} branches={branches} clients={clients} logs={logs} programs={programs} evaluations={evaluations} t={t}/>}
       {(isAdmin && selectedTrainer) && <CoachEvaluationForm profile={profile} targetTrainerId={selectedTrainer.id} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
       {isHeadCoach && <CoachEvaluationForm profile={profile} targetTrainerId={''} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
-      <div className="table-actions"><ExportButton rows={visibleClientsRows} filename="clients.csv" t={t}/></div>
+      <ClientProfilePanel clients={visibleClients} programs={programs} logs={logs} staff={staff} t={t}/>
+      <div className="table-actions"><ExportButton rows={visibleClientsRows} filename="clients.csv" t={t}/><PrintButton t={t}/></div>
       <Table title={isTrainer?t.myClients:t.clients} rows={visibleClientsRows} canManage={isAdmin} onEdit={r=>setEdit({type:'client',row:r})} onDelete={r=>del('clients',r,r.full_name)} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'full_name',label:t.clientName},{key:'phone',label:t.phone},{key:'goal',label:t.goal},{key:'level',label:t.level},{key:'status',label:t.status},{key:'next_followup_date',label:t.nextFollowupDate},{key:'need_director_support',label:t.needDirectorSupport}]}/>
       <div className="table-actions"><ExportButton rows={visibleAttendance} filename="attendance.csv" t={t}/></div>
       <Table title={t.attendance} rows={visibleAttendance} canManage={false} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'attendance_date',label:t.date},{key:'shift',label:t.shift},{key:'check_in',label:t.checkIn},{key:'check_out',label:t.checkOut},{key:'late_minutes',label:t.lateMinutes},{key:'overtime_minutes',label:t.overtimeMinutes},{key:'notes',label:t.notes}]}/>
@@ -1194,6 +1293,7 @@ function Dashboard({ profile, lang }) {
     </>}
 
     {activeTab === 'reports' && <>
+      {isAdmin && <BackupPanel data={{profiles:staff, clients, logs, attendanceLogs, programs, seniorReports, headReports, evaluations, auditLogs}} t={t}/>}
       {isAdmin && <MonthlyTrainerReport staff={staff} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} evaluations={evaluations} t={t}/>}
       {(isAdmin || isSenior) && <Table title={t.seniorReport} rows={visibleSeniorReports} canManage={false} t={t} columns={[...(isAdmin?[{key:'senior_email',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'branch_pressure',label:t.branchPressure},{key:'total_sessions_done',label:t.totalSessionsDone},{key:'free_service_count',label:t.freeService},{key:'problem_description',label:t.problemDescription},{key:'floor_tasks',label:t.floorTasks},{key:'service_notes',label:t.serviceNotes},{key:'client_issues',label:t.clientIssues},{key:'actions_taken',label:t.actionsTaken},{key:'resolved',label:t.resolved},{key:'notes',label:t.notes}]}/>}
       {(isAdmin || isHeadCoach) && <Table title={t.headCoachReport} rows={visibleHeadReports} canManage={false} t={t} columns={[...(isAdmin?[{key:'head_coach_email',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'total_sessions_done',label:t.totalSessionsDone},{key:'free_service_count',label:t.freeService},{key:'rotation_count',label:t.rotation},{key:'tasks_done',label:t.tasksDone},{key:'follow_ups',label:t.followUps},{key:'trainer_issues',label:t.trainerIssues},{key:'branch_summary',label:t.branchSummary},{key:'notes',label:t.notes}]}/>}
