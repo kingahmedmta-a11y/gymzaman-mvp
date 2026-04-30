@@ -28,7 +28,11 @@ const TEXT = {
     fullName: 'الاسم', branch: 'الفرع', role: 'الدور', saveStaff: 'حفظ بيانات المدرب', savedStaff: 'تم حفظ بيانات المدرب.',
     active: 'active', inactive: 'inactive',
     seniorReport: 'تقرير السينيور', addSeniorReport: 'إضافة تقرير سينيور', branchPressure: 'ضغط الفرع', serviceNotes: 'ملاحظات الخدمة',
-    coachCommitment: 'التزام المدربين', clientIssues: 'مشاكل العملاء', actionsTaken: 'الإجراءات التي تمت', resolved: 'تم الحل؟', saveSeniorReport: 'حفظ تقرير السينيور', seniorReportSaved: 'تم حفظ تقرير السينيور بنجاح.'
+    coachCommitment: 'التزام المدربين', clientIssues: 'مشاكل العملاء', actionsTaken: 'الإجراءات التي تمت', resolved: 'تم الحل؟', saveSeniorReport: 'حفظ تقرير السينيور', seniorReportSaved: 'تم حفظ تقرير السينيور بنجاح.',
+    trainerProfile: 'ملف المدرب', coachEvaluation: 'تقييم المدرب', evaluationHistory: 'سجل التقييمات',
+    technicalScore: 'التقييم الفني', behaviorScore: 'التقييم السلوكي', leadershipScore: 'تقييم القيادة', serviceScore: 'تقييم الخدمة',
+    evaluatorNotes: 'ملاحظات المقيم', saveEvaluation: 'حفظ التقييم', evaluationSaved: 'تم حفظ التقييم بنجاح.',
+    selectedTrainerInfo: 'بيانات المدرب المختار', problemDescription: 'وصف المشكلة', evaluatedBy: 'تم التقييم بواسطة'
   },
   en: {
     loginTitle: 'Gym Zaman', loginSub: 'Internal Management System', staffOnly: 'Staff access only',
@@ -53,7 +57,11 @@ const TEXT = {
     fullName: 'Full Name', branch: 'Branch', role: 'Role', saveStaff: 'Save Staff Data', savedStaff: 'Staff data saved.',
     active: 'active', inactive: 'inactive',
     seniorReport: 'Senior Report', addSeniorReport: 'Add Senior Report', branchPressure: 'Branch Pressure', serviceNotes: 'Service Notes',
-    coachCommitment: 'Coach Commitment', clientIssues: 'Client Issues', actionsTaken: 'Actions Taken', resolved: 'Resolved?', saveSeniorReport: 'Save Senior Report', seniorReportSaved: 'Senior report saved successfully.'
+    coachCommitment: 'Coach Commitment', clientIssues: 'Client Issues', actionsTaken: 'Actions Taken', resolved: 'Resolved?', saveSeniorReport: 'Save Senior Report', seniorReportSaved: 'Senior report saved successfully.',
+    trainerProfile: 'Trainer Profile', coachEvaluation: 'Coach Evaluation', evaluationHistory: 'Evaluation History',
+    technicalScore: 'Technical Score', behaviorScore: 'Behavior Score', leadershipScore: 'Leadership Score', serviceScore: 'Service Score',
+    evaluatorNotes: 'Evaluator Notes', saveEvaluation: 'Save Evaluation', evaluationSaved: 'Evaluation saved successfully.',
+    selectedTrainerInfo: 'Selected Trainer Info', problemDescription: 'Problem Description', evaluatedBy: 'Evaluated By'
   }
 }
 
@@ -190,6 +198,7 @@ function SeniorDailyReportForm({ profile, onSaved, lang }) {
     coach_commitment_notes: '',
     client_issues: '',
     actions_taken: '',
+    problem_description: '',
     resolved: 'no',
     notes: ''
   })
@@ -210,6 +219,7 @@ function SeniorDailyReportForm({ profile, onSaved, lang }) {
       coach_commitment_notes: form.coach_commitment_notes,
       client_issues: form.client_issues,
       actions_taken: form.actions_taken,
+      problem_description: form.problem_description,
       resolved: form.resolved === 'yes',
       notes: form.notes
     }
@@ -225,6 +235,7 @@ function SeniorDailyReportForm({ profile, onSaved, lang }) {
         coach_commitment_notes: '',
         client_issues: '',
         actions_taken: '',
+        problem_description: '',
         resolved: 'no',
         notes: ''
       })
@@ -257,6 +268,11 @@ function SeniorDailyReportForm({ profile, onSaved, lang }) {
             <option value="no">no</option>
             <option value="yes">yes</option>
           </select>
+        </div>
+
+        <div className="full">
+          <label>{t.problemDescription}</label>
+          <textarea value={form.problem_description} onChange={e => f('problem_description', e.target.value)} placeholder="What exactly was the problem?" />
         </div>
 
         <div className="full">
@@ -378,9 +394,138 @@ function StaffManagement({ staff, branches, onSaved, t }) {
   )
 }
 
+
+function TrainerProfilePanel({ trainer, branches, clients, logs, programs, evaluations, t }) {
+  if (!trainer) return null
+  const branch = branches.find(b => b.id === trainer.branch_id)
+  const trainerClients = clients.filter(c => c.assigned_trainer_id === trainer.id)
+  const trainerLogs = logs.filter(l => l.trainer_id === trainer.id)
+  const trainerPrograms = programs.filter(p => p.trainer_id === trainer.id)
+  const trainerEvaluations = evaluations.filter(e => e.trainer_id === trainer.id)
+  const totalPt = trainerLogs.reduce((s, r) => s + Number(r.pt_sessions_count || 0), 0)
+  const totalFree = trainerLogs.reduce((s, r) => s + Number(r.free_service_count || 0), 0)
+  const totalRotation = trainerLogs.reduce((s, r) => s + Number(r.rotation_count || 0), 0)
+
+  return (
+    <div className="card trainer-profile-card">
+      <h3><UserRound size={18}/>{t.trainerProfile}</h3>
+      <div className="profile-grid">
+        <div><span>{t.fullName}</span><b>{trainer.full_name || '-'}</b></div>
+        <div><span>{t.email}</span><b>{trainer.email || '-'}</b></div>
+        <div><span>{t.role}</span><b>{trainer.role || '-'}</b></div>
+        <div><span>{t.branch}</span><b>{branch?.name || '-'}</b></div>
+        <div><span>{t.status}</span><b>{trainer.status || '-'}</b></div>
+        <div><span>{t.clients}</span><b>{trainerClients.length}</b></div>
+        <div><span>{t.programs}</span><b>{trainerPrograms.length}</b></div>
+        <div><span>{t.logs}</span><b>{trainerLogs.length}</b></div>
+        <div><span>{t.ptSessions}</span><b>{totalPt}</b></div>
+        <div><span>{t.freeService}</span><b>{totalFree}</b></div>
+        <div><span>{t.rotation}</span><b>{totalRotation}</b></div>
+        <div><span>{t.evaluationHistory}</span><b>{trainerEvaluations.length}</b></div>
+      </div>
+    </div>
+  )
+}
+
+function CoachEvaluationForm({ profile, targetTrainerId, eligibleTrainers, onSaved, lang }) {
+  const t = TEXT[lang]
+  const [form, setForm] = useState({
+    trainer_id: targetTrainerId || '',
+    evaluation_date: new Date().toISOString().slice(0,10),
+    technical_score: 80,
+    behavior_score: 80,
+    leadership_score: 80,
+    service_score: 80,
+    evaluator_notes: ''
+  })
+  const [msg, setMsg] = useState('')
+
+  useEffect(() => {
+    if (targetTrainerId) setForm(p => ({ ...p, trainer_id: targetTrainerId }))
+  }, [targetTrainerId])
+
+  function f(k,v){ setForm(p => ({...p, [k]: v})) }
+
+  async function submit(e){
+    e.preventDefault()
+    if (!form.trainer_id) {
+      setMsg('Select trainer first')
+      return
+    }
+    const target = eligibleTrainers.find(x => x.id === form.trainer_id)
+    const payload = {
+      trainer_id: form.trainer_id,
+      evaluator_id: profile.id,
+      branch_id: target?.branch_id || profile.branch_id,
+      evaluation_date: form.evaluation_date,
+      technical_score: Number(form.technical_score || 0),
+      behavior_score: Number(form.behavior_score || 0),
+      leadership_score: Number(form.leadership_score || 0),
+      service_score: Number(form.service_score || 0),
+      evaluator_notes: form.evaluator_notes
+    }
+    const { error } = await supabase.from('trainer_evaluations').insert(payload)
+    if (error) setMsg(error.message)
+    else {
+      setMsg(t.evaluationSaved)
+      setForm({
+        trainer_id: targetTrainerId || '',
+        evaluation_date: new Date().toISOString().slice(0,10),
+        technical_score: 80,
+        behavior_score: 80,
+        leadership_score: 80,
+        service_score: 80,
+        evaluator_notes: ''
+      })
+      onSaved()
+    }
+  }
+
+  return (
+    <div className="card coach-eval-card">
+      <h3><ClipboardList size={18}/>{t.coachEvaluation}</h3>
+      <form className="grid-form simple-form" onSubmit={submit}>
+        <div>
+          <label>{t.trainerEmail}</label>
+          <select value={form.trainer_id} onChange={e => f('trainer_id', e.target.value)} disabled={Boolean(targetTrainerId)}>
+            <option value="">---</option>
+            {eligibleTrainers.map(tr => <option key={tr.id} value={tr.id}>{tr.email} — {tr.full_name}</option>)}
+          </select>
+        </div>
+        <div>
+          <label>{t.date}</label>
+          <input type="date" value={form.evaluation_date} onChange={e => f('evaluation_date', e.target.value)} />
+        </div>
+        <div>
+          <label>{t.technicalScore}</label>
+          <input type="number" min="0" max="100" value={form.technical_score} onChange={e => f('technical_score', e.target.value)} />
+        </div>
+        <div>
+          <label>{t.behaviorScore}</label>
+          <input type="number" min="0" max="100" value={form.behavior_score} onChange={e => f('behavior_score', e.target.value)} />
+        </div>
+        <div>
+          <label>{t.leadershipScore}</label>
+          <input type="number" min="0" max="100" value={form.leadership_score} onChange={e => f('leadership_score', e.target.value)} />
+        </div>
+        <div>
+          <label>{t.serviceScore}</label>
+          <input type="number" min="0" max="100" value={form.service_score} onChange={e => f('service_score', e.target.value)} />
+        </div>
+        <div className="full">
+          <label>{t.evaluatorNotes}</label>
+          <textarea value={form.evaluator_notes} onChange={e => f('evaluator_notes', e.target.value)} />
+        </div>
+        {msg && <div className={msg.includes('success') || msg.includes('بنجاح') ? 'success full' : 'error full'}>{msg}</div>}
+        <button>{t.saveEvaluation}</button>
+      </form>
+    </div>
+  )
+}
+
 function Dashboard({ profile, lang }) {
   const t=TEXT[lang]
-  const [clients,setClients]=useState([]), [logs,setLogs]=useState([]), [branches,setBranches]=useState([]), [programs,setPrograms]=useState([]), [staff,setStaff]=useState([]), [seniorReports,setSeniorReports]=useState([])
+  const [clients,setClients]=useState([]), [logs,setLogs]=useState([]), [branches,setBranches]=useState([]), [programs,setPrograms]=useState([]), [staff,setStaff]=useState([]), [seniorReports,setSeniorReports]=useState([]), [evaluations,setEvaluations]=useState([])
   const [loading,setLoading]=useState(true), [notice,setNotice]=useState(''), [edit,setEdit]=useState(null), [selectedTrainerId,setSelectedTrainerId]=useState('all')
   const isAdmin=profile.role==='owner'||profile.role==='fitness_director', isTrainer=profile.role==='trainer', isSenior=profile.role==='senior', isHeadCoach=profile.role==='head_coach'
 
@@ -391,13 +536,14 @@ function Dashboard({ profile, lang }) {
       supabase.from('trainer_daily_logs').select('*').order('created_at',{ascending:false}),
       supabase.from('branches').select('*').order('name'),
       supabase.from('pt_programs').select('*').order('created_at',{ascending:false}),
-      supabase.from('senior_daily_reports').select('*').order('created_at',{ascending:false})
+      supabase.from('senior_daily_reports').select('*').order('created_at',{ascending:false}),
+      supabase.from('trainer_evaluations').select('*').order('created_at',{ascending:false})
     ]
     if (isAdmin || isHeadCoach) calls.push(supabase.from('profiles').select('id, full_name, email, role, branch_id, status').order('email'))
     const res = await Promise.all(calls)
-    const [c,l,b,p,sr,s] = res
-    if(c.error)setNotice(c.error.message); if(p.error)setNotice(p.error.message); if(sr.error)setNotice(sr.error.message); if(s?.error)setNotice(s.error.message)
-    setClients(c.data||[]); setLogs(l.data||[]); setBranches(b.data||[]); setPrograms(p.data||[]); setSeniorReports(sr.data||[]); setStaff(s?.data||[])
+    const [c,l,b,p,sr,e,s] = res
+    if(c.error)setNotice(c.error.message); if(p.error)setNotice(p.error.message); if(sr.error)setNotice(sr.error.message); if(e.error)setNotice(e.error.message); if(s?.error)setNotice(s.error.message)
+    setClients(c.data||[]); setLogs(l.data||[]); setBranches(b.data||[]); setPrograms(p.data||[]); setSeniorReports(sr.data||[]); setEvaluations(e.data||[]); setStaff(s?.data||[])
     setLoading(false)
   }
 
@@ -406,6 +552,8 @@ function Dashboard({ profile, lang }) {
   async function del(table,row,label){ if(!confirm(`Delete ${label}?`)) return; const {error}=await supabase.from(table).delete().eq('id',row.id); if(error)alert(error.message); else load() }
 
   const trainers = staff.filter(s => ['trainer','senior','head_coach'].includes(s.role))
+  const selectedTrainer = selectedTrainerId !== 'all' ? staff.find(s => s.id === selectedTrainerId) : null
+  const evaluableTrainers = isHeadCoach ? staff.filter(s => s.branch_id === profile.branch_id && ['trainer','senior'].includes(s.role)) : trainers
   const clientMapAll = Object.fromEntries(clients.map(c=>[c.id,c.full_name]))
   const trainerMap = Object.fromEntries(staff.map(tr=>[tr.id,tr.email]))
 
@@ -417,6 +565,8 @@ function Dashboard({ profile, lang }) {
   const visibleLogsRows = visibleLogs.map(l=>({...l, trainer_email: trainerMap[l.trainer_id] || '-'}))
   const visibleSeniorReportsRaw = isAdmin ? seniorReports : seniorReports.filter(r => r.senior_id === profile.id)
   const visibleSeniorReports = visibleSeniorReportsRaw.map(r => ({...r, senior_email: trainerMap[r.senior_id] || '-'}))
+  const visibleEvaluationsRaw = isAdmin && selectedTrainerId !== 'all' ? evaluations.filter(ev => ev.trainer_id === selectedTrainerId) : evaluations
+  const visibleEvaluations = visibleEvaluationsRaw.map(ev => ({...ev, trainer_email: trainerMap[ev.trainer_id] || '-', evaluator_email: trainerMap[ev.evaluator_id] || (ev.evaluator_id === profile.id ? profile.email : '-')}))
 
   const today=new Date().toISOString().slice(0,10), todayLogs=visibleLogs.filter(x=>x.log_date===today), rows=isAdmin?todayLogs:visibleLogs
   const totals={logs:rows.length,rotation:rows.reduce((s,r)=>s+Number(r.rotation_count||0),0),pt:rows.reduce((s,r)=>s+Number(r.pt_sessions_count||0),0),free:rows.reduce((s,r)=>s+Number(r.free_service_count||0),0)}
@@ -425,6 +575,9 @@ function Dashboard({ profile, lang }) {
   if(loading)return <div className="card">Loading...</div>
   return <><section className="hero simple-hero"><h2>{title}</h2><p>{t.hero}</p></section>{notice&&<div className="error">{notice}</div>}
     {isAdmin && <TrainerFilter trainers={trainers} selectedTrainerId={selectedTrainerId} setSelectedTrainerId={setSelectedTrainerId} t={t}/>}
+    {isAdmin && selectedTrainer && <TrainerProfilePanel trainer={selectedTrainer} branches={branches} clients={clients} logs={logs} programs={programs} evaluations={evaluations} t={t}/>}
+    {(isAdmin && selectedTrainer) && <CoachEvaluationForm profile={profile} targetTrainerId={selectedTrainer.id} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
+    {isHeadCoach && <CoachEvaluationForm profile={profile} targetTrainerId={''} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
     <section className="stats-grid"><StatCard title={isAdmin?t.todayLogs:t.myLogs} value={totals.logs} icon={<CalendarDays/>}/><StatCard title={isAdmin?t.rotationToday:t.myClients} value={isAdmin?totals.rotation:visibleClients.length} icon={<Users/>}/><StatCard title={isAdmin?t.ptToday:t.myPrograms} value={isAdmin?totals.pt:visiblePrograms.length} icon={<Dumbbell/>}/><StatCard title={t.freeToday} value={totals.free} icon={<ClipboardList/>}/></section>
     <div className="card note"><b>{isAdmin?t.adminNote:t.trainerNote}</b></div>
     {isAdmin && <StaffManagement staff={staff} branches={branches} onSaved={load} t={t}/>}
@@ -435,7 +588,8 @@ function Dashboard({ profile, lang }) {
     <Table title={isTrainer?t.myClients:t.clients} rows={visibleClientsRows} canManage={isAdmin} onEdit={r=>setEdit({type:'client',row:r})} onDelete={r=>del('clients',r,r.full_name)} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'full_name',label:t.clientName},{key:'phone',label:t.phone},{key:'goal',label:t.goal},{key:'level',label:t.level},{key:'status',label:t.status}]}/>
     <Table title={isTrainer?t.myLogs:t.logs} rows={visibleLogsRows} canManage={isAdmin} onEdit={r=>setEdit({type:'log',row:r})} onDelete={r=>del('trainer_daily_logs',r,r.log_date)} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'log_date',label:t.date},{key:'shift',label:t.shift},{key:'rotation_count',label:t.rotation},{key:'pt_sessions_count',label:t.ptSessions},{key:'free_service_count',label:t.freeService},{key:'notes',label:t.notes}]}/>
     <Table title={isTrainer?t.myPrograms:t.programs} rows={visiblePrograms} canManage={isAdmin} onEdit={r=>setEdit({type:'program',row:r})} onDelete={r=>del('pt_programs',r,r.program_name)} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'client_name',label:t.clientName},{key:'program_name',label:t.programName},{key:'goal',label:t.goal},{key:'duration_weeks',label:t.duration},{key:'status',label:t.status}]}/>
-    {(isAdmin || isSenior) && <Table title={t.seniorReport} rows={visibleSeniorReports} canManage={false} t={t} columns={[...(isAdmin?[{key:'senior_email',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'branch_pressure',label:t.branchPressure},{key:'service_notes',label:t.serviceNotes},{key:'client_issues',label:t.clientIssues},{key:'actions_taken',label:t.actionsTaken},{key:'resolved',label:t.resolved},{key:'notes',label:t.notes}]}/>}
+    {(isAdmin || isSenior) && <Table title={t.seniorReport} rows={visibleSeniorReports} canManage={false} t={t} columns={[...(isAdmin?[{key:'senior_email',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'branch_pressure',label:t.branchPressure},{key:'problem_description',label:t.problemDescription},{key:'service_notes',label:t.serviceNotes},{key:'client_issues',label:t.clientIssues},{key:'actions_taken',label:t.actionsTaken},{key:'resolved',label:t.resolved},{key:'notes',label:t.notes}]}/>}
+    {(isAdmin || isHeadCoach) && <Table title={t.evaluationHistory} rows={visibleEvaluations} canManage={false} t={t} columns={[{key:'trainer_email',label:t.trainerEmail},{key:'evaluation_date',label:t.date},{key:'technical_score',label:t.technicalScore},{key:'behavior_score',label:t.behaviorScore},{key:'leadership_score',label:t.leadershipScore},{key:'service_score',label:t.serviceScore},{key:'evaluator_notes',label:t.evaluatorNotes}]}/>}
     {edit&&<EditForm type={edit.type} row={edit.row} onClose={()=>setEdit(null)} onSaved={load} lang={lang}/>}
   </>
 }
