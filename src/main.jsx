@@ -43,7 +43,11 @@ const TEXT = {
     performanceDashboard: 'لوحة الأداء', topBySessions: 'أعلى مدرب سيشنز', topByFreeService: 'أعلى مدرب Free Service', trainersNoReport: 'مدربين بدون تقرير اليوم', activeCoaches: 'مدربين نشطين', totalClients: 'إجمالي العملاء',
     monthlyReport: 'التقرير الشهري للمدربين', reportMonth: 'شهر التقرير', totalLogs: 'عدد التقارير', totalLate: 'إجمالي التأخير', totalOvertime: 'إجمالي الأوفر تايم', avgEvaluation: 'متوسط التقييم',
     branchComparison: 'مقارنة الفروع', alerts: 'تنبيهات وملاحظات', alertType: 'نوع التنبيه', alertDetails: 'التفاصيل', noAlerts: 'لا توجد تنبيهات حاليًا',
-    branchName: 'اسم الفرع', totalRotation: 'إجمالي Rotation', totalFreeService: 'إجمالي Free Service', totalPrograms: 'إجمالي البرامج', unresolvedProblems: 'مشاكل غير محلولة'
+    branchName: 'اسم الفرع', totalRotation: 'إجمالي Rotation', totalFreeService: 'إجمالي Free Service', totalPrograms: 'إجمالي البرامج', unresolvedProblems: 'مشاكل غير محلولة',
+    tabOverview: 'Overview', tabTrainerData: 'بيانات المدربين', tabInputs: 'إدخال البيانات', tabReports: 'التقارير', tabStaff: 'إدارة الفريق',
+    searchPlaceholder: 'بحث بالاسم / الإيميل / الهاتف / الملاحظات...', exportCsv: 'تصدير CSV', auditLog: 'سجل التعديلات',
+    clientFollowup: 'متابعة العميل', lastContactDate: 'آخر تواصل', nextFollowupDate: 'ميعاد المتابعة القادم', followupNotes: 'ملاحظات المتابعة', needDirectorSupport: 'يحتاج تدخل المدير؟',
+    entityType: 'نوع البيانات', action: 'الإجراء', changedBy: 'تم بواسطة', changedAt: 'وقت التعديل'
   },
   en: {
     loginTitle: 'Gym Zaman', loginSub: 'Internal Management System', staffOnly: 'Staff access only',
@@ -83,12 +87,80 @@ const TEXT = {
     performanceDashboard: 'Performance Dashboard', topBySessions: 'Top Trainer by Sessions', topByFreeService: 'Top Trainer by Free Service', trainersNoReport: 'Trainers with No Report Today', activeCoaches: 'Active Coaches', totalClients: 'Total Clients',
     monthlyReport: 'Monthly Trainer Report', reportMonth: 'Report Month', totalLogs: 'Total Logs', totalLate: 'Total Late', totalOvertime: 'Total Overtime', avgEvaluation: 'Avg Evaluation',
     branchComparison: 'Branch Comparison', alerts: 'Alerts & Notes', alertType: 'Alert Type', alertDetails: 'Details', noAlerts: 'No alerts currently',
-    branchName: 'Branch Name', totalRotation: 'Total Rotation', totalFreeService: 'Total Free Service', totalPrograms: 'Total Programs', unresolvedProblems: 'Unresolved Problems'
+    branchName: 'Branch Name', totalRotation: 'Total Rotation', totalFreeService: 'Total Free Service', totalPrograms: 'Total Programs', unresolvedProblems: 'Unresolved Problems',
+    tabOverview: 'Overview', tabTrainerData: 'Trainer Data', tabInputs: 'Data Entry', tabReports: 'Reports', tabStaff: 'Staff Management',
+    searchPlaceholder: 'Search by name / email / phone / notes...', exportCsv: 'Export CSV', auditLog: 'Audit Log',
+    clientFollowup: 'Client Follow-up', lastContactDate: 'Last Contact', nextFollowupDate: 'Next Follow-up', followupNotes: 'Follow-up Notes', needDirectorSupport: 'Need Director Support?',
+    entityType: 'Entity Type', action: 'Action', changedBy: 'Changed By', changedAt: 'Changed At'
   }
 }
 
 const ROLE_OPTIONS = ['trainer', 'senior', 'head_coach', 'fitness_director', 'owner']
 const STATUS_OPTIONS = ['active', 'inactive']
+
+
+function logAudit(actorId, action, entityType, entityId, details = {}) {
+  if (!actorId) return Promise.resolve()
+  return supabase.from('audit_logs').insert({
+    actor_id: actorId,
+    action,
+    entity_type: entityType,
+    entity_id: entityId || null,
+    details
+  })
+}
+
+function rowMatches(row, query) {
+  if (!query) return true
+  const q = query.toLowerCase()
+  return Object.values(row || {}).some(value => String(value ?? '').toLowerCase().includes(q))
+}
+
+function exportRowsToCsv(filename, rows) {
+  if (!rows || rows.length === 0) return
+  const keys = Array.from(rows.reduce((set, row) => {
+    Object.keys(row || {}).forEach(k => set.add(k))
+    return set
+  }, new Set()))
+  const escapeCsv = value => {
+    const text = String(value ?? '')
+    return `"${text.replaceAll('"', '""')}"`
+  }
+  const csv = [keys.join(','), ...rows.map(row => keys.map(k => escapeCsv(row[k])).join(','))].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+function ExportButton({ rows, filename, t }) {
+  return <button className="export-btn" type="button" onClick={() => exportRowsToCsv(filename, rows)}>{t.exportCsv}</button>
+}
+
+function SearchBox({ value, onChange, t }) {
+  return (
+    <div className="card search-card">
+      <Search size={18}/>
+      <input value={value} onChange={e => onChange(e.target.value)} placeholder={t.searchPlaceholder}/>
+    </div>
+  )
+}
+
+function TabBar({ tabs, activeTab, setActiveTab }) {
+  return (
+    <div className="tabs-bar">
+      {tabs.map(tab => (
+        <button key={tab.key} className={activeTab === tab.key ? 'active' : ''} onClick={() => setActiveTab(tab.key)} type="button">
+          {tab.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 
 function StatCard({ title, value, icon }) {
   return <div className="card stat"><div><p className="muted">{title}</p><h2>{value}</h2></div><div className="icon">{icon}</div></div>
@@ -163,7 +235,7 @@ function Modal({ title, children, onClose }) {
 function EditForm({ type, row, onClose, onSaved, lang }) {
   const t = TEXT[lang]
   const defaults = type === 'client' ? {
-    full_name: row.full_name || '', phone: row.phone || '', goal: row.goal || '', level: row.level || 'beginner', status: row.status || 'active'
+    full_name: row.full_name || '', phone: row.phone || '', goal: row.goal || '', level: row.level || 'beginner', status: row.status || 'active', last_contact_date: row.last_contact_date || '', next_followup_date: row.next_followup_date || '', need_director_support: row.need_director_support ? 'yes' : 'no', followup_notes: row.followup_notes || ''
   } : type === 'log' ? {
     log_date: row.log_date || new Date().toISOString().slice(0,10), shift: row.shift || 'PM', check_in: row.check_in || '15:00', check_out: row.check_out || '23:00',
     rotation_count: row.rotation_count || 0, new_clients_count: row.new_clients_count || 0, pt_sessions_count: row.pt_sessions_count || 0, free_service_count: row.free_service_count || 0, notes: row.notes || ''
@@ -177,22 +249,84 @@ function EditForm({ type, row, onClose, onSaved, lang }) {
   async function submit(e){
     e.preventDefault()
     const payload = {...form}
+    if (type === 'client') {
+      payload.need_director_support = form.need_director_support === 'yes'
+      payload.last_contact_date = form.last_contact_date || null
+      payload.next_followup_date = form.next_followup_date || null
+    }
     ;['rotation_count','new_clients_count','pt_sessions_count','free_service_count','duration_weeks'].forEach(k=>{ if(payload[k] !== undefined) payload[k] = Number(payload[k] || 0) })
     const { error } = await supabase.from(table).update(payload).eq('id', row.id)
     if(error) setMessage(error.message); else { onSaved(); onClose() }
   }
   return <Modal title={`${t.edit} ${type}`} onClose={onClose}><form className="grid-form simple-form" onSubmit={submit}>
-    {type==='client' && <><div><label>{t.clientName}</label><input value={form.full_name} onChange={e=>f('full_name',e.target.value)}/></div><div><label>{t.phone}</label><input value={form.phone} onChange={e=>f('phone',e.target.value)}/></div><div><label>{t.goal}</label><input value={form.goal} onChange={e=>f('goal',e.target.value)}/></div><div><label>{t.level}</label><select value={form.level} onChange={e=>f('level',e.target.value)}><option>beginner</option><option>intermediate</option><option>advanced</option></select></div><div><label>{t.status}</label><select value={form.status} onChange={e=>f('status',e.target.value)}><option>active</option><option>inactive</option></select></div></>}
+    {type==='client' && <>
+      <div><label>{t.clientName}</label><input value={form.full_name} onChange={e=>f('full_name',e.target.value)}/></div>
+      <div><label>{t.phone}</label><input value={form.phone} onChange={e=>f('phone',e.target.value)}/></div>
+      <div><label>{t.goal}</label><input value={form.goal} onChange={e=>f('goal',e.target.value)}/></div>
+      <div><label>{t.level}</label><select value={form.level} onChange={e=>f('level',e.target.value)}><option>beginner</option><option>intermediate</option><option>advanced</option></select></div>
+      <div><label>{t.status}</label><select value={form.status} onChange={e=>f('status',e.target.value)}><option>active</option><option>follow_up</option><option>need_support</option><option>inactive</option></select></div>
+      <div><label>{t.lastContactDate}</label><input type="date" value={form.last_contact_date} onChange={e=>f('last_contact_date',e.target.value)}/></div>
+      <div><label>{t.nextFollowupDate}</label><input type="date" value={form.next_followup_date} onChange={e=>f('next_followup_date',e.target.value)}/></div>
+      <div><label>{t.needDirectorSupport}</label><select value={form.need_director_support} onChange={e=>f('need_director_support',e.target.value)}><option value="no">no</option><option value="yes">yes</option></select></div>
+      <div className="full"><label>{t.followupNotes}</label><textarea value={form.followup_notes} onChange={e=>f('followup_notes',e.target.value)}/></div>
+    </>}
     {type==='log' && <><div><label>{t.date}</label><input type="date" value={form.log_date} onChange={e=>f('log_date',e.target.value)}/></div><div><label>{t.shift}</label><select value={form.shift} onChange={e=>f('shift',e.target.value)}><option>AM</option><option>PM</option></select></div><div><label>{t.checkIn}</label><input type="time" value={form.check_in} onChange={e=>f('check_in',e.target.value)}/></div><div><label>{t.checkOut}</label><input type="time" value={form.check_out} onChange={e=>f('check_out',e.target.value)}/></div><div><label>{t.rotation}</label><input type="number" value={form.rotation_count} onChange={e=>f('rotation_count',e.target.value)}/></div><div><label>{t.newClients}</label><input type="number" value={form.new_clients_count} onChange={e=>f('new_clients_count',e.target.value)}/></div><div><label>{t.ptSessions}</label><input type="number" value={form.pt_sessions_count} onChange={e=>f('pt_sessions_count',e.target.value)}/></div><div><label>{t.freeService}</label><input type="number" value={form.free_service_count} onChange={e=>f('free_service_count',e.target.value)}/></div><div className="full"><label>{t.notes}</label><textarea value={form.notes} onChange={e=>f('notes',e.target.value)}/></div></>}
     {type==='program' && <><div><label>{t.programName}</label><input value={form.program_name} onChange={e=>f('program_name',e.target.value)}/></div><div><label>{t.goal}</label><input value={form.goal} onChange={e=>f('goal',e.target.value)}/></div><div><label>{t.duration}</label><input type="number" value={form.duration_weeks} onChange={e=>f('duration_weeks',e.target.value)}/></div><div><label>{t.status}</label><select value={form.status} onChange={e=>f('status',e.target.value)}><option>active</option><option>inactive</option></select></div><div className="full"><label>{t.exercises}</label><textarea value={form.exercises} onChange={e=>f('exercises',e.target.value)}/></div><div className="full"><label>{t.notes}</label><textarea value={form.notes} onChange={e=>f('notes',e.target.value)}/></div></>}
     {message && <div className="error full">{message}</div>}<button>{t.save}</button></form></Modal>
 }
 
 function AddClientForm({ profile, branches, onSaved, lang }) {
-  const t=TEXT[lang]; const [form,setForm]=useState({full_name:'',phone:'',goal:'Hypertrophy',level:'beginner'}); const [msg,setMsg]=useState('')
+  const t=TEXT[lang]
+  const [form,setForm]=useState({
+    full_name:'',
+    phone:'',
+    goal:'Hypertrophy',
+    level:'beginner',
+    status:'active',
+    last_contact_date:'',
+    next_followup_date:'',
+    need_director_support:'no',
+    followup_notes:''
+  })
+  const [msg,setMsg]=useState('')
   function f(k,v){setForm(p=>({...p,[k]:v}))}
-  async function submit(e){e.preventDefault(); const {error}=await supabase.from('clients').insert({full_name:form.full_name,phone:form.phone,goal:form.goal,level:form.level,branch_id:profile.branch_id||branches[0]?.id,assigned_trainer_id:profile.role==='trainer'?profile.id:null,status:'active',created_by:profile.id}); if(error)setMsg(error.message); else{setMsg(t.clientSaved);setForm({full_name:'',phone:'',goal:'Hypertrophy',level:'beginner'});onSaved()}}
-  return <div className="card compact-card"><h3><PlusCircle size={18}/>{t.addClient}</h3><form className="grid-form simple-form" onSubmit={submit}><div><label>{t.clientName}</label><input required value={form.full_name} onChange={e=>f('full_name',e.target.value)}/></div><div><label>{t.phone}</label><input value={form.phone} onChange={e=>f('phone',e.target.value)}/></div><div><label>{t.goal}</label><input value={form.goal} onChange={e=>f('goal',e.target.value)}/></div><div><label>{t.level}</label><select value={form.level} onChange={e=>f('level',e.target.value)}><option>beginner</option><option>intermediate</option><option>advanced</option></select></div>{msg && <div className="success full">{msg}</div>}<button>{t.saveClient}</button></form></div>
+  async function submit(e){
+    e.preventDefault()
+    const payload = {
+      full_name:form.full_name,
+      phone:form.phone,
+      goal:form.goal,
+      level:form.level,
+      status:form.status,
+      branch_id:profile.branch_id||branches[0]?.id,
+      assigned_trainer_id:profile.role==='trainer'?profile.id:null,
+      created_by:profile.id,
+      last_contact_date: form.last_contact_date || null,
+      next_followup_date: form.next_followup_date || null,
+      need_director_support: form.need_director_support === 'yes',
+      followup_notes: form.followup_notes
+    }
+    const {data,error}=await supabase.from('clients').insert(payload).select('id').single()
+    if(error)setMsg(error.message)
+    else{
+      await logAudit(profile.id, 'insert', 'client', data?.id, { email: profile.email, client: form.full_name })
+      setMsg(t.clientSaved)
+      setForm({full_name:'',phone:'',goal:'Hypertrophy',level:'beginner',status:'active',last_contact_date:'',next_followup_date:'',need_director_support:'no',followup_notes:''})
+      onSaved()
+    }
+  }
+  return <div className="card compact-card"><h3><PlusCircle size={18}/>{t.addClient}</h3><form className="grid-form simple-form" onSubmit={submit}>
+    <div><label>{t.clientName}</label><input required value={form.full_name} onChange={e=>f('full_name',e.target.value)}/></div>
+    <div><label>{t.phone}</label><input value={form.phone} onChange={e=>f('phone',e.target.value)}/></div>
+    <div><label>{t.goal}</label><input value={form.goal} onChange={e=>f('goal',e.target.value)}/></div>
+    <div><label>{t.level}</label><select value={form.level} onChange={e=>f('level',e.target.value)}><option>beginner</option><option>intermediate</option><option>advanced</option></select></div>
+    <div><label>{t.status}</label><select value={form.status} onChange={e=>f('status',e.target.value)}><option>active</option><option>follow_up</option><option>need_support</option><option>inactive</option></select></div>
+    <div><label>{t.lastContactDate}</label><input type="date" value={form.last_contact_date} onChange={e=>f('last_contact_date',e.target.value)}/></div>
+    <div><label>{t.nextFollowupDate}</label><input type="date" value={form.next_followup_date} onChange={e=>f('next_followup_date',e.target.value)}/></div>
+    <div><label>{t.needDirectorSupport}</label><select value={form.need_director_support} onChange={e=>f('need_director_support',e.target.value)}><option value="no">no</option><option value="yes">yes</option></select></div>
+    <div className="full"><label>{t.followupNotes}</label><textarea value={form.followup_notes} onChange={e=>f('followup_notes',e.target.value)}/></div>
+    {msg && <div className="success full">{msg}</div>}<button>{t.saveClient}</button>
+  </form></div>
 }
 
 function DailyLogForm({ profile, onSaved, lang }) {
@@ -358,7 +492,7 @@ function TrainerFilter({ trainers, selectedTrainerId, setSelectedTrainerId, t })
   return <div className="card filter-card"><h3><Search size={18}/>{t.filterByTrainer}</h3><select value={selectedTrainerId} onChange={e=>setSelectedTrainerId(e.target.value)}><option value="all">{t.allTrainers}</option>{trainers.map(tr=><option key={tr.id} value={tr.id}>{tr.email} — {tr.full_name}</option>)}</select></div>
 }
 
-function StaffManagement({ staff, branches, onSaved, t }) {
+function StaffManagement({ staff, branches, onSaved, t, currentProfile }) {
   const [rows, setRows] = useState(staff)
   const [savingId, setSavingId] = useState('')
   const [message, setMessage] = useState('')
@@ -382,6 +516,7 @@ function StaffManagement({ staff, branches, onSaved, t }) {
     const { error } = await supabase.from('profiles').update(payload).eq('id', row.id)
     if (error) setMessage(error.message)
     else {
+      await logAudit(currentProfile?.id, 'update', 'profile', row.id, { email: row.email, role: row.role, branch_id: row.branch_id, status: row.status })
       setMessage(t.savedStaff)
       onSaved()
     }
@@ -731,9 +866,10 @@ function CoachEvaluationForm({ profile, targetTrainerId, eligibleTrainers, onSav
       service_score: Number(form.service_score || 0),
       evaluator_notes: form.evaluator_notes
     }
-    const { error } = await supabase.from('trainer_evaluations').insert(payload)
+    const { data, error } = await supabase.from('trainer_evaluations').insert(payload).select('id').single()
     if (error) setMsg(error.message)
     else {
+      await logAudit(profile.id, 'insert', 'trainer_evaluation', data?.id, { trainer_id: form.trainer_id, score: Math.round((payload.technical_score+payload.behavior_score+payload.leadership_score+payload.service_score)/4) })
       setMsg(t.evaluationSaved)
       setForm({
         trainer_id: targetTrainerId || '',
@@ -868,6 +1004,7 @@ function BranchComparisonDashboard({ branches, staff, clients, logs, programs, a
   return (
     <div className="card branch-comparison-card">
       <h3><Users size={18}/>{t.branchComparison}</h3>
+      <ExportButton rows={rows} filename="branch-comparison.csv" t={t}/>
       <div className="table-wrap">
         <table>
           <thead>
@@ -912,7 +1049,7 @@ function MonthlyTrainerReport({ staff, clients, logs, programs, attendanceLogs, 
   return (
     <div className="card monthly-report-card">
       <h3><ClipboardList size={18}/>{t.monthlyReport}</h3>
-      <div className="month-control"><label>{t.reportMonth}</label><input type="month" value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} /></div>
+      <div className="month-control"><label>{t.reportMonth}</label><input type="month" value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} /><ExportButton rows={rows} filename={`monthly-trainer-report-${selectedMonth}.csv`} t={t}/></div>
       <div className="table-wrap">
         <table>
           <thead><tr><th>{t.fullName}</th><th>{t.trainerEmail}</th><th>{t.role}</th><th>{t.clients}</th><th>{t.programs}</th><th>{t.totalLogs}</th><th>{t.ptSessions}</th><th>{t.freeService}</th><th>{t.rotation}</th><th>{t.totalLate}</th><th>{t.totalOvertime}</th><th>{t.avgEvaluation}</th><th>{t.grade}</th></tr></thead>
@@ -923,10 +1060,32 @@ function MonthlyTrainerReport({ staff, clients, logs, programs, attendanceLogs, 
   )
 }
 
+
+function AuditLogPanel({ auditLogs, staff, t }) {
+  const actorMap = Object.fromEntries(staff.map(s => [s.id, s.email || s.full_name]))
+  const rows = auditLogs.map(log => ({
+    ...log,
+    actor_email: actorMap[log.actor_id] || log.actor_id || '-',
+    details_text: typeof log.details === 'object' ? JSON.stringify(log.details) : String(log.details || '')
+  }))
+  return (
+    <div className="card audit-card">
+      <h3><ShieldCheck size={18}/>{t.auditLog}</h3>
+      <ExportButton rows={rows} filename="audit-log.csv" t={t}/>
+      <div className="table-wrap">
+        <table>
+          <thead><tr><th>{t.changedAt}</th><th>{t.changedBy}</th><th>{t.action}</th><th>{t.entityType}</th><th>{t.alertDetails}</th></tr></thead>
+          <tbody>{rows.map(r => <tr key={r.id}><td>{String(r.created_at || '').replace('T',' ').slice(0,19)}</td><td>{r.actor_email}</td><td>{r.action}</td><td>{r.entity_type}</td><td>{r.details_text}</td></tr>)}</tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
 function Dashboard({ profile, lang }) {
   const t=TEXT[lang]
-  const [clients,setClients]=useState([]), [logs,setLogs]=useState([]), [attendanceLogs,setAttendanceLogs]=useState([]), [branches,setBranches]=useState([]), [programs,setPrograms]=useState([]), [staff,setStaff]=useState([]), [seniorReports,setSeniorReports]=useState([]), [headReports,setHeadReports]=useState([]), [evaluations,setEvaluations]=useState([])
-  const [loading,setLoading]=useState(true), [notice,setNotice]=useState(''), [edit,setEdit]=useState(null), [selectedTrainerId,setSelectedTrainerId]=useState('all')
+  const [clients,setClients]=useState([]), [logs,setLogs]=useState([]), [attendanceLogs,setAttendanceLogs]=useState([]), [branches,setBranches]=useState([]), [programs,setPrograms]=useState([]), [staff,setStaff]=useState([]), [seniorReports,setSeniorReports]=useState([]), [headReports,setHeadReports]=useState([]), [evaluations,setEvaluations]=useState([]), [auditLogs,setAuditLogs]=useState([])
+  const [loading,setLoading]=useState(true), [notice,setNotice]=useState(''), [edit,setEdit]=useState(null), [selectedTrainerId,setSelectedTrainerId]=useState('all'), [activeTab,setActiveTab]=useState('overview'), [searchQuery,setSearchQuery]=useState('')
   const isAdmin=profile.role==='owner'||profile.role==='fitness_director', isTrainer=profile.role==='trainer', isSenior=profile.role==='senior', isHeadCoach=profile.role==='head_coach'
 
   async function load(){
@@ -939,19 +1098,20 @@ function Dashboard({ profile, lang }) {
       supabase.from('senior_daily_reports').select('*').order('created_at',{ascending:false}),
       supabase.from('trainer_evaluations').select('*').order('created_at',{ascending:false}),
       supabase.from('head_coach_daily_reports').select('*').order('created_at',{ascending:false}),
-      supabase.from('attendance_logs').select('*').order('created_at',{ascending:false})
+      supabase.from('attendance_logs').select('*').order('created_at',{ascending:false}),
+      supabase.from('audit_logs').select('*').order('created_at',{ascending:false}).limit(100)
     ]
     if (isAdmin || isHeadCoach) calls.push(supabase.from('profiles').select('id, full_name, email, role, branch_id, status').order('email'))
     const res = await Promise.all(calls)
-    const [c,l,b,p,sr,e,hr,a,s] = res
-    if(c.error)setNotice(c.error.message); if(p.error)setNotice(p.error.message); if(sr.error)setNotice(sr.error.message); if(e.error)setNotice(e.error.message); if(hr.error)setNotice(hr.error.message); if(a.error)setNotice(a.error.message); if(s?.error)setNotice(s.error.message)
-    setClients(c.data||[]); setLogs(l.data||[]); setBranches(b.data||[]); setPrograms(p.data||[]); setSeniorReports(sr.data||[]); setEvaluations(e.data||[]); setHeadReports(hr.data||[]); setAttendanceLogs(a.data||[]); setStaff(s?.data||[])
+    const [c,l,b,p,sr,e,hr,a,au,s] = res
+    if(c.error)setNotice(c.error.message); if(p.error)setNotice(p.error.message); if(sr.error)setNotice(sr.error.message); if(e.error)setNotice(e.error.message); if(hr.error)setNotice(hr.error.message); if(a.error)setNotice(a.error.message); if(au.error)setNotice(au.error.message); if(s?.error)setNotice(s.error.message)
+    setClients(c.data||[]); setLogs(l.data||[]); setBranches(b.data||[]); setPrograms(p.data||[]); setSeniorReports(sr.data||[]); setEvaluations(e.data||[]); setHeadReports(hr.data||[]); setAttendanceLogs(a.data||[]); setAuditLogs(au.data||[]); setStaff(s?.data||[])
     setLoading(false)
   }
 
   useEffect(()=>{load()},[])
 
-  async function del(table,row,label){ if(!confirm(`Delete ${label}?`)) return; const {error}=await supabase.from(table).delete().eq('id',row.id); if(error)alert(error.message); else load() }
+  async function del(table,row,label){ if(!confirm(`Delete ${label}?`)) return; const {error}=await supabase.from(table).delete().eq('id',row.id); if(error)alert(error.message); else { await logAudit(profile.id, 'delete', table, row.id, { label }); load() } }
 
   const trainers = staff.filter(s => ['trainer','senior','head_coach'].includes(s.role))
   const selectedTrainer = selectedTrainerId !== 'all' ? staff.find(s => s.id === selectedTrainerId) : null
@@ -962,48 +1122,87 @@ function Dashboard({ profile, lang }) {
   const visibleClients = isAdmin && selectedTrainerId !== 'all' ? clients.filter(c=>c.assigned_trainer_id===selectedTrainerId) : clients
   const visibleLogs = isAdmin && selectedTrainerId !== 'all' ? logs.filter(l=>l.trainer_id===selectedTrainerId) : logs
   const visibleProgramsRaw = isAdmin && selectedTrainerId !== 'all' ? programs.filter(p=>p.trainer_id===selectedTrainerId) : programs
-  const visiblePrograms = visibleProgramsRaw.map(p=>({...p,client_name:clientMapAll[p.client_id]||'-', trainer_email: trainerMap[p.trainer_id] || '-'}))
-  const visibleClientsRows = visibleClients.map(c=>({...c, trainer_email: trainerMap[c.assigned_trainer_id] || '-'}))
-  const visibleLogsRows = visibleLogs.map(l=>({...l, trainer_email: trainerMap[l.trainer_id] || '-'}))
+  const visibleProgramsBase = visibleProgramsRaw.map(p=>({...p,client_name:clientMapAll[p.client_id]||'-', trainer_email: trainerMap[p.trainer_id] || '-'}))
+  const visibleClientsRowsBase = visibleClients.map(c=>({...c, trainer_email: trainerMap[c.assigned_trainer_id] || '-'}))
+  const visibleLogsRowsBase = visibleLogs.map(l=>({...l, trainer_email: trainerMap[l.trainer_id] || '-'}))
   const visibleAttendanceRaw = isAdmin && selectedTrainerId !== 'all' ? attendanceLogs.filter(a => a.trainer_id === selectedTrainerId) : attendanceLogs
-  const visibleAttendance = visibleAttendanceRaw.map(a => ({...a, trainer_email: trainerMap[a.trainer_id] || '-'}))
+  const visibleAttendanceBase = visibleAttendanceRaw.map(a => ({...a, trainer_email: trainerMap[a.trainer_id] || '-'}))
   const visibleSeniorReportsRaw = isAdmin ? seniorReports : seniorReports.filter(r => r.senior_id === profile.id)
-  const visibleSeniorReports = visibleSeniorReportsRaw.map(r => ({...r, senior_email: trainerMap[r.senior_id] || '-'}))
+  const visibleSeniorReportsBase = visibleSeniorReportsRaw.map(r => ({...r, senior_email: trainerMap[r.senior_id] || '-'}))
   const visibleHeadReportsRaw = isAdmin ? headReports : headReports.filter(r => r.head_coach_id === profile.id)
-  const visibleHeadReports = visibleHeadReportsRaw.map(r => ({...r, head_coach_email: trainerMap[r.head_coach_id] || '-'}))
+  const visibleHeadReportsBase = visibleHeadReportsRaw.map(r => ({...r, head_coach_email: trainerMap[r.head_coach_id] || '-'}))
   const visibleEvaluationsRaw = isAdmin && selectedTrainerId !== 'all' ? evaluations.filter(ev => ev.trainer_id === selectedTrainerId) : evaluations
-  const visibleEvaluations = visibleEvaluationsRaw.map(ev => { const score = Math.round((Number(ev.technical_score||0)+Number(ev.behavior_score||0)+Number(ev.leadership_score||0)+Number(ev.service_score||0))/4); return {...ev, final_score: score, grade: gradeFromScore(score, t), recommendation: recommendationFromScore(score), trainer_email: trainerMap[ev.trainer_id] || '-', evaluator_email: trainerMap[ev.evaluator_id] || (ev.evaluator_id === profile.id ? profile.email : '-')} })
+  const visibleEvaluationsBase = visibleEvaluationsRaw.map(ev => { const score = Math.round((Number(ev.technical_score||0)+Number(ev.behavior_score||0)+Number(ev.leadership_score||0)+Number(ev.service_score||0))/4); return {...ev, final_score: score, grade: gradeFromScore(score, t), recommendation: recommendationFromScore(score), trainer_email: trainerMap[ev.trainer_id] || '-', evaluator_email: trainerMap[ev.evaluator_id] || (ev.evaluator_id === profile.id ? profile.email : '-')} })
+  const visiblePrograms = visibleProgramsBase.filter(r => rowMatches(r, searchQuery))
+  const visibleClientsRows = visibleClientsRowsBase.filter(r => rowMatches(r, searchQuery))
+  const visibleLogsRows = visibleLogsRowsBase.filter(r => rowMatches(r, searchQuery))
+  const visibleAttendance = visibleAttendanceBase.filter(r => rowMatches(r, searchQuery))
+  const visibleSeniorReports = visibleSeniorReportsBase.filter(r => rowMatches(r, searchQuery))
+  const visibleHeadReports = visibleHeadReportsBase.filter(r => rowMatches(r, searchQuery))
+  const visibleEvaluations = visibleEvaluationsBase.filter(r => rowMatches(r, searchQuery))
 
   const today=new Date().toISOString().slice(0,10), todayLogs=visibleLogs.filter(x=>x.log_date===today), rows=isAdmin?todayLogs:visibleLogs
   const totals={logs:rows.length,rotation:rows.reduce((s,r)=>s+Number(r.rotation_count||0),0),pt:rows.reduce((s,r)=>s+Number(r.pt_sessions_count||0),0),free:rows.reduce((s,r)=>s+Number(r.free_service_count||0),0)}
   const title=profile.role==='owner'?t.owner:profile.role==='fitness_director'?t.director:profile.role==='trainer'?t.trainer:t.dashboard
+  const tabs = isAdmin ? [
+    {key:'overview', label:t.tabOverview},
+    {key:'trainerData', label:t.tabTrainerData},
+    {key:'reports', label:t.tabReports},
+    {key:'staff', label:t.tabStaff}
+  ] : [
+    {key:'overview', label:t.tabOverview},
+    {key:'inputs', label:t.tabInputs},
+    {key:'trainerData', label:t.tabTrainerData},
+    {key:'reports', label:t.tabReports}
+  ]
 
   if(loading)return <div className="card">Loading...</div>
-  return <><section className="hero simple-hero"><h2>{title}</h2><p>{t.hero}</p></section>{notice&&<div className="error">{notice}</div>}
-    {isAdmin && <TrainerFilter trainers={trainers} selectedTrainerId={selectedTrainerId} setSelectedTrainerId={setSelectedTrainerId} t={t}/>}
-    {isAdmin && selectedTrainer && <TrainerProfilePanel trainer={selectedTrainer} branches={branches} clients={clients} logs={logs} programs={programs} evaluations={evaluations} t={t}/>}
-    {(isAdmin && selectedTrainer) && <CoachEvaluationForm profile={profile} targetTrainerId={selectedTrainer.id} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
-    {isHeadCoach && <CoachEvaluationForm profile={profile} targetTrainerId={''} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
-    {isHeadCoach && <HeadCoachDailyReportForm profile={profile} onSaved={load} lang={lang}/>}
-    <section className="stats-grid"><StatCard title={isAdmin?t.todayLogs:t.myLogs} value={totals.logs} icon={<CalendarDays/>}/><StatCard title={isAdmin?t.rotationToday:t.myClients} value={isAdmin?totals.rotation:visibleClients.length} icon={<Users/>}/><StatCard title={isAdmin?t.ptToday:t.myPrograms} value={isAdmin?totals.pt:visiblePrograms.length} icon={<Dumbbell/>}/><StatCard title={t.freeToday} value={totals.free} icon={<ClipboardList/>}/></section>
-    <div className="card note"><b>{isAdmin?t.adminNote:t.trainerNote}</b></div>
-    {isAdmin && <PerformanceDashboard staff={staff} clients={clients} logs={logs} attendanceLogs={attendanceLogs} t={t}/>} 
-    {isAdmin && <AlertsPanel staff={staff} logs={logs} attendanceLogs={attendanceLogs} seniorReports={seniorReports} evaluations={evaluations} t={t}/>} 
-    {isAdmin && <BranchComparisonDashboard branches={branches} staff={staff} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} seniorReports={seniorReports} headReports={headReports} t={t}/>} 
-    {isAdmin && <MonthlyTrainerReport staff={staff} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} evaluations={evaluations} t={t}/>} 
-    {isAdmin && <StaffManagement staff={staff} branches={branches} onSaved={load} t={t}/>}
-    {(isTrainer||isAdmin)&&<AddClientForm profile={profile} branches={branches} onSaved={load} lang={lang}/>}
-    {(isTrainer || isSenior || isHeadCoach)&&<AttendanceForm profile={profile} onSaved={load} lang={lang}/>}
-    {isTrainer&&<DailyLogForm profile={profile} onSaved={load} lang={lang}/>}
-    {isSenior&&<SeniorDailyReportForm profile={profile} onSaved={load} lang={lang}/>}
-    {isTrainer&&<PTProgramForm profile={profile} clients={visibleClients} onSaved={load} lang={lang}/>}
-    <Table title={isTrainer?t.myClients:t.clients} rows={visibleClientsRows} canManage={isAdmin} onEdit={r=>setEdit({type:'client',row:r})} onDelete={r=>del('clients',r,r.full_name)} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'full_name',label:t.clientName},{key:'phone',label:t.phone},{key:'goal',label:t.goal},{key:'level',label:t.level},{key:'status',label:t.status}]}/>
-    <Table title={t.attendance} rows={visibleAttendance} canManage={false} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'attendance_date',label:t.date},{key:'shift',label:t.shift},{key:'check_in',label:t.checkIn},{key:'check_out',label:t.checkOut},{key:'late_minutes',label:t.lateMinutes},{key:'overtime_minutes',label:t.overtimeMinutes},{key:'notes',label:t.notes}]}/>
-    <Table title={isTrainer?t.myLogs:t.logs} rows={visibleLogsRows} canManage={isAdmin} onEdit={r=>setEdit({type:'log',row:r})} onDelete={r=>del('trainer_daily_logs',r,r.log_date)} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'log_date',label:t.date},{key:'shift',label:t.shift},{key:'rotation_count',label:t.rotation},{key:'pt_sessions_count',label:t.ptSessions},{key:'free_service_count',label:t.freeService},{key:'notes',label:t.notes}]}/>
-    <Table title={isTrainer?t.myPrograms:t.programs} rows={visiblePrograms} canManage={isAdmin} onEdit={r=>setEdit({type:'program',row:r})} onDelete={r=>del('pt_programs',r,r.program_name)} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'client_name',label:t.clientName},{key:'program_name',label:t.programName},{key:'goal',label:t.goal},{key:'duration_weeks',label:t.duration},{key:'status',label:t.status}]}/>
-    {(isAdmin || isSenior) && <Table title={t.seniorReport} rows={visibleSeniorReports} canManage={false} t={t} columns={[...(isAdmin?[{key:'senior_email',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'branch_pressure',label:t.branchPressure},{key:'total_sessions_done',label:t.totalSessionsDone},{key:'free_service_count',label:t.freeService},{key:'problem_description',label:t.problemDescription},{key:'floor_tasks',label:t.floorTasks},{key:'service_notes',label:t.serviceNotes},{key:'client_issues',label:t.clientIssues},{key:'actions_taken',label:t.actionsTaken},{key:'resolved',label:t.resolved},{key:'notes',label:t.notes}]}/>}
-    {(isAdmin || isHeadCoach) && <Table title={t.headCoachReport} rows={visibleHeadReports} canManage={false} t={t} columns={[...(isAdmin?[{key:'head_coach_email',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'total_sessions_done',label:t.totalSessionsDone},{key:'free_service_count',label:t.freeService},{key:'rotation_count',label:t.rotation},{key:'tasks_done',label:t.tasksDone},{key:'follow_ups',label:t.followUps},{key:'trainer_issues',label:t.trainerIssues},{key:'branch_summary',label:t.branchSummary},{key:'notes',label:t.notes}]}/>}
-    {(isAdmin || isHeadCoach) && <Table title={t.evaluationHistory} rows={visibleEvaluations} canManage={false} t={t} columns={[{key:'trainer_email',label:t.trainerEmail},{key:'evaluation_date',label:t.date},{key:'technical_score',label:t.technicalScore},{key:'behavior_score',label:t.behaviorScore},{key:'leadership_score',label:t.leadershipScore},{key:'service_score',label:t.serviceScore},{key:'final_score',label:t.finalScore},{key:'grade',label:t.grade},{key:'recommendation',label:t.recommendation},{key:'evaluator_notes',label:t.evaluatorNotes}]}/>}
+  return <>
+    <section className="hero simple-hero"><h2>{title}</h2><p>{t.hero}</p></section>
+    {notice&&<div className="error">{notice}</div>}
+    <TabBar tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab}/>
+    <SearchBox value={searchQuery} onChange={setSearchQuery} t={t}/>
+
+    {activeTab === 'overview' && <>
+      <section className="stats-grid"><StatCard title={isAdmin?t.todayLogs:t.myLogs} value={totals.logs} icon={<CalendarDays/>}/><StatCard title={isAdmin?t.rotationToday:t.myClients} value={isAdmin?totals.rotation:visibleClients.length} icon={<Users/>}/><StatCard title={isAdmin?t.ptToday:t.myPrograms} value={isAdmin?totals.pt:visiblePrograms.length} icon={<Dumbbell/>}/><StatCard title={t.freeToday} value={totals.free} icon={<ClipboardList/>}/></section>
+      <div className="card note"><b>{isAdmin?t.adminNote:t.trainerNote}</b></div>
+      {isAdmin && <PerformanceDashboard staff={staff} clients={clients} logs={logs} attendanceLogs={attendanceLogs} t={t}/>}
+      {isAdmin && <AlertsPanel staff={staff} logs={logs} attendanceLogs={attendanceLogs} seniorReports={seniorReports} evaluations={evaluations} t={t}/>}
+      {isAdmin && <BranchComparisonDashboard branches={branches} staff={staff} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} seniorReports={seniorReports} headReports={headReports} t={t}/>}
+    </>}
+
+    {activeTab === 'trainerData' && <>
+      {isAdmin && <TrainerFilter trainers={trainers} selectedTrainerId={selectedTrainerId} setSelectedTrainerId={setSelectedTrainerId} t={t}/>}
+      {isAdmin && selectedTrainer && <TrainerProfilePanel trainer={selectedTrainer} branches={branches} clients={clients} logs={logs} programs={programs} evaluations={evaluations} t={t}/>}
+      {(isAdmin && selectedTrainer) && <CoachEvaluationForm profile={profile} targetTrainerId={selectedTrainer.id} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
+      {isHeadCoach && <CoachEvaluationForm profile={profile} targetTrainerId={''} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
+      <div className="table-actions"><ExportButton rows={visibleClientsRows} filename="clients.csv" t={t}/></div>
+      <Table title={isTrainer?t.myClients:t.clients} rows={visibleClientsRows} canManage={isAdmin} onEdit={r=>setEdit({type:'client',row:r})} onDelete={r=>del('clients',r,r.full_name)} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'full_name',label:t.clientName},{key:'phone',label:t.phone},{key:'goal',label:t.goal},{key:'level',label:t.level},{key:'status',label:t.status},{key:'next_followup_date',label:t.nextFollowupDate},{key:'need_director_support',label:t.needDirectorSupport}]}/>
+      <div className="table-actions"><ExportButton rows={visibleAttendance} filename="attendance.csv" t={t}/></div>
+      <Table title={t.attendance} rows={visibleAttendance} canManage={false} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'attendance_date',label:t.date},{key:'shift',label:t.shift},{key:'check_in',label:t.checkIn},{key:'check_out',label:t.checkOut},{key:'late_minutes',label:t.lateMinutes},{key:'overtime_minutes',label:t.overtimeMinutes},{key:'notes',label:t.notes}]}/>
+      <Table title={isTrainer?t.myLogs:t.logs} rows={visibleLogsRows} canManage={isAdmin} onEdit={r=>setEdit({type:'log',row:r})} onDelete={r=>del('trainer_daily_logs',r,r.log_date)} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'log_date',label:t.date},{key:'shift',label:t.shift},{key:'rotation_count',label:t.rotation},{key:'pt_sessions_count',label:t.ptSessions},{key:'free_service_count',label:t.freeService},{key:'notes',label:t.notes}]}/>
+      <Table title={isTrainer?t.myPrograms:t.programs} rows={visiblePrograms} canManage={isAdmin} onEdit={r=>setEdit({type:'program',row:r})} onDelete={r=>del('pt_programs',r,r.program_name)} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'client_name',label:t.clientName},{key:'program_name',label:t.programName},{key:'goal',label:t.goal},{key:'duration_weeks',label:t.duration},{key:'status',label:t.status}]}/>
+    </>}
+
+    {activeTab === 'inputs' && <>
+      {(isTrainer||isAdmin)&&<AddClientForm profile={profile} branches={branches} onSaved={load} lang={lang}/>}
+      {(isTrainer || isSenior || isHeadCoach)&&<AttendanceForm profile={profile} onSaved={load} lang={lang}/>}
+      {isTrainer&&<DailyLogForm profile={profile} onSaved={load} lang={lang}/>}
+      {isSenior&&<SeniorDailyReportForm profile={profile} onSaved={load} lang={lang}/>}
+      {isHeadCoach && <HeadCoachDailyReportForm profile={profile} onSaved={load} lang={lang}/>}
+      {isTrainer&&<PTProgramForm profile={profile} clients={visibleClients} onSaved={load} lang={lang}/>}
+    </>}
+
+    {activeTab === 'reports' && <>
+      {isAdmin && <MonthlyTrainerReport staff={staff} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} evaluations={evaluations} t={t}/>}
+      {(isAdmin || isSenior) && <Table title={t.seniorReport} rows={visibleSeniorReports} canManage={false} t={t} columns={[...(isAdmin?[{key:'senior_email',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'branch_pressure',label:t.branchPressure},{key:'total_sessions_done',label:t.totalSessionsDone},{key:'free_service_count',label:t.freeService},{key:'problem_description',label:t.problemDescription},{key:'floor_tasks',label:t.floorTasks},{key:'service_notes',label:t.serviceNotes},{key:'client_issues',label:t.clientIssues},{key:'actions_taken',label:t.actionsTaken},{key:'resolved',label:t.resolved},{key:'notes',label:t.notes}]}/>}
+      {(isAdmin || isHeadCoach) && <Table title={t.headCoachReport} rows={visibleHeadReports} canManage={false} t={t} columns={[...(isAdmin?[{key:'head_coach_email',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'total_sessions_done',label:t.totalSessionsDone},{key:'free_service_count',label:t.freeService},{key:'rotation_count',label:t.rotation},{key:'tasks_done',label:t.tasksDone},{key:'follow_ups',label:t.followUps},{key:'trainer_issues',label:t.trainerIssues},{key:'branch_summary',label:t.branchSummary},{key:'notes',label:t.notes}]}/>}
+      {(isAdmin || isHeadCoach) && <><div className="table-actions"><ExportButton rows={visibleEvaluations} filename="evaluations.csv" t={t}/></div><Table title={t.evaluationHistory} rows={visibleEvaluations} canManage={false} t={t} columns={[{key:'trainer_email',label:t.trainerEmail},{key:'evaluation_date',label:t.date},{key:'technical_score',label:t.technicalScore},{key:'behavior_score',label:t.behaviorScore},{key:'leadership_score',label:t.leadershipScore},{key:'service_score',label:t.serviceScore},{key:'final_score',label:t.finalScore},{key:'grade',label:t.grade},{key:'recommendation',label:t.recommendation},{key:'evaluator_notes',label:t.evaluatorNotes}]}/></>}
+      {isAdmin && <AuditLogPanel auditLogs={auditLogs} staff={staff} t={t}/>}
+    </>}
+
+    {activeTab === 'staff' && isAdmin && <StaffManagement staff={staff} branches={branches} onSaved={load} t={t} currentProfile={profile}/>}
+
     {edit&&<EditForm type={edit.type} row={edit.row} onClose={()=>setEdit(null)} onSaved={load} lang={lang}/>}
   </>
 }
