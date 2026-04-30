@@ -32,7 +32,11 @@ const TEXT = {
     trainerProfile: 'ملف المدرب', coachEvaluation: 'تقييم المدرب', evaluationHistory: 'سجل التقييمات',
     technicalScore: 'التقييم الفني', behaviorScore: 'التقييم السلوكي', leadershipScore: 'تقييم القيادة', serviceScore: 'تقييم الخدمة',
     evaluatorNotes: 'ملاحظات المقيم', saveEvaluation: 'حفظ التقييم', evaluationSaved: 'تم حفظ التقييم بنجاح.',
-    selectedTrainerInfo: 'بيانات المدرب المختار', problemDescription: 'وصف المشكلة', evaluatedBy: 'تم التقييم بواسطة'
+    selectedTrainerInfo: 'بيانات المدرب المختار', problemDescription: 'وصف المشكلة', evaluatedBy: 'تم التقييم بواسطة',
+    headCoachReport: 'تقرير الهيد كوتش', addHeadCoachReport: 'إضافة تقرير هيد كوتش',
+    tasksDone: 'المهام التي تمت', followUps: 'المتابعات', trainerIssues: 'مشاكل المدربين', branchSummary: 'ملخص الفرع',
+    saveHeadCoachReport: 'حفظ تقرير الهيد كوتش', headCoachReportSaved: 'تم حفظ تقرير الهيد كوتش بنجاح.',
+    totalSessionsDone: 'عدد السيشنز المنفذة', floorTasks: 'مهام الأرضية'
   },
   en: {
     loginTitle: 'Gym Zaman', loginSub: 'Internal Management System', staffOnly: 'Staff access only',
@@ -61,7 +65,11 @@ const TEXT = {
     trainerProfile: 'Trainer Profile', coachEvaluation: 'Coach Evaluation', evaluationHistory: 'Evaluation History',
     technicalScore: 'Technical Score', behaviorScore: 'Behavior Score', leadershipScore: 'Leadership Score', serviceScore: 'Service Score',
     evaluatorNotes: 'Evaluator Notes', saveEvaluation: 'Save Evaluation', evaluationSaved: 'Evaluation saved successfully.',
-    selectedTrainerInfo: 'Selected Trainer Info', problemDescription: 'Problem Description', evaluatedBy: 'Evaluated By'
+    selectedTrainerInfo: 'Selected Trainer Info', problemDescription: 'Problem Description', evaluatedBy: 'Evaluated By',
+    headCoachReport: 'Head Coach Report', addHeadCoachReport: 'Add Head Coach Report',
+    tasksDone: 'Tasks Done', followUps: 'Follow-ups', trainerIssues: 'Trainer Issues', branchSummary: 'Branch Summary',
+    saveHeadCoachReport: 'Save Head Coach Report', headCoachReportSaved: 'Head Coach report saved successfully.',
+    totalSessionsDone: 'Total Sessions Done', floorTasks: 'Floor Tasks'
   }
 }
 
@@ -194,6 +202,9 @@ function SeniorDailyReportForm({ profile, onSaved, lang }) {
   const [form, setForm] = useState({
     report_date: today,
     branch_pressure: '',
+    total_sessions_done: 0,
+    free_service_count: 0,
+    floor_tasks: '',
     service_notes: '',
     coach_commitment_notes: '',
     client_issues: '',
@@ -215,6 +226,9 @@ function SeniorDailyReportForm({ profile, onSaved, lang }) {
       branch_id: profile.branch_id,
       report_date: form.report_date,
       branch_pressure: form.branch_pressure,
+      total_sessions_done: Number(form.total_sessions_done || 0),
+      free_service_count: Number(form.free_service_count || 0),
+      floor_tasks: form.floor_tasks,
       service_notes: form.service_notes,
       coach_commitment_notes: form.coach_commitment_notes,
       client_issues: form.client_issues,
@@ -231,6 +245,9 @@ function SeniorDailyReportForm({ profile, onSaved, lang }) {
       setForm({
         report_date: today,
         branch_pressure: '',
+        total_sessions_done: 0,
+        free_service_count: 0,
+        floor_tasks: '',
         service_notes: '',
         coach_commitment_notes: '',
         client_issues: '',
@@ -263,11 +280,26 @@ function SeniorDailyReportForm({ profile, onSaved, lang }) {
         </div>
 
         <div>
+          <label>{t.totalSessionsDone}</label>
+          <input type="number" min="0" value={form.total_sessions_done} onChange={e => f('total_sessions_done', e.target.value)} />
+        </div>
+
+        <div>
+          <label>{t.freeService}</label>
+          <input type="number" min="0" value={form.free_service_count} onChange={e => f('free_service_count', e.target.value)} />
+        </div>
+
+        <div>
           <label>{t.resolved}</label>
           <select value={form.resolved} onChange={e => f('resolved', e.target.value)}>
             <option value="no">no</option>
             <option value="yes">yes</option>
           </select>
+        </div>
+
+        <div className="full">
+          <label>{t.floorTasks}</label>
+          <textarea value={form.floor_tasks} onChange={e => f('floor_tasks', e.target.value)} placeholder="Floor tasks, follow-up, service support..." />
         </div>
 
         <div className="full">
@@ -390,6 +422,107 @@ function StaffManagement({ staff, branches, onSaved, t }) {
           </tbody>
         </table>
       </div>
+    </div>
+  )
+}
+
+
+
+function HeadCoachDailyReportForm({ profile, onSaved, lang }) {
+  const t = TEXT[lang]
+  const today = new Date().toISOString().slice(0,10)
+  const [form, setForm] = useState({
+    report_date: today,
+    total_sessions_done: 0,
+    free_service_count: 0,
+    rotation_count: 0,
+    trainer_issues: '',
+    tasks_done: '',
+    follow_ups: '',
+    branch_summary: '',
+    notes: ''
+  })
+  const [msg, setMsg] = useState('')
+
+  function f(k,v){ setForm(p => ({...p, [k]: v})) }
+
+  async function submit(e){
+    e.preventDefault()
+    const payload = {
+      head_coach_id: profile.id,
+      branch_id: profile.branch_id,
+      report_date: form.report_date,
+      total_sessions_done: Number(form.total_sessions_done || 0),
+      free_service_count: Number(form.free_service_count || 0),
+      rotation_count: Number(form.rotation_count || 0),
+      trainer_issues: form.trainer_issues,
+      tasks_done: form.tasks_done,
+      follow_ups: form.follow_ups,
+      branch_summary: form.branch_summary,
+      notes: form.notes
+    }
+    const { error } = await supabase.from('head_coach_daily_reports').insert(payload)
+    if (error) setMsg(error.message)
+    else {
+      setMsg(t.headCoachReportSaved)
+      setForm({
+        report_date: today,
+        total_sessions_done: 0,
+        free_service_count: 0,
+        rotation_count: 0,
+        trainer_issues: '',
+        tasks_done: '',
+        follow_ups: '',
+        branch_summary: '',
+        notes: ''
+      })
+      onSaved()
+    }
+  }
+
+  return (
+    <div className="card compact-card head-report-card">
+      <h3><ClipboardList size={18}/>{t.addHeadCoachReport}</h3>
+      <form className="grid-form simple-form" onSubmit={submit}>
+        <div>
+          <label>{t.date}</label>
+          <input type="date" value={form.report_date} onChange={e => f('report_date', e.target.value)} />
+        </div>
+        <div>
+          <label>{t.totalSessionsDone}</label>
+          <input type="number" min="0" value={form.total_sessions_done} onChange={e => f('total_sessions_done', e.target.value)} />
+        </div>
+        <div>
+          <label>{t.freeService}</label>
+          <input type="number" min="0" value={form.free_service_count} onChange={e => f('free_service_count', e.target.value)} />
+        </div>
+        <div>
+          <label>{t.rotation}</label>
+          <input type="number" min="0" value={form.rotation_count} onChange={e => f('rotation_count', e.target.value)} />
+        </div>
+        <div className="full">
+          <label>{t.tasksDone}</label>
+          <textarea value={form.tasks_done} onChange={e => f('tasks_done', e.target.value)} placeholder="Daily operational tasks completed..." />
+        </div>
+        <div className="full">
+          <label>{t.followUps}</label>
+          <textarea value={form.follow_ups} onChange={e => f('follow_ups', e.target.value)} placeholder="Coach follow-ups, member follow-ups, unresolved items..." />
+        </div>
+        <div className="full">
+          <label>{t.trainerIssues}</label>
+          <textarea value={form.trainer_issues} onChange={e => f('trainer_issues', e.target.value)} placeholder="Late attendance, floor weakness, service issue..." />
+        </div>
+        <div className="full">
+          <label>{t.branchSummary}</label>
+          <textarea value={form.branch_summary} onChange={e => f('branch_summary', e.target.value)} placeholder="Overall branch status today..." />
+        </div>
+        <div className="full">
+          <label>{t.notes}</label>
+          <textarea value={form.notes} onChange={e => f('notes', e.target.value)} />
+        </div>
+        {msg && <div className={msg.includes('success') || msg.includes('بنجاح') ? 'success full' : 'error full'}>{msg}</div>}
+        <button>{t.saveHeadCoachReport}</button>
+      </form>
     </div>
   )
 }
@@ -525,7 +658,7 @@ function CoachEvaluationForm({ profile, targetTrainerId, eligibleTrainers, onSav
 
 function Dashboard({ profile, lang }) {
   const t=TEXT[lang]
-  const [clients,setClients]=useState([]), [logs,setLogs]=useState([]), [branches,setBranches]=useState([]), [programs,setPrograms]=useState([]), [staff,setStaff]=useState([]), [seniorReports,setSeniorReports]=useState([]), [evaluations,setEvaluations]=useState([])
+  const [clients,setClients]=useState([]), [logs,setLogs]=useState([]), [branches,setBranches]=useState([]), [programs,setPrograms]=useState([]), [staff,setStaff]=useState([]), [seniorReports,setSeniorReports]=useState([]), [headReports,setHeadReports]=useState([]), [evaluations,setEvaluations]=useState([])
   const [loading,setLoading]=useState(true), [notice,setNotice]=useState(''), [edit,setEdit]=useState(null), [selectedTrainerId,setSelectedTrainerId]=useState('all')
   const isAdmin=profile.role==='owner'||profile.role==='fitness_director', isTrainer=profile.role==='trainer', isSenior=profile.role==='senior', isHeadCoach=profile.role==='head_coach'
 
@@ -537,13 +670,14 @@ function Dashboard({ profile, lang }) {
       supabase.from('branches').select('*').order('name'),
       supabase.from('pt_programs').select('*').order('created_at',{ascending:false}),
       supabase.from('senior_daily_reports').select('*').order('created_at',{ascending:false}),
-      supabase.from('trainer_evaluations').select('*').order('created_at',{ascending:false})
+      supabase.from('trainer_evaluations').select('*').order('created_at',{ascending:false}),
+      supabase.from('head_coach_daily_reports').select('*').order('created_at',{ascending:false})
     ]
     if (isAdmin || isHeadCoach) calls.push(supabase.from('profiles').select('id, full_name, email, role, branch_id, status').order('email'))
     const res = await Promise.all(calls)
-    const [c,l,b,p,sr,e,s] = res
-    if(c.error)setNotice(c.error.message); if(p.error)setNotice(p.error.message); if(sr.error)setNotice(sr.error.message); if(e.error)setNotice(e.error.message); if(s?.error)setNotice(s.error.message)
-    setClients(c.data||[]); setLogs(l.data||[]); setBranches(b.data||[]); setPrograms(p.data||[]); setSeniorReports(sr.data||[]); setEvaluations(e.data||[]); setStaff(s?.data||[])
+    const [c,l,b,p,sr,e,hr,s] = res
+    if(c.error)setNotice(c.error.message); if(p.error)setNotice(p.error.message); if(sr.error)setNotice(sr.error.message); if(e.error)setNotice(e.error.message); if(hr.error)setNotice(hr.error.message); if(s?.error)setNotice(s.error.message)
+    setClients(c.data||[]); setLogs(l.data||[]); setBranches(b.data||[]); setPrograms(p.data||[]); setSeniorReports(sr.data||[]); setEvaluations(e.data||[]); setHeadReports(hr.data||[]); setStaff(s?.data||[])
     setLoading(false)
   }
 
@@ -565,6 +699,8 @@ function Dashboard({ profile, lang }) {
   const visibleLogsRows = visibleLogs.map(l=>({...l, trainer_email: trainerMap[l.trainer_id] || '-'}))
   const visibleSeniorReportsRaw = isAdmin ? seniorReports : seniorReports.filter(r => r.senior_id === profile.id)
   const visibleSeniorReports = visibleSeniorReportsRaw.map(r => ({...r, senior_email: trainerMap[r.senior_id] || '-'}))
+  const visibleHeadReportsRaw = isAdmin ? headReports : headReports.filter(r => r.head_coach_id === profile.id)
+  const visibleHeadReports = visibleHeadReportsRaw.map(r => ({...r, head_coach_email: trainerMap[r.head_coach_id] || '-'}))
   const visibleEvaluationsRaw = isAdmin && selectedTrainerId !== 'all' ? evaluations.filter(ev => ev.trainer_id === selectedTrainerId) : evaluations
   const visibleEvaluations = visibleEvaluationsRaw.map(ev => ({...ev, trainer_email: trainerMap[ev.trainer_id] || '-', evaluator_email: trainerMap[ev.evaluator_id] || (ev.evaluator_id === profile.id ? profile.email : '-')}))
 
@@ -578,6 +714,7 @@ function Dashboard({ profile, lang }) {
     {isAdmin && selectedTrainer && <TrainerProfilePanel trainer={selectedTrainer} branches={branches} clients={clients} logs={logs} programs={programs} evaluations={evaluations} t={t}/>}
     {(isAdmin && selectedTrainer) && <CoachEvaluationForm profile={profile} targetTrainerId={selectedTrainer.id} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
     {isHeadCoach && <CoachEvaluationForm profile={profile} targetTrainerId={''} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
+    {isHeadCoach && <HeadCoachDailyReportForm profile={profile} onSaved={load} lang={lang}/>}
     <section className="stats-grid"><StatCard title={isAdmin?t.todayLogs:t.myLogs} value={totals.logs} icon={<CalendarDays/>}/><StatCard title={isAdmin?t.rotationToday:t.myClients} value={isAdmin?totals.rotation:visibleClients.length} icon={<Users/>}/><StatCard title={isAdmin?t.ptToday:t.myPrograms} value={isAdmin?totals.pt:visiblePrograms.length} icon={<Dumbbell/>}/><StatCard title={t.freeToday} value={totals.free} icon={<ClipboardList/>}/></section>
     <div className="card note"><b>{isAdmin?t.adminNote:t.trainerNote}</b></div>
     {isAdmin && <StaffManagement staff={staff} branches={branches} onSaved={load} t={t}/>}
@@ -588,7 +725,8 @@ function Dashboard({ profile, lang }) {
     <Table title={isTrainer?t.myClients:t.clients} rows={visibleClientsRows} canManage={isAdmin} onEdit={r=>setEdit({type:'client',row:r})} onDelete={r=>del('clients',r,r.full_name)} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'full_name',label:t.clientName},{key:'phone',label:t.phone},{key:'goal',label:t.goal},{key:'level',label:t.level},{key:'status',label:t.status}]}/>
     <Table title={isTrainer?t.myLogs:t.logs} rows={visibleLogsRows} canManage={isAdmin} onEdit={r=>setEdit({type:'log',row:r})} onDelete={r=>del('trainer_daily_logs',r,r.log_date)} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'log_date',label:t.date},{key:'shift',label:t.shift},{key:'rotation_count',label:t.rotation},{key:'pt_sessions_count',label:t.ptSessions},{key:'free_service_count',label:t.freeService},{key:'notes',label:t.notes}]}/>
     <Table title={isTrainer?t.myPrograms:t.programs} rows={visiblePrograms} canManage={isAdmin} onEdit={r=>setEdit({type:'program',row:r})} onDelete={r=>del('pt_programs',r,r.program_name)} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'client_name',label:t.clientName},{key:'program_name',label:t.programName},{key:'goal',label:t.goal},{key:'duration_weeks',label:t.duration},{key:'status',label:t.status}]}/>
-    {(isAdmin || isSenior) && <Table title={t.seniorReport} rows={visibleSeniorReports} canManage={false} t={t} columns={[...(isAdmin?[{key:'senior_email',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'branch_pressure',label:t.branchPressure},{key:'problem_description',label:t.problemDescription},{key:'service_notes',label:t.serviceNotes},{key:'client_issues',label:t.clientIssues},{key:'actions_taken',label:t.actionsTaken},{key:'resolved',label:t.resolved},{key:'notes',label:t.notes}]}/>}
+    {(isAdmin || isSenior) && <Table title={t.seniorReport} rows={visibleSeniorReports} canManage={false} t={t} columns={[...(isAdmin?[{key:'senior_email',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'branch_pressure',label:t.branchPressure},{key:'total_sessions_done',label:t.totalSessionsDone},{key:'free_service_count',label:t.freeService},{key:'problem_description',label:t.problemDescription},{key:'floor_tasks',label:t.floorTasks},{key:'service_notes',label:t.serviceNotes},{key:'client_issues',label:t.clientIssues},{key:'actions_taken',label:t.actionsTaken},{key:'resolved',label:t.resolved},{key:'notes',label:t.notes}]}/>}
+    {(isAdmin || isHeadCoach) && <Table title={t.headCoachReport} rows={visibleHeadReports} canManage={false} t={t} columns={[...(isAdmin?[{key:'head_coach_email',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'total_sessions_done',label:t.totalSessionsDone},{key:'free_service_count',label:t.freeService},{key:'rotation_count',label:t.rotation},{key:'tasks_done',label:t.tasksDone},{key:'follow_ups',label:t.followUps},{key:'trainer_issues',label:t.trainerIssues},{key:'branch_summary',label:t.branchSummary},{key:'notes',label:t.notes}]}/>}
     {(isAdmin || isHeadCoach) && <Table title={t.evaluationHistory} rows={visibleEvaluations} canManage={false} t={t} columns={[{key:'trainer_email',label:t.trainerEmail},{key:'evaluation_date',label:t.date},{key:'technical_score',label:t.technicalScore},{key:'behavior_score',label:t.behaviorScore},{key:'leadership_score',label:t.leadershipScore},{key:'service_score',label:t.serviceScore},{key:'evaluator_notes',label:t.evaluatorNotes}]}/>}
     {edit&&<EditForm type={edit.type} row={edit.row} onClose={()=>setEdit(null)} onSaved={load} lang={lang}/>}
   </>
