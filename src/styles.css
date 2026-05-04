@@ -746,3 +746,177 @@ textarea:focus {
 .trainer-quick-actions button:hover{
   transform:translateY(-1px);
 }
+/* Gym Zaman Final UI Polish - CSS only */
+
+:root{
+  --gz-orange:#ff6b12;
+  --gz-dark:#111827;
+  --gz-muted:#64748b;
+  --gz-bg:#f4f7fb;
+  --gz-border:#e5e7eb;
+}
+
+body{background:var(--gz-bg);}
+
+.card:empty,
+.card.note:empty,
+.search-card:empty{
+  display:none!important;
+}
+
+main{padding-bottom:40px;}
+
+.hero,
+.simple-hero{
+  border-radius:28px!important;
+  min-height:auto!important;
+  padding:26px 30px!important;
+  box-shadow:0 18px 40px rgba(255,107,18,.18)!important;
+}
+
+.hero h2,
+.simple-hero h2{
+  font-size:30px!important;
+  line-height:1.25!important;
+  margin:0!important;
+}
+
+aside{
+  box-shadow:-8px 0 28px rgba(15,23,42,.16);
+}
+
+aside nav{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+aside nav a{
+  border-radius:16px!important;
+  transition:.18s ease;
+}
+
+aside nav a:hover{
+  background:rgba(255,255,255,.12)!important;
+  transform:translateX(-2px);
+}
+
+.tabs-bar{
+  display:grid!important;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:14px!important;
+  margin:22px 0!important;
+}
+
+.tabs-bar button,
+.trainer-quick-actions button,
+button,
+.export-btn{
+  border-radius:16px!important;
+  transition:.18s ease;
+}
+
+.tabs-bar button:hover,
+.trainer-quick-actions button:hover,
+button:hover,
+.export-btn:hover{
+  transform:translateY(-1px);
+}
+
+.trainer-quick-actions{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:14px;
+  margin:18px 0 22px;
+}
+
+.trainer-quick-actions button{
+  border:0;
+  background:linear-gradient(135deg,var(--gz-orange),#ff8a3d);
+  color:#fff;
+  padding:17px 18px;
+  font-weight:800;
+  box-shadow:0 12px 28px rgba(255,107,18,.20);
+  cursor:pointer;
+}
+
+.card{
+  border:1px solid var(--gz-border)!important;
+  border-radius:22px!important;
+  box-shadow:0 10px 28px rgba(15,23,42,.06)!important;
+}
+
+input,
+select,
+textarea{
+  border-radius:14px!important;
+  border:1px solid #dbe3ef!important;
+}
+
+textarea{min-height:92px;}
+
+.table-wrap{
+  border-radius:18px!important;
+  overflow:auto!important;
+  border:1px solid var(--gz-border);
+}
+
+table{
+  border-collapse:separate!important;
+  border-spacing:0!important;
+  width:100%;
+}
+
+th{
+  position:sticky;
+  top:0;
+  background:#f8fafc!important;
+  color:#0f172a!important;
+  font-weight:800!important;
+  z-index:1;
+}
+
+td,th{
+  padding:12px 14px!important;
+  border-bottom:1px solid #edf2f7!important;
+}
+
+tr:hover td{background:#fff7ed!important;}
+
+.search-card{padding:16px!important;}
+
+.search-card input{
+  min-height:52px;
+  font-size:16px;
+}
+
+@media (max-width: 900px){
+  main{padding:16px!important;}
+  .hero,.simple-hero{padding:22px!important;border-radius:24px!important;}
+  .hero h2,.simple-hero h2{font-size:24px!important;}
+  .tabs-bar{grid-template-columns:1fr!important;}
+  .trainer-quick-actions{grid-template-columns:1fr!important;}
+  .card{border-radius:18px!important;}
+  table{min-width:760px;}
+}
+
+@media print{
+  aside,
+  .tabs-bar,
+  .search-card,
+  .logout,
+  .lang-btn,
+  .table-actions,
+  .export-btn,
+  .small-action,
+  button{
+    display:none!important;
+  }
+  main{padding:0!important;}
+  .card{
+    box-shadow:none!important;
+    border:1px solid #ddd!important;
+    break-inside:avoid;
+  }
+  body{background:#fff!important;}
+}
