@@ -320,6 +320,158 @@ th {
   }
 }
 
+select, textarea {
+  width: 100%;
+  border: 1px solid #d9deea;
+  border-radius: 14px;
+  padding: 13px 14px;
+  outline: none;
+  background: white;
+  font: inherit;
+}
+
+textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+select:focus,
+textarea:focus {
+  border-color: #f97316;
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.12);
+}
+
+.grid-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.grid-form .full {
+  grid-column: 1 / -1;
+}
+
+.grid-form button {
+  width: auto;
+  min-width: 180px;
+}
+
+.card h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.success {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  border-radius: 14px;
+  padding: 12px;
+  margin-top: 14px;
+}
+
+@media (max-width: 900px) {
+  .grid-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Trainer email admin filter update */
+.filter-card h3{display:flex;gap:8px;align-items:center}
+.filter-card select{max-width:520px}
+
+/* Staff Management update */
+.staff-card h3,
+.filter-card h3{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.table-input,
+.table-select{
+  width: 100%;
+  min-width: 170px;
+  border: 1px solid #dbe4f0;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font: inherit;
+  background: white;
+}
+
+.small-action.save{
+  background:#16a34a;
+}
+
+.staff-card .table-wrap{
+  max-height: 520px;
+}
+
+/* Senior Daily Report update */
+.senior-report-card h3{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+/* Coach details and evaluation update */
+.trainer-profile-card h3,
+.coach-eval-card h3{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.profile-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:12px;
+}
+
+.profile-grid div{
+  border:1px solid #e2e8f0;
+  border-radius:14px;
+  padding:12px;
+  background:#f8fafc;
+}
+
+.profile-grid span{
+  display:block;
+  font-size:12px;
+  color:#64748b;
+  margin-bottom:6px;
+}
+
+.profile-grid b{
+  color:#0f172a;
+}
+
+/* Senior and Head Coach duties update */
+.head-report-card h3{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+/* Attendance, evaluation score and performance dashboard */
+.attendance-card h3,
+.performance-card h3{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+/* Monthly report + Branch comparison + Alerts */
+.month-control{display:flex;gap:12px;align-items:center;margin:12px 0 16px}
+.month-control input{max-width:220px}
+.alerts-card h3,.branch-comparison-card h3,.monthly-report-card h3{display:flex;gap:8px;align-items:center}
+
+/* Monthly report + Branch comparison + Alerts */
+.month-control{display:flex;gap:12px;align-items:center;margin:12px 0 16px}
+.month-control input{max-width:220px}
+.alerts-card h3,.branch-comparison-card h3,.monthly-report-card h3{display:flex;gap:8px;align-items:center}
+
 /* Tabs + Search + Export + Follow-up + Audit + Mobile clean view */
 .tabs-bar{
   display:flex;
@@ -407,4 +559,190 @@ th {
   .table-wrap{
     overflow-x:auto;
   }
+}
+
+/* Tabs + Search + Export + Follow-up + Audit + Mobile clean view */
+.tabs-bar{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:14px 0 18px;
+}
+.tabs-bar button{
+  border:1px solid #e2e8f0;
+  background:#fff;
+  border-radius:999px;
+  padding:10px 16px;
+  font-weight:700;
+  cursor:pointer;
+}
+.tabs-bar button.active{
+  background:#ff6b13;
+  color:#fff;
+  border-color:#ff6b13;
+}
+.search-card{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:14px 16px;
+}
+.search-card input{
+  border:0;
+  outline:0;
+  width:100%;
+  font:inherit;
+  background:transparent;
+}
+.export-btn{
+  background:#0f172a;
+  color:white;
+  border:0;
+  border-radius:12px;
+  padding:9px 14px;
+  font-weight:700;
+  cursor:pointer;
+}
+.table-actions{
+  display:flex;
+  justify-content:flex-end;
+  margin:10px 0;
+}
+.audit-card h3{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+@media (max-width: 760px){
+  .app{
+    display:block;
+  }
+  aside{
+    position:relative;
+    width:100%;
+    min-height:auto;
+  }
+  aside nav{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  main{
+    padding:14px;
+  }
+  .stats-grid{
+    grid-template-columns:1fr;
+  }
+  .grid-form{
+    grid-template-columns:1fr !important;
+  }
+  .tabs-bar{
+    overflow-x:auto;
+    flex-wrap:nowrap;
+    padding-bottom:6px;
+  }
+  .tabs-bar button{
+    white-space:nowrap;
+  }
+  .table-wrap{
+    overflow-x:auto;
+  }
+}
+
+
+/* Final operations update: client profile, print, backup, program builder */
+.backup-card h3,
+.client-profile-card h3,
+.program-builder-card h3{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.client-profile-top{
+  display:flex;
+  gap:12px;
+  align-items:end;
+  flex-wrap:wrap;
+  margin:12px 0 16px;
+}
+
+.client-profile-top label{
+  display:block;
+  font-weight:700;
+  margin-bottom:6px;
+}
+
+.client-profile-top select{
+  min-width:280px;
+  max-width:520px;
+}
+
+.profile-section{
+  margin-top:16px;
+  border-top:1px solid #e2e8f0;
+  padding-top:14px;
+}
+
+.profile-section h4{
+  margin:0 0 10px;
+}
+
+.mini-card{
+  border:1px solid #e2e8f0;
+  background:#f8fafc;
+  border-radius:14px;
+  padding:12px;
+  margin-bottom:10px;
+}
+
+.mini-card pre{
+  white-space:pre-wrap;
+  font-family:inherit;
+  background:#fff;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #e2e8f0;
+  max-height:260px;
+  overflow:auto;
+}
+
+.print-btn{
+  background:#0f172a;
+}
+
+@media print{
+  aside,.tabs-bar,.search-card,.logout,.lang-btn,.table-actions,.export-btn,.small-action,button{
+    display:none!important;
+  }
+  main{
+    padding:0!important;
+  }
+  .card{
+    box-shadow:none!important;
+    break-inside:avoid;
+  }
+}
+/* Trainer quick actions */
+.trainer-quick-actions{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:14px;
+  margin:18px 0;
+}
+
+.trainer-quick-actions button{
+  border:0;
+  border-radius:18px;
+  background:#ff6b12;
+  color:#fff;
+  padding:16px 18px;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:0 10px 24px rgba(255,107,18,.18);
+}
+
+.trainer-quick-actions button:hover{
+  transform:translateY(-1px);
 }
