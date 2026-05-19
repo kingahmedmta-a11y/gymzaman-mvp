@@ -29,7 +29,7 @@ const TEXT = {
     active: 'active', inactive: 'inactive',
     seniorReport: 'تقرير السينيور', addSeniorReport: 'إضافة تقرير سينيور', branchPressure: 'ضغط الفرع', serviceNotes: 'ملاحظات الخدمة',
     coachCommitment: 'التزام المدربين', clientIssues: 'مشاكل العملاء', actionsTaken: 'الإجراءات التي تمت', resolved: 'تم الحل؟', saveSeniorReport: 'حفظ تقرير السينيور', seniorReportSaved: 'تم حفظ تقرير السينيور بنجاح.',
-    trainerProfile: 'ملف المدرب', coachEvaluation: 'تقييم المدرب', evaluationHistory: 'سجل التقييمات',
+    trainerProfile: 'ملف المدرب', trainerFile: 'ملف المدرب الكامل', trainerFiles: 'ملفات المدربين', autoEvaluation: 'التقييم التلقائي', automaticScore: 'الدرجة التلقائية', activityScore: 'درجة النشاط', attendanceScore: 'درجة الالتزام', reportingScore: 'درجة التقارير', headCoachScore: 'تقييم الهيد كوتش', evaluationPreview: 'معاينة التقييم النهائي', coachEvaluation: 'تقييم المدرب', evaluationHistory: 'سجل التقييمات',
     technicalScore: 'التقييم الفني', behaviorScore: 'التقييم السلوكي', leadershipScore: 'تقييم القيادة', serviceScore: 'تقييم الخدمة',
     evaluatorNotes: 'ملاحظات المقيم', saveEvaluation: 'حفظ التقييم', evaluationSaved: 'تم حفظ التقييم بنجاح.',
     selectedTrainerInfo: 'بيانات المدرب المختار', problemDescription: 'وصف المشكلة', evaluatedBy: 'تم التقييم بواسطة',
@@ -73,7 +73,7 @@ const TEXT = {
     active: 'active', inactive: 'inactive',
     seniorReport: 'Senior Report', addSeniorReport: 'Add Senior Report', branchPressure: 'Branch Pressure', serviceNotes: 'Service Notes',
     coachCommitment: 'Coach Commitment', clientIssues: 'Client Issues', actionsTaken: 'Actions Taken', resolved: 'Resolved?', saveSeniorReport: 'Save Senior Report', seniorReportSaved: 'Senior report saved successfully.',
-    trainerProfile: 'Trainer Profile', coachEvaluation: 'Coach Evaluation', evaluationHistory: 'Evaluation History',
+    trainerProfile: 'Trainer Profile', trainerFile: 'Full Trainer File', trainerFiles: 'Trainer Files', autoEvaluation: 'Automatic Evaluation', automaticScore: 'Automatic Score', activityScore: 'Activity Score', attendanceScore: 'Attendance Score', reportingScore: 'Reporting Score', headCoachScore: 'Head Coach Score', evaluationPreview: 'Final Evaluation Preview', coachEvaluation: 'Coach Evaluation', evaluationHistory: 'Evaluation History',
     technicalScore: 'Technical Score', behaviorScore: 'Behavior Score', leadershipScore: 'Leadership Score', serviceScore: 'Service Score',
     evaluatorNotes: 'Evaluator Notes', saveEvaluation: 'Save Evaluation', evaluationSaved: 'Evaluation saved successfully.',
     selectedTrainerInfo: 'Selected Trainer Info', problemDescription: 'Problem Description', evaluatedBy: 'Evaluated By',
@@ -817,13 +817,33 @@ function HeadCoachDailyReportForm({ profile, onSaved, lang }) {
 }
 
 
-function TrainerProfilePanel({ trainer, branches, clients, logs, programs, evaluations, t }) {
+
+function calculateAutomaticTrainerScore(trainer, logs, attendanceLogs, evaluations, month = new Date().toISOString().slice(0,7)) {
+  const monthLogs = logs.filter(l => l.trainer_id === trainer.id && monthOf(l.log_date) === month)
+  const monthAttendance = attendanceLogs.filter(a => a.trainer_id === trainer.id && monthOf(a.attendance_date) === month)
+  const monthEvaluations = evaluations.filter(e => e.trainer_id === trainer.id && monthOf(e.evaluation_date || e.created_at) === month)
+  const totalPt = monthLogs.reduce((s, r) => s + Number(r.pt_sessions_count || 0), 0)
+  const totalFree = monthLogs.reduce((s, r) => s + Number(r.free_service_count || 0), 0)
+  const totalRotation = monthLogs.reduce((s, r) => s + Number(r.rotation_count || 0), 0)
+  const lateMinutes = monthAttendance.reduce((s, r) => s + Number(r.late_minutes || 0), 0)
+  const headCoachScores = monthEvaluations.map(e => (Number(e.technical_score||0)+Number(e.behavior_score||0)+Number(e.leadership_score||0)+Number(e.service_score||0))/4)
+  const headCoachScore = headCoachScores.length ? avg(headCoachScores) : 80
+  const activityScore = Math.min(100, Math.round((totalPt * 5) + (totalFree * 3) + (totalRotation * 2)))
+  const attendanceScore = Math.max(0, Math.min(100, 100 - Math.round(lateMinutes / 5)))
+  const reportingScore = Math.min(100, Math.round((monthLogs.length / 22) * 100))
+  const automaticScore = Math.round((headCoachScore * 0.40) + (activityScore * 0.25) + (attendanceScore * 0.20) + (reportingScore * 0.15))
+  return { automaticScore, activityScore, attendanceScore, reportingScore, headCoachScore, totalPt, totalFree, totalRotation, lateMinutes, totalLogs: monthLogs.length }
+}
+
+function TrainerProfilePanel({ trainer, branches, clients, logs, programs, attendanceLogs = [], evaluations, t }) {
   if (!trainer) return null
   const branch = branches.find(b => b.id === trainer.branch_id)
   const trainerClients = clients.filter(c => c.assigned_trainer_id === trainer.id)
   const trainerLogs = logs.filter(l => l.trainer_id === trainer.id)
   const trainerPrograms = programs.filter(p => p.trainer_id === trainer.id)
   const trainerEvaluations = evaluations.filter(e => e.trainer_id === trainer.id)
+  const trainerAttendance = attendanceLogs.filter(a => a.trainer_id === trainer.id)
+  const auto = calculateAutomaticTrainerScore(trainer, logs, attendanceLogs, evaluations)
   const totalPt = trainerLogs.reduce((s, r) => s + Number(r.pt_sessions_count || 0), 0)
   const totalFree = trainerLogs.reduce((s, r) => s + Number(r.free_service_count || 0), 0)
   const totalRotation = trainerLogs.reduce((s, r) => s + Number(r.rotation_count || 0), 0)
@@ -844,7 +864,19 @@ function TrainerProfilePanel({ trainer, branches, clients, logs, programs, evalu
         <div><span>{t.freeService}</span><b>{totalFree}</b></div>
         <div><span>{t.rotation}</span><b>{totalRotation}</b></div>
         <div><span>{t.evaluationHistory}</span><b>{trainerEvaluations.length}</b></div>
+        <div><span>{t.automaticScore}</span><b>{auto.automaticScore}% — {gradeFromScore(auto.automaticScore, t)}</b></div>
       </div>
+      <div className="profile-score-grid">
+        <div><span>{t.headCoachScore}</span><b>{auto.headCoachScore}%</b></div>
+        <div><span>{t.activityScore}</span><b>{auto.activityScore}%</b></div>
+        <div><span>{t.attendanceScore}</span><b>{auto.attendanceScore}%</b></div>
+        <div><span>{t.reportingScore}</span><b>{auto.reportingScore}%</b></div>
+      </div>
+      <Table title={t.clients} rows={trainerClients.slice(0, 10)} canManage={false} t={t} columns={[{key:'full_name',label:t.clientName},{key:'phone',label:t.phone},{key:'goal',label:t.goal},{key:'status',label:t.status},{key:'next_followup_date',label:t.nextFollowupDate}]} />
+      <Table title={t.attendance} rows={trainerAttendance.slice(0, 10)} canManage={false} t={t} columns={[{key:'attendance_date',label:t.date},{key:'shift',label:t.shift},{key:'check_in',label:t.checkIn},{key:'check_out',label:t.checkOut},{key:'late_minutes',label:t.lateMinutes},{key:'overtime_minutes',label:t.overtimeMinutes}]} />
+      <Table title={t.logs} rows={trainerLogs.slice(0, 10)} canManage={false} t={t} columns={[{key:'log_date',label:t.date},{key:'shift',label:t.shift},{key:'rotation_count',label:t.rotation},{key:'pt_sessions_count',label:t.ptSessions},{key:'free_service_count',label:t.freeService},{key:'notes',label:t.notes}]} />
+      <Table title={t.programs} rows={trainerPrograms.slice(0, 10)} canManage={false} t={t} columns={[{key:'program_name',label:t.programName},{key:'goal',label:t.goal},{key:'duration_weeks',label:t.duration},{key:'status',label:t.status}]} />
+      <Table title={t.evaluationHistory} rows={trainerEvaluations.map(ev => { const score = Math.round((Number(ev.technical_score||0)+Number(ev.behavior_score||0)+Number(ev.leadership_score||0)+Number(ev.service_score||0))/4); return {...ev, final_score: score, grade: gradeFromScore(score, t)} }).slice(0,10)} canManage={false} t={t} columns={[{key:'evaluation_date',label:t.date},{key:'technical_score',label:t.technicalScore},{key:'behavior_score',label:t.behaviorScore},{key:'leadership_score',label:t.leadershipScore},{key:'service_score',label:t.serviceScore},{key:'final_score',label:t.finalScore},{key:'grade',label:t.grade},{key:'evaluator_notes',label:t.evaluatorNotes}]} />
     </div>
   )
 }
@@ -897,6 +929,8 @@ function CoachEvaluationForm({ profile, targetTrainerId, eligibleTrainers, onSav
     }
   }
 
+  const previewScore = Math.round((Number(form.technical_score||0)+Number(form.behavior_score||0)+Number(form.leadership_score||0)+Number(form.service_score||0))/4)
+
   return (
     <div className="card coach-eval-card">
       <h3><ClipboardList size={18}/>{t.coachEvaluation}</h3>
@@ -927,6 +961,10 @@ function CoachEvaluationForm({ profile, targetTrainerId, eligibleTrainers, onSav
         <div>
           <label>{t.serviceScore}</label>
           <input type="number" min="0" max="100" value={form.service_score} onChange={e => f('service_score', e.target.value)} />
+        </div>
+        <div className="score-preview">
+          <span>{t.evaluationPreview}</span>
+          <b>{previewScore}% — {gradeFromScore(previewScore, t)}</b>
         </div>
         <div className="full">
           <label>{t.evaluatorNotes}</label>
@@ -1129,7 +1167,7 @@ function Dashboard({ profile, lang }) {
 
   const branchStaff = staff.filter(s => s.branch_id === profile.branch_id)
   const trainers = (isBranchLeader ? branchStaff : staff).filter(s => ['trainer','senior','head_coach'].includes(s.role))
-  const selectedTrainer = selectedTrainerId !== 'all' ? trainers.find(s => s.id === selectedTrainerId) : null
+  const selectedTrainer = selectedTrainerId !== 'all' ? trainers.find(s => s.id === selectedTrainerId) : (isTrainer ? profile : null)
   const evaluableTrainers = isBranchLeader ? branchStaff.filter(s => s.id !== profile.id && ['trainer','senior'].includes(s.role)) : trainers
   const clientMapAll = Object.fromEntries(clients.map(c=>[c.id,c.full_name]))
   const trainerMap = Object.fromEntries([...staff, profile].map(tr=>[tr.id,tr.email || tr.full_name]))
@@ -1201,12 +1239,13 @@ function Dashboard({ profile, lang }) {
       {(isAdmin || isBranchLeader) && <PerformanceDashboard staff={isAdmin?staff:branchStaff} clients={visibleClients} logs={visibleLogs} attendanceLogs={visibleAttendanceRaw} t={t}/>}
       {(isAdmin || isBranchLeader) && <AlertsPanel staff={isAdmin?staff:branchStaff} logs={visibleLogs} attendanceLogs={visibleAttendanceRaw} seniorReports={visibleSeniorReportsRaw} evaluations={visibleEvaluationsRaw} t={t}/>}
       {isAdmin && <BranchComparisonDashboard branches={branches} staff={staff} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} seniorReports={seniorReports} headReports={headReports} t={t}/>}
+      {isTrainer && <TrainerProfilePanel trainer={profile} branches={branches} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} evaluations={evaluations} t={t}/>}
     </>}
 
     {activeTab === 'trainerData' && <>
-      {isAdmin && <TrainerFilter trainers={trainers} selectedTrainerId={selectedTrainerId} setSelectedTrainerId={setSelectedTrainerId} t={t}/>}
+      {(isAdmin || isBranchLeader) && <TrainerFilter trainers={trainers} selectedTrainerId={selectedTrainerId} setSelectedTrainerId={setSelectedTrainerId} t={t}/>}
       {isBranchLeader && <Table title={t.staffManagement} rows={branchStaff.filter(r => rowMatches(r, searchQuery))} canManage={false} t={t} columns={[{key:'full_name',label:t.fullName},{key:'email',label:t.email},{key:'role',label:t.role},{key:'status',label:t.status}]}/>}
-      {isAdmin && selectedTrainer && <TrainerProfilePanel trainer={selectedTrainer} branches={branches} clients={clients} logs={logs} programs={programs} evaluations={evaluations} t={t}/>}
+      {(isAdmin || isBranchLeader) && selectedTrainer && <TrainerProfilePanel trainer={selectedTrainer} branches={branches} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} evaluations={evaluations} t={t}/>}
       {((isAdmin || isBranchLeader) && selectedTrainer) && <CoachEvaluationForm profile={profile} targetTrainerId={selectedTrainer.id} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
       {isBranchLeader && !selectedTrainer && <CoachEvaluationForm profile={profile} targetTrainerId={''} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
       <div className="table-actions"><ExportButton rows={visibleClientsRows} filename="clients.csv" t={t}/></div>
