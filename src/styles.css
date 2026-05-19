@@ -920,3 +920,87 @@ tr:hover td{background:#fff7ed!important;}
   }
   body{background:#fff!important;}
 }
+
+/* Gym Zaman RBAC clarity update */
+.clean-login input,
+.grid-form input,
+.grid-form select,
+.grid-form textarea,
+.table-input,
+.table-select,
+.filter-card select,
+.month-control input {
+  min-height: 46px;
+  font-size: 15px;
+}
+
+select {
+  appearance: auto;
+  color: #0f172a;
+  background-color: #fff;
+  border: 1px solid #cbd5e1;
+}
+
+.tabs-bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: rgba(244, 246, 251, 0.92);
+  backdrop-filter: blur(8px);
+  padding: 10px 0;
+}
+
+.card h3 {
+  color: #0f172a;
+}
+
+.table-wrap table th {
+  white-space: nowrap;
+}
+
+.table-wrap table td {
+  vertical-align: top;
+}
+
+.simple-hero {
+  padding: 20px 24px;
+}
+
+.simple-hero h2 {
+  font-size: clamp(24px, 3vw, 36px);
+}
+
+.card.note {
+  border-inline-start: 5px solid #f97316;
+}
+
+.notice{
+  background:#fff7ed;
+  border:1px solid #fed7aa;
+  color:#9a3412;
+  border-radius:14px;
+  padding:12px 14px;
+  margin:12px 0;
+  font-weight:700;
+}
+.draft-hint{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  color:#64748b;
+  font-size:13px;
+  background:#f8fafc;
+  border:1px dashed #cbd5e1;
+  border-radius:12px;
+  padding:8px 10px;
+}
+.login-card select{
+  width:100%;
+  padding:13px 14px;
+  border-radius:14px;
+  border:1px solid #d7dce3;
+  background:#fff;
+  color:#111827;
+  font-weight:700;
+  outline:none;
+}

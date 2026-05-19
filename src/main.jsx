@@ -6,7 +6,7 @@ import './styles.css'
 
 const TEXT = {
   ar: {
-    loginTitle: 'Gym Zaman', loginSub: 'نظام إدارة داخلي', staffOnly: 'دخول مخصص للموظفين فقط',
+    loginTitle: 'Gym Zaman', loginSub: 'نظام إدارة داخلي', staffOnly: 'دخول مخصص للموظفين فقط', selectBranch: 'اختيار الفرع', autoSavedDraft: 'تم الحفظ تلقائيًا كمسودة', branchLoginMismatch: 'تنبيه: الفرع المختار في شاشة الدخول مختلف عن الفرع المسجل لحسابك. تم تطبيق صلاحية فرعك المسجل فقط.',
     email: 'الإيميل', password: 'الباسورد', login: 'دخول', logging: 'جاري الدخول...',
     loggedInAs: 'مسجل دخول باسم', dashboard: 'الرئيسية', clients: 'العملاء', logs: 'تقارير اليوم', programs: 'برامج PT',
     staffManagement: 'إدارة الفريق', owner: 'لوحة الأونر', director: 'لوحة المدير', trainer: 'لوحة المدرب',
@@ -22,7 +22,7 @@ const TEXT = {
     exercises: 'التمارين / الخطة', saveProgram: 'حفظ البرنامج', programSaved: 'تم حفظ البرنامج بنجاح.',
     control: 'تحكم', edit: 'تعديل', delete: 'حذف', save: 'حفظ التعديل', logout: 'خروج', noData: 'لا توجد بيانات.',
     adminNote: 'تحكم الإدارة: اختار مدرب بالإيميل لعرض عملائه وتقاريره وبرامجه فقط، أو اعرض الكل.',
-    trainerNote: 'صفحة المدرب: تظهر بياناتك أنت فقط حسب صلاحيات قاعدة البيانات.',
+    trainerNote: '',
     filterByTrainer: 'اختيار المدرب بالإيميل', allTrainers: 'كل المدربين', trainerEmail: 'إيميل المدرب',
     staffNote: 'إدارة الفريق: تعديل الدور، الفرع، والحالة. تظهر فقط للأونر والديركتور.',
     fullName: 'الاسم', branch: 'الفرع', role: 'الدور', saveStaff: 'حفظ بيانات المدرب', savedStaff: 'تم حفظ بيانات المدرب.',
@@ -50,7 +50,7 @@ const TEXT = {
     entityType: 'نوع البيانات', action: 'الإجراء', changedBy: 'تم بواسطة', changedAt: 'وقت التعديل'
   },
   en: {
-    loginTitle: 'Gym Zaman', loginSub: 'Internal Management System', staffOnly: 'Staff access only',
+    loginTitle: 'Gym Zaman', loginSub: 'Internal Management System', staffOnly: 'Staff access only', selectBranch: 'Select Branch', autoSavedDraft: 'Auto-saved as draft', branchLoginMismatch: 'Notice: the branch selected on login differs from your saved account branch. Your saved branch permission was applied.',
     email: 'Email', password: 'Password', login: 'Login', logging: 'Signing in...',
     loggedInAs: 'Logged in as', dashboard: 'Dashboard', clients: 'Clients', logs: 'Daily Logs', programs: 'PT Programs',
     staffManagement: 'Staff Management', owner: 'Owner Dashboard', director: 'Fitness Director Dashboard', trainer: 'Trainer Dashboard',
@@ -66,7 +66,7 @@ const TEXT = {
     exercises: 'Exercises / Plan', saveProgram: 'Save Program', programSaved: 'PT program saved successfully.',
     control: 'Control', edit: 'Edit', delete: 'Delete', save: 'Save Changes', logout: 'Logout', noData: 'No data found.',
     adminNote: 'Admin control: choose a trainer by email to view only their clients, logs, and programs, or view all.',
-    trainerNote: 'Trainer view: only your own data appears based on database security.',
+    trainerNote: '',
     filterByTrainer: 'Filter by Trainer Email', allTrainers: 'All Trainers', trainerEmail: 'Trainer Email',
     staffNote: 'Staff Management: update role, branch, and status. Visible only for Owner and Director.',
     fullName: 'Full Name', branch: 'Branch', role: 'Role', saveStaff: 'Save Staff Data', savedStaff: 'Staff data saved.',
@@ -97,6 +97,31 @@ const TEXT = {
 
 const ROLE_OPTIONS = ['trainer', 'senior', 'head_coach', 'fitness_director', 'owner']
 const STATUS_OPTIONS = ['active', 'inactive']
+
+const LOGIN_BRANCH_OPTIONS = ['Miami', 'Moharram Bey', 'Janaklis']
+
+function useAutoSavedForm(storageKey, initialValue) {
+  const [form, setForm] = useState(() => {
+    try {
+      const saved = localStorage.getItem(storageKey)
+      return saved ? { ...initialValue, ...JSON.parse(saved) } : initialValue
+    } catch {
+      return initialValue
+    }
+  })
+  const [draftSaved, setDraftSaved] = useState(false)
+  useEffect(() => {
+    localStorage.setItem(storageKey, JSON.stringify(form))
+    setDraftSaved(true)
+    const timer = setTimeout(() => setDraftSaved(false), 1200)
+    return () => clearTimeout(timer)
+  }, [storageKey, form])
+  const clearDraft = (nextValue = initialValue) => {
+    localStorage.removeItem(storageKey)
+    setForm(nextValue)
+  }
+  return [form, setForm, draftSaved, clearDraft]
+}
 
 
 function logAudit(actorId, action, entityType, entityId, details = {}) {
@@ -174,12 +199,14 @@ function Login({ lang, setLang }) {
   const t = TEXT[lang]
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [loginBranch, setLoginBranch] = useState(localStorage.getItem('gymzaman_login_branch') || LOGIN_BRANCH_OPTIONS[0])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   async function handleLogin(e) {
     e.preventDefault()
     setLoading(true); setError('')
+    localStorage.setItem('gymzaman_login_branch', loginBranch)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) setError(error.message)
     setLoading(false)
@@ -194,6 +221,7 @@ function Login({ lang, setLang }) {
         </div>
         <div className="secure-note"><LockKeyhole size={18}/><span>{t.staffOnly}</span></div>
         <form onSubmit={handleLogin}>
+          <label>{t.selectBranch}</label><select value={loginBranch} onChange={e=>setLoginBranch(e.target.value)}>{LOGIN_BRANCH_OPTIONS.map(b => <option key={b} value={b}>{b}</option>)}</select>
           <label>{t.email}</label><input value={email} onChange={e=>setEmail(e.target.value)} placeholder="name@gymzaman.com"/>
           <label>{t.password}</label><input value={password} onChange={e=>setPassword(e.target.value)} type="password"/>
           {error && <div className="error">{error}</div>}
@@ -215,15 +243,18 @@ function Layout({ profile, children, lang, setLang }) {
         <LanguageButton lang={lang} setLang={setLang}/>
         <button className="logout" onClick={()=>supabase.auth.signOut()}><LogOut size={18}/>{t.logout}</button>
       </aside>
-      <main><header><div><p className="muted">{t.loggedInAs}</p><h1>{profile.full_name}</h1></div><div className="pill"><UserRound size={16}/>{roleLabel}</div></header>{children}</main>
+      <main><header><div><p className="muted">{t.loggedInAs}</p><h1>{profile.full_name}</h1></div><div className="pill"><UserRound size={16}/>{roleLabel}{profile?.branch_name ? ` • ${profile.branch_name}` : ''}</div></header>{children}</main>
     </div>
   )
 }
 
-function Table({ title, rows, columns, canManage, onEdit, onDelete, t }) {
+function Table({ title, rows, columns, canManage, canEdit, canDelete, onEdit, onDelete, t }) {
+  const showEdit = canEdit ?? canManage
+  const showDelete = canDelete ?? canManage
+  const showControl = showEdit || showDelete
   return <div className="card"><h3>{title}</h3>{rows.length === 0 ? <p className="muted">{t.noData}</p> :
-    <div className="table-wrap"><table><thead><tr>{columns.map(c=><th key={c.key}>{c.label}</th>)}{canManage && <th>{t.control}</th>}</tr></thead>
-      <tbody>{rows.map((r,i)=><tr key={r.id || i}>{columns.map(c=><td key={c.key}>{String(r[c.key] ?? '-')}</td>)}{canManage && <td><div className="row-actions"><button className="small-action edit" onClick={()=>onEdit(r)}><Pencil size={14}/>{t.edit}</button><button className="small-action delete" onClick={()=>onDelete(r)}><Trash2 size={14}/>{t.delete}</button></div></td>}</tr>)}</tbody>
+    <div className="table-wrap"><table><thead><tr>{columns.map(c=><th key={c.key}>{c.label}</th>)}{showControl && <th>{t.control}</th>}</tr></thead>
+      <tbody>{rows.map((r,i)=><tr key={r.id || i}>{columns.map(c=><td key={c.key}>{String(r[c.key] ?? '-')}</td>)}{showControl && <td><div className="row-actions">{showEdit && <button className="small-action edit" onClick={()=>onEdit(r)}><Pencil size={14}/>{t.edit}</button>}{showDelete && <button className="small-action delete" onClick={()=>onDelete(r)}><Trash2 size={14}/>{t.delete}</button>}</div></td>}</tr>)}</tbody>
     </table></div>}
   </div>
 }
@@ -234,7 +265,9 @@ function Modal({ title, children, onClose }) {
 
 function EditForm({ type, row, onClose, onSaved, lang }) {
   const t = TEXT[lang]
-  const defaults = type === 'client' ? {
+  const defaults = type === 'attendance' ? {
+    attendance_date: row.attendance_date || new Date().toISOString().slice(0,10), shift: row.shift || 'PM', expected_in: row.expected_in || '15:00', expected_out: row.expected_out || '23:00', check_in: row.check_in || '15:00', check_out: row.check_out || '23:00', notes: row.notes || ''
+  } : type === 'client' ? {
     full_name: row.full_name || '', phone: row.phone || '', goal: row.goal || '', level: row.level || 'beginner', status: row.status || 'active', last_contact_date: row.last_contact_date || '', next_followup_date: row.next_followup_date || '', need_director_support: row.need_director_support ? 'yes' : 'no', followup_notes: row.followup_notes || ''
   } : type === 'log' ? {
     log_date: row.log_date || new Date().toISOString().slice(0,10), shift: row.shift || 'PM', check_in: row.check_in || '15:00', check_out: row.check_out || '23:00',
@@ -244,7 +277,7 @@ function EditForm({ type, row, onClose, onSaved, lang }) {
   }
   const [form, setForm] = useState(defaults)
   const [message, setMessage] = useState('')
-  const table = type === 'client' ? 'clients' : type === 'log' ? 'trainer_daily_logs' : 'pt_programs'
+  const table = type === 'attendance' ? 'attendance_logs' : type === 'client' ? 'clients' : type === 'log' ? 'trainer_daily_logs' : 'pt_programs'
   function f(k,v){setForm(p=>({...p,[k]:v}))}
   async function submit(e){
     e.preventDefault()
@@ -254,11 +287,13 @@ function EditForm({ type, row, onClose, onSaved, lang }) {
       payload.last_contact_date = form.last_contact_date || null
       payload.next_followup_date = form.next_followup_date || null
     }
+    if (type === 'attendance') { const calc = calculateLateAndOvertime(form.check_in, form.check_out, form.expected_in, form.expected_out); payload.late_minutes = calc.late; payload.overtime_minutes = calc.overtime }
     ;['rotation_count','new_clients_count','pt_sessions_count','free_service_count','duration_weeks'].forEach(k=>{ if(payload[k] !== undefined) payload[k] = Number(payload[k] || 0) })
     const { error } = await supabase.from(table).update(payload).eq('id', row.id)
     if(error) setMessage(error.message); else { onSaved(); onClose() }
   }
   return <Modal title={`${t.edit} ${type}`} onClose={onClose}><form className="grid-form simple-form" onSubmit={submit}>
+    {type==='attendance' && <><div><label>{t.date}</label><input type="date" value={form.attendance_date} onChange={e=>f('attendance_date',e.target.value)}/></div><div><label>{t.shift}</label><select value={form.shift} onChange={e=>f('shift',e.target.value)}><option>AM</option><option>PM</option></select></div><div><label>{t.expectedIn}</label><input type="time" value={form.expected_in} onChange={e=>f('expected_in',e.target.value)}/></div><div><label>{t.expectedOut}</label><input type="time" value={form.expected_out} onChange={e=>f('expected_out',e.target.value)}/></div><div><label>{t.checkIn}</label><input type="time" value={form.check_in} onChange={e=>f('check_in',e.target.value)}/></div><div><label>{t.checkOut}</label><input type="time" value={form.check_out} onChange={e=>f('check_out',e.target.value)}/></div><div className="full"><label>{t.notes}</label><textarea value={form.notes} onChange={e=>f('notes',e.target.value)}/></div></>}
     {type==='client' && <>
       <div><label>{t.clientName}</label><input value={form.full_name} onChange={e=>f('full_name',e.target.value)}/></div>
       <div><label>{t.phone}</label><input value={form.phone} onChange={e=>f('phone',e.target.value)}/></div>
@@ -277,7 +312,7 @@ function EditForm({ type, row, onClose, onSaved, lang }) {
 
 function AddClientForm({ profile, branches, onSaved, lang }) {
   const t=TEXT[lang]
-  const [form,setForm]=useState({
+  const clientInitial={
     full_name:'',
     phone:'',
     goal:'Hypertrophy',
@@ -287,7 +322,8 @@ function AddClientForm({ profile, branches, onSaved, lang }) {
     next_followup_date:'',
     need_director_support:'no',
     followup_notes:''
-  })
+  }
+  const [form,setForm,draftSaved,clearDraft]=useAutoSavedForm(`gymzaman_draft_client_${profile.id}`, clientInitial)
   const [msg,setMsg]=useState('')
   function f(k,v){setForm(p=>({...p,[k]:v}))}
   async function submit(e){
@@ -311,7 +347,7 @@ function AddClientForm({ profile, branches, onSaved, lang }) {
     else{
       await logAudit(profile.id, 'insert', 'client', data?.id, { email: profile.email, client: form.full_name })
       setMsg(t.clientSaved)
-      setForm({full_name:'',phone:'',goal:'Hypertrophy',level:'beginner',status:'active',last_contact_date:'',next_followup_date:'',need_director_support:'no',followup_notes:''})
+      clearDraft(clientInitial)
       onSaved()
     }
   }
@@ -325,29 +361,29 @@ function AddClientForm({ profile, branches, onSaved, lang }) {
     <div><label>{t.nextFollowupDate}</label><input type="date" value={form.next_followup_date} onChange={e=>f('next_followup_date',e.target.value)}/></div>
     <div><label>{t.needDirectorSupport}</label><select value={form.need_director_support} onChange={e=>f('need_director_support',e.target.value)}><option value="no">no</option><option value="yes">yes</option></select></div>
     <div className="full"><label>{t.followupNotes}</label><textarea value={form.followup_notes} onChange={e=>f('followup_notes',e.target.value)}/></div>
-    {msg && <div className="success full">{msg}</div>}<button>{t.saveClient}</button>
+    {draftSaved && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}{msg && <div className="success full">{msg}</div>}<button>{t.saveClient}</button>
   </form></div>
 }
 
 function DailyLogForm({ profile, onSaved, lang }) {
-  const t=TEXT[lang], today=new Date().toISOString().slice(0,10); const [form,setForm]=useState({log_date:today,shift:'PM',check_in:'15:00',check_out:'23:00',rotation_count:0,new_clients_count:0,pt_sessions_count:0,free_service_count:0,notes:''}); const [msg,setMsg]=useState('')
+  const t=TEXT[lang], today=new Date().toISOString().slice(0,10); const logInitial={log_date:today,shift:'PM',check_in:'15:00',check_out:'23:00',rotation_count:0,new_clients_count:0,pt_sessions_count:0,free_service_count:0,notes:''}; const [form,setForm,draftSaved,clearDraft]=useAutoSavedForm(`gymzaman_draft_log_${profile.id}`, logInitial); const [msg,setMsg]=useState('')
   function f(k,v){setForm(p=>({...p,[k]:v}))}
-  async function submit(e){e.preventDefault(); const payload={...form,trainer_id:profile.id,branch_id:profile.branch_id,rotation_count:Number(form.rotation_count||0),new_clients_count:Number(form.new_clients_count||0),pt_sessions_count:Number(form.pt_sessions_count||0),free_service_count:Number(form.free_service_count||0)}; const {error}=await supabase.from('trainer_daily_logs').insert(payload); if(error)setMsg(error.message); else{setMsg(t.logSaved);onSaved()}}
-  return <div className="card compact-card"><h3><PlusCircle size={18}/>{t.addLog}</h3><form className="grid-form simple-form" onSubmit={submit}><div><label>{t.date}</label><input type="date" value={form.log_date} onChange={e=>f('log_date',e.target.value)}/></div><div><label>{t.shift}</label><select value={form.shift} onChange={e=>f('shift',e.target.value)}><option>AM</option><option>PM</option></select></div><div><label>{t.checkIn}</label><input type="time" value={form.check_in} onChange={e=>f('check_in',e.target.value)}/></div><div><label>{t.checkOut}</label><input type="time" value={form.check_out} onChange={e=>f('check_out',e.target.value)}/></div><div><label>{t.rotation}</label><input type="number" value={form.rotation_count} onChange={e=>f('rotation_count',e.target.value)}/></div><div><label>{t.newClients}</label><input type="number" value={form.new_clients_count} onChange={e=>f('new_clients_count',e.target.value)}/></div><div><label>{t.ptSessions}</label><input type="number" value={form.pt_sessions_count} onChange={e=>f('pt_sessions_count',e.target.value)}/></div><div><label>{t.freeService}</label><input type="number" value={form.free_service_count} onChange={e=>f('free_service_count',e.target.value)}/></div><div className="full"><label>{t.notes}</label><textarea value={form.notes} onChange={e=>f('notes',e.target.value)}/></div>{msg && <div className="success full">{msg}</div>}<button>{t.saveLog}</button></form></div>
+  async function submit(e){e.preventDefault(); const payload={...form,trainer_id:profile.id,branch_id:profile.branch_id,rotation_count:Number(form.rotation_count||0),new_clients_count:Number(form.new_clients_count||0),pt_sessions_count:Number(form.pt_sessions_count||0),free_service_count:Number(form.free_service_count||0)}; const {error}=await supabase.from('trainer_daily_logs').insert(payload); if(error)setMsg(error.message); else{setMsg(t.logSaved);clearDraft(logInitial);onSaved()}}
+  return <div className="card compact-card"><h3><PlusCircle size={18}/>{t.addLog}</h3><form className="grid-form simple-form" onSubmit={submit}><div><label>{t.date}</label><input type="date" value={form.log_date} onChange={e=>f('log_date',e.target.value)}/></div><div><label>{t.shift}</label><select value={form.shift} onChange={e=>f('shift',e.target.value)}><option>AM</option><option>PM</option></select></div><div><label>{t.checkIn}</label><input type="time" value={form.check_in} onChange={e=>f('check_in',e.target.value)}/></div><div><label>{t.checkOut}</label><input type="time" value={form.check_out} onChange={e=>f('check_out',e.target.value)}/></div><div><label>{t.rotation}</label><input type="number" value={form.rotation_count} onChange={e=>f('rotation_count',e.target.value)}/></div><div><label>{t.newClients}</label><input type="number" value={form.new_clients_count} onChange={e=>f('new_clients_count',e.target.value)}/></div><div><label>{t.ptSessions}</label><input type="number" value={form.pt_sessions_count} onChange={e=>f('pt_sessions_count',e.target.value)}/></div><div><label>{t.freeService}</label><input type="number" value={form.free_service_count} onChange={e=>f('free_service_count',e.target.value)}/></div><div className="full"><label>{t.notes}</label><textarea value={form.notes} onChange={e=>f('notes',e.target.value)}/></div>{draftSaved && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}{msg && <div className="success full">{msg}</div>}<button>{t.saveLog}</button></form></div>
 }
 
 function PTProgramForm({ profile, clients, onSaved, lang }) {
-  const t=TEXT[lang]; const [form,setForm]=useState({client_id:'',program_name:'Hypertrophy Program',goal:'Hypertrophy',duration_weeks:4,exercises:'',notes:''}); const [msg,setMsg]=useState('')
+  const t=TEXT[lang]; const programInitial={client_id:'',program_name:'Hypertrophy Program',goal:'Hypertrophy',duration_weeks:4,exercises:'',notes:''}; const [form,setForm,draftSaved,clearDraft]=useAutoSavedForm(`gymzaman_draft_program_${profile.id}`, programInitial); const [msg,setMsg]=useState('')
   function f(k,v){setForm(p=>({...p,[k]:v}))}
-  async function submit(e){e.preventDefault(); const client=clients.find(c=>c.id===form.client_id); const payload={...form,duration_weeks:Number(form.duration_weeks||0),trainer_id:profile.id,branch_id:profile.branch_id||client?.branch_id,status:'active',created_by:profile.id}; const {error}=await supabase.from('pt_programs').insert(payload); if(error)setMsg(error.message); else{setMsg(t.programSaved);setForm({client_id:'',program_name:'Hypertrophy Program',goal:'Hypertrophy',duration_weeks:4,exercises:'',notes:''});onSaved()}}
-  return <div className="card compact-card"><h3><PlusCircle size={18}/>{t.addProgram}</h3><form className="grid-form simple-form" onSubmit={submit}><div><label>{t.selectClient}</label><select required value={form.client_id} onChange={e=>f('client_id',e.target.value)}><option value="">---</option>{clients.map(c=><option key={c.id} value={c.id}>{c.full_name}</option>)}</select></div><div><label>{t.programName}</label><input value={form.program_name} onChange={e=>f('program_name',e.target.value)}/></div><div><label>{t.goal}</label><input value={form.goal} onChange={e=>f('goal',e.target.value)}/></div><div><label>{t.duration}</label><input type="number" value={form.duration_weeks} onChange={e=>f('duration_weeks',e.target.value)}/></div><div className="full"><label>{t.exercises}</label><textarea value={form.exercises} onChange={e=>f('exercises',e.target.value)} placeholder={'Day 1: Chest + Triceps\nDay 2: Back + Biceps'}/></div><div className="full"><label>{t.notes}</label><textarea value={form.notes} onChange={e=>f('notes',e.target.value)}/></div>{msg && <div className="success full">{msg}</div>}<button>{t.saveProgram}</button></form></div>
+  async function submit(e){e.preventDefault(); const client=clients.find(c=>c.id===form.client_id); const payload={...form,duration_weeks:Number(form.duration_weeks||0),trainer_id:profile.id,branch_id:profile.branch_id||client?.branch_id,status:'active',created_by:profile.id}; const {error}=await supabase.from('pt_programs').insert(payload); if(error)setMsg(error.message); else{setMsg(t.programSaved);clearDraft(programInitial);onSaved()}}
+  return <div className="card compact-card"><h3><PlusCircle size={18}/>{t.addProgram}</h3><form className="grid-form simple-form" onSubmit={submit}><div><label>{t.selectClient}</label><select required value={form.client_id} onChange={e=>f('client_id',e.target.value)}><option value="">---</option>{clients.map(c=><option key={c.id} value={c.id}>{c.full_name}</option>)}</select></div><div><label>{t.programName}</label><input value={form.program_name} onChange={e=>f('program_name',e.target.value)}/></div><div><label>{t.goal}</label><input value={form.goal} onChange={e=>f('goal',e.target.value)}/></div><div><label>{t.duration}</label><input type="number" value={form.duration_weeks} onChange={e=>f('duration_weeks',e.target.value)}/></div><div className="full"><label>{t.exercises}</label><textarea value={form.exercises} onChange={e=>f('exercises',e.target.value)} placeholder={'Day 1: Chest + Triceps\nDay 2: Back + Biceps'}/></div><div className="full"><label>{t.notes}</label><textarea value={form.notes} onChange={e=>f('notes',e.target.value)}/></div>{draftSaved && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}{msg && <div className="success full">{msg}</div>}<button>{t.saveProgram}</button></form></div>
 }
 
 
 function SeniorDailyReportForm({ profile, onSaved, lang }) {
   const t = TEXT[lang]
   const today = new Date().toISOString().slice(0,10)
-  const [form, setForm] = useState({
+  const seniorReportInitial = {
     report_date: today,
     branch_pressure: '',
     total_sessions_done: 0,
@@ -360,7 +396,8 @@ function SeniorDailyReportForm({ profile, onSaved, lang }) {
     problem_description: '',
     resolved: 'no',
     notes: ''
-  })
+  }
+  const [form, setForm, draftSaved, clearDraft] = useAutoSavedForm(`gymzaman_draft_senior_report_${profile.id}`, seniorReportInitial)
   const [msg, setMsg] = useState('')
 
   function f(k, v) {
@@ -390,20 +427,7 @@ function SeniorDailyReportForm({ profile, onSaved, lang }) {
     if (error) setMsg(error.message)
     else {
       setMsg(t.seniorReportSaved)
-      setForm({
-        report_date: today,
-        branch_pressure: '',
-        total_sessions_done: 0,
-        free_service_count: 0,
-        floor_tasks: '',
-        service_notes: '',
-        coach_commitment_notes: '',
-        client_issues: '',
-        actions_taken: '',
-        problem_description: '',
-        resolved: 'no',
-        notes: ''
-      })
+      clearDraft(seniorReportInitial)
       onSaved()
     }
   }
@@ -480,6 +504,7 @@ function SeniorDailyReportForm({ profile, onSaved, lang }) {
           <textarea value={form.notes} onChange={e => f('notes', e.target.value)} />
         </div>
 
+        {draftSaved && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}
         {msg && <div className={msg.includes('success') || msg.includes('بنجاح') ? 'success full' : 'error full'}>{msg}</div>}
         <button>{t.saveSeniorReport}</button>
       </form>
@@ -605,7 +630,7 @@ function recommendationFromScore(score) {
 function AttendanceForm({ profile, onSaved, lang }) {
   const t = TEXT[lang]
   const today = new Date().toISOString().slice(0,10)
-  const [form, setForm] = useState({
+  const attendanceInitial = {
     attendance_date: today,
     shift: 'PM',
     expected_in: '15:00',
@@ -613,7 +638,8 @@ function AttendanceForm({ profile, onSaved, lang }) {
     check_in: '15:00',
     check_out: '23:00',
     notes: ''
-  })
+  }
+  const [form, setForm, draftSaved, clearDraft] = useAutoSavedForm(`gymzaman_draft_attendance_${profile.id}`, attendanceInitial)
   const [msg, setMsg] = useState('')
 
   function f(k, v) { setForm(p => ({ ...p, [k]: v })) }
@@ -639,6 +665,7 @@ function AttendanceForm({ profile, onSaved, lang }) {
     if (error) setMsg(error.message)
     else {
       setMsg(t.attendanceSaved)
+      clearDraft(attendanceInitial)
       onSaved()
     }
   }
@@ -656,6 +683,7 @@ function AttendanceForm({ profile, onSaved, lang }) {
         <div><label>{t.lateMinutes}</label><input value={calc.late} readOnly /></div>
         <div><label>{t.overtimeMinutes}</label><input value={calc.overtime} readOnly /></div>
         <div className="full"><label>{t.notes}</label><textarea value={form.notes} onChange={e=>f('notes', e.target.value)} /></div>
+        {draftSaved && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}
         {msg && <div className={msg.includes('success') || msg.includes('بنجاح') ? 'success full' : 'error full'}>{msg}</div>}
         <button>{t.save}</button>
       </form>
@@ -700,7 +728,7 @@ function PerformanceDashboard({ staff, clients, logs, attendanceLogs, t }) {
 function HeadCoachDailyReportForm({ profile, onSaved, lang }) {
   const t = TEXT[lang]
   const today = new Date().toISOString().slice(0,10)
-  const [form, setForm] = useState({
+  const headReportInitial = {
     report_date: today,
     total_sessions_done: 0,
     free_service_count: 0,
@@ -710,7 +738,8 @@ function HeadCoachDailyReportForm({ profile, onSaved, lang }) {
     follow_ups: '',
     branch_summary: '',
     notes: ''
-  })
+  }
+  const [form, setForm, draftSaved, clearDraft] = useAutoSavedForm(`gymzaman_draft_head_report_${profile.id}`, headReportInitial)
   const [msg, setMsg] = useState('')
 
   function f(k,v){ setForm(p => ({...p, [k]: v})) }
@@ -734,17 +763,7 @@ function HeadCoachDailyReportForm({ profile, onSaved, lang }) {
     if (error) setMsg(error.message)
     else {
       setMsg(t.headCoachReportSaved)
-      setForm({
-        report_date: today,
-        total_sessions_done: 0,
-        free_service_count: 0,
-        rotation_count: 0,
-        trainer_issues: '',
-        tasks_done: '',
-        follow_ups: '',
-        branch_summary: '',
-        notes: ''
-      })
+      clearDraft(headReportInitial)
       onSaved()
     }
   }
@@ -789,6 +808,7 @@ function HeadCoachDailyReportForm({ profile, onSaved, lang }) {
           <label>{t.notes}</label>
           <textarea value={form.notes} onChange={e => f('notes', e.target.value)} />
         </div>
+        {draftSaved && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}
         {msg && <div className={msg.includes('success') || msg.includes('بنجاح') ? 'success full' : 'error full'}>{msg}</div>}
         <button>{t.saveHeadCoachReport}</button>
       </form>
@@ -831,7 +851,7 @@ function TrainerProfilePanel({ trainer, branches, clients, logs, programs, evalu
 
 function CoachEvaluationForm({ profile, targetTrainerId, eligibleTrainers, onSaved, lang }) {
   const t = TEXT[lang]
-  const [form, setForm] = useState({
+  const evaluationInitial = {
     trainer_id: targetTrainerId || '',
     evaluation_date: new Date().toISOString().slice(0,10),
     technical_score: 80,
@@ -839,7 +859,8 @@ function CoachEvaluationForm({ profile, targetTrainerId, eligibleTrainers, onSav
     leadership_score: 80,
     service_score: 80,
     evaluator_notes: ''
-  })
+  }
+  const [form, setForm, draftSaved, clearDraft] = useAutoSavedForm(`gymzaman_draft_evaluation_${profile.id}_${targetTrainerId || 'new'}`, evaluationInitial)
   const [msg, setMsg] = useState('')
 
   useEffect(() => {
@@ -871,15 +892,7 @@ function CoachEvaluationForm({ profile, targetTrainerId, eligibleTrainers, onSav
     else {
       await logAudit(profile.id, 'insert', 'trainer_evaluation', data?.id, { trainer_id: form.trainer_id, score: Math.round((payload.technical_score+payload.behavior_score+payload.leadership_score+payload.service_score)/4) })
       setMsg(t.evaluationSaved)
-      setForm({
-        trainer_id: targetTrainerId || '',
-        evaluation_date: new Date().toISOString().slice(0,10),
-        technical_score: 80,
-        behavior_score: 80,
-        leadership_score: 80,
-        service_score: 80,
-        evaluator_notes: ''
-      })
+      clearDraft(evaluationInitial)
       onSaved()
     }
   }
@@ -919,6 +932,7 @@ function CoachEvaluationForm({ profile, targetTrainerId, eligibleTrainers, onSav
           <label>{t.evaluatorNotes}</label>
           <textarea value={form.evaluator_notes} onChange={e => f('evaluator_notes', e.target.value)} />
         </div>
+        {draftSaved && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}
         {msg && <div className={msg.includes('success') || msg.includes('بنجاح') ? 'success full' : 'error full'}>{msg}</div>}
         <button>{t.saveEvaluation}</button>
       </form>
@@ -1086,7 +1100,7 @@ function Dashboard({ profile, lang }) {
   const t=TEXT[lang]
   const [clients,setClients]=useState([]), [logs,setLogs]=useState([]), [attendanceLogs,setAttendanceLogs]=useState([]), [branches,setBranches]=useState([]), [programs,setPrograms]=useState([]), [staff,setStaff]=useState([]), [seniorReports,setSeniorReports]=useState([]), [headReports,setHeadReports]=useState([]), [evaluations,setEvaluations]=useState([]), [auditLogs,setAuditLogs]=useState([])
   const [loading,setLoading]=useState(true), [notice,setNotice]=useState(''), [edit,setEdit]=useState(null), [selectedTrainerId,setSelectedTrainerId]=useState('all'), [activeTab,setActiveTab]=useState('overview'), [searchQuery,setSearchQuery]=useState('')
-  const isAdmin=profile.role==='owner'||profile.role==='fitness_director', isTrainer=profile.role==='trainer', isSenior=profile.role==='senior', isHeadCoach=profile.role==='head_coach'
+  const isAdmin=profile.role==='owner'||profile.role==='fitness_director', isTrainer=profile.role==='trainer', isSenior=profile.role==='senior', isHeadCoach=profile.role==='head_coach', isBranchLeader=['senior','head_coach'].includes(profile.role)
 
   async function load(){
     setLoading(true)
@@ -1101,7 +1115,7 @@ function Dashboard({ profile, lang }) {
       supabase.from('attendance_logs').select('*').order('created_at',{ascending:false}),
       supabase.from('audit_logs').select('*').order('created_at',{ascending:false}).limit(100)
     ]
-    if (isAdmin || isHeadCoach) calls.push(supabase.from('profiles').select('id, full_name, email, role, branch_id, status').order('email'))
+    if (!isTrainer) calls.push(supabase.from('profiles').select('id, full_name, email, role, branch_id, status').order('email'))
     const res = await Promise.all(calls)
     const [c,l,b,p,sr,e,hr,a,au,s] = res
     if(c.error)setNotice(c.error.message); if(p.error)setNotice(p.error.message); if(sr.error)setNotice(sr.error.message); if(e.error)setNotice(e.error.message); if(hr.error)setNotice(hr.error.message); if(a.error)setNotice(a.error.message); if(au.error)setNotice(au.error.message); if(s?.error)setNotice(s.error.message)
@@ -1113,25 +1127,39 @@ function Dashboard({ profile, lang }) {
 
   async function del(table,row,label){ if(!confirm(`Delete ${label}?`)) return; const {error}=await supabase.from(table).delete().eq('id',row.id); if(error)alert(error.message); else { await logAudit(profile.id, 'delete', table, row.id, { label }); load() } }
 
-  const trainers = staff.filter(s => ['trainer','senior','head_coach'].includes(s.role))
-  const selectedTrainer = selectedTrainerId !== 'all' ? staff.find(s => s.id === selectedTrainerId) : null
-  const evaluableTrainers = isHeadCoach ? staff.filter(s => s.branch_id === profile.branch_id && ['trainer','senior'].includes(s.role)) : trainers
+  const branchStaff = staff.filter(s => s.branch_id === profile.branch_id)
+  const trainers = (isBranchLeader ? branchStaff : staff).filter(s => ['trainer','senior','head_coach'].includes(s.role))
+  const selectedTrainer = selectedTrainerId !== 'all' ? trainers.find(s => s.id === selectedTrainerId) : null
+  const evaluableTrainers = isBranchLeader ? branchStaff.filter(s => s.id !== profile.id && ['trainer','senior'].includes(s.role)) : trainers
   const clientMapAll = Object.fromEntries(clients.map(c=>[c.id,c.full_name]))
-  const trainerMap = Object.fromEntries(staff.map(tr=>[tr.id,tr.email]))
+  const trainerMap = Object.fromEntries([...staff, profile].map(tr=>[tr.id,tr.email || tr.full_name]))
 
-  const visibleClients = isAdmin && selectedTrainerId !== 'all' ? clients.filter(c=>c.assigned_trainer_id===selectedTrainerId) : clients
-  const visibleLogs = isAdmin && selectedTrainerId !== 'all' ? logs.filter(l=>l.trainer_id===selectedTrainerId) : logs
-  const visibleProgramsRaw = isAdmin && selectedTrainerId !== 'all' ? programs.filter(p=>p.trainer_id===selectedTrainerId) : programs
+  const scopeByTrainer = (rows, trainerField='trainer_id') => {
+    if (isAdmin) return selectedTrainerId !== 'all' ? rows.filter(r => r[trainerField] === selectedTrainerId) : rows
+    if (isBranchLeader) return rows.filter(r => r.branch_id === profile.branch_id)
+    return rows.filter(r => r[trainerField] === profile.id || r.created_by === profile.id)
+  }
+  const visibleClients = isAdmin
+    ? (selectedTrainerId !== 'all' ? clients.filter(c => c.assigned_trainer_id === selectedTrainerId) : clients)
+    : isBranchLeader
+      ? clients.filter(c => c.branch_id === profile.branch_id)
+      : clients.filter(c => c.assigned_trainer_id === profile.id || c.created_by === profile.id)
+  const visibleLogs = scopeByTrainer(logs)
+  const visibleProgramsRaw = scopeByTrainer(programs)
   const visibleProgramsBase = visibleProgramsRaw.map(p=>({...p,client_name:clientMapAll[p.client_id]||'-', trainer_email: trainerMap[p.trainer_id] || '-'}))
   const visibleClientsRowsBase = visibleClients.map(c=>({...c, trainer_email: trainerMap[c.assigned_trainer_id] || '-'}))
   const visibleLogsRowsBase = visibleLogs.map(l=>({...l, trainer_email: trainerMap[l.trainer_id] || '-'}))
-  const visibleAttendanceRaw = isAdmin && selectedTrainerId !== 'all' ? attendanceLogs.filter(a => a.trainer_id === selectedTrainerId) : attendanceLogs
+  const visibleAttendanceRaw = scopeByTrainer(attendanceLogs)
   const visibleAttendanceBase = visibleAttendanceRaw.map(a => ({...a, trainer_email: trainerMap[a.trainer_id] || '-'}))
-  const visibleSeniorReportsRaw = isAdmin ? seniorReports : seniorReports.filter(r => r.senior_id === profile.id)
+  const visibleSeniorReportsRaw = isAdmin ? seniorReports : isBranchLeader ? seniorReports.filter(r => r.branch_id === profile.branch_id) : seniorReports.filter(r => r.senior_id === profile.id)
   const visibleSeniorReportsBase = visibleSeniorReportsRaw.map(r => ({...r, senior_email: trainerMap[r.senior_id] || '-'}))
-  const visibleHeadReportsRaw = isAdmin ? headReports : headReports.filter(r => r.head_coach_id === profile.id)
+  const visibleHeadReportsRaw = isAdmin ? headReports : isBranchLeader ? headReports.filter(r => r.branch_id === profile.branch_id) : headReports.filter(r => r.head_coach_id === profile.id)
   const visibleHeadReportsBase = visibleHeadReportsRaw.map(r => ({...r, head_coach_email: trainerMap[r.head_coach_id] || '-'}))
-  const visibleEvaluationsRaw = isAdmin && selectedTrainerId !== 'all' ? evaluations.filter(ev => ev.trainer_id === selectedTrainerId) : evaluations
+  const visibleEvaluationsRaw = isAdmin
+    ? (selectedTrainerId !== 'all' ? evaluations.filter(ev => ev.trainer_id === selectedTrainerId) : evaluations)
+    : isBranchLeader
+      ? evaluations.filter(ev => ev.branch_id === profile.branch_id)
+      : evaluations.filter(ev => ev.trainer_id === profile.id)
   const visibleEvaluationsBase = visibleEvaluationsRaw.map(ev => { const score = Math.round((Number(ev.technical_score||0)+Number(ev.behavior_score||0)+Number(ev.leadership_score||0)+Number(ev.service_score||0))/4); return {...ev, final_score: score, grade: gradeFromScore(score, t), recommendation: recommendationFromScore(score), trainer_email: trainerMap[ev.trainer_id] || '-', evaluator_email: trainerMap[ev.evaluator_id] || (ev.evaluator_id === profile.id ? profile.email : '-')} })
   const visiblePrograms = visibleProgramsBase.filter(r => rowMatches(r, searchQuery))
   const visibleClientsRows = visibleClientsRowsBase.filter(r => rowMatches(r, searchQuery))
@@ -1143,7 +1171,10 @@ function Dashboard({ profile, lang }) {
 
   const today=new Date().toISOString().slice(0,10), todayLogs=visibleLogs.filter(x=>x.log_date===today), rows=isAdmin?todayLogs:visibleLogs
   const totals={logs:rows.length,rotation:rows.reduce((s,r)=>s+Number(r.rotation_count||0),0),pt:rows.reduce((s,r)=>s+Number(r.pt_sessions_count||0),0),free:rows.reduce((s,r)=>s+Number(r.free_service_count||0),0)}
-  const title=profile.role==='owner'?t.owner:profile.role==='fitness_director'?t.director:profile.role==='trainer'?t.trainer:t.dashboard
+  const selectedLoginBranch = localStorage.getItem('gymzaman_login_branch') || ''
+  const profileBranchName = branches.find(b => b.id === profile.branch_id)?.name || profile.branch_name || ''
+  const loginBranchMismatch = selectedLoginBranch && profileBranchName && selectedLoginBranch !== profileBranchName && !isAdmin
+  const title=profile.role==='owner'?t.owner:profile.role==='fitness_director'?t.director:profile.role==='head_coach'?t.headCoachReport:profile.role==='senior'?t.seniorReport:profile.role==='trainer'?t.trainer:t.dashboard
   const tabs = isAdmin ? [
     {key:'overview', label:t.tabOverview},
     {key:'trainerData', label:t.tabTrainerData},
@@ -1160,32 +1191,34 @@ function Dashboard({ profile, lang }) {
   return <>
     <section className="hero simple-hero"><h2>{title}</h2></section>
     {notice&&<div className="error">{notice}</div>}
+    {loginBranchMismatch && <div className="notice">{t.branchLoginMismatch}</div>}
     <TabBar tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab}/>
     {!isTrainer && <SearchBox value={searchQuery} onChange={setSearchQuery} t={t}/>}
 
     {activeTab === 'overview' && <>
       <section className="stats-grid"><StatCard title={isAdmin?t.todayLogs:t.myLogs} value={totals.logs} icon={<CalendarDays/>}/><StatCard title={isAdmin?t.rotationToday:t.myClients} value={isAdmin?totals.rotation:visibleClients.length} icon={<Users/>}/><StatCard title={isAdmin?t.ptToday:t.myPrograms} value={isAdmin?totals.pt:visiblePrograms.length} icon={<Dumbbell/>}/><StatCard title={t.freeToday} value={totals.free} icon={<ClipboardList/>}/></section>
-      <div className="card note"><b>{isAdmin?t.adminNote:t.trainerNote}</b></div>
-      {isAdmin && <PerformanceDashboard staff={staff} clients={clients} logs={logs} attendanceLogs={attendanceLogs} t={t}/>}
-      {isAdmin && <AlertsPanel staff={staff} logs={logs} attendanceLogs={attendanceLogs} seniorReports={seniorReports} evaluations={evaluations} t={t}/>}
+      {isAdmin && <div className="card note"><b>{t.adminNote}</b></div>}
+      {(isAdmin || isBranchLeader) && <PerformanceDashboard staff={isAdmin?staff:branchStaff} clients={visibleClients} logs={visibleLogs} attendanceLogs={visibleAttendanceRaw} t={t}/>}
+      {(isAdmin || isBranchLeader) && <AlertsPanel staff={isAdmin?staff:branchStaff} logs={visibleLogs} attendanceLogs={visibleAttendanceRaw} seniorReports={visibleSeniorReportsRaw} evaluations={visibleEvaluationsRaw} t={t}/>}
       {isAdmin && <BranchComparisonDashboard branches={branches} staff={staff} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} seniorReports={seniorReports} headReports={headReports} t={t}/>}
     </>}
 
     {activeTab === 'trainerData' && <>
       {isAdmin && <TrainerFilter trainers={trainers} selectedTrainerId={selectedTrainerId} setSelectedTrainerId={setSelectedTrainerId} t={t}/>}
+      {isBranchLeader && <Table title={t.staffManagement} rows={branchStaff.filter(r => rowMatches(r, searchQuery))} canManage={false} t={t} columns={[{key:'full_name',label:t.fullName},{key:'email',label:t.email},{key:'role',label:t.role},{key:'status',label:t.status}]}/>}
       {isAdmin && selectedTrainer && <TrainerProfilePanel trainer={selectedTrainer} branches={branches} clients={clients} logs={logs} programs={programs} evaluations={evaluations} t={t}/>}
-      {(isAdmin && selectedTrainer) && <CoachEvaluationForm profile={profile} targetTrainerId={selectedTrainer.id} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
-      {isHeadCoach && <CoachEvaluationForm profile={profile} targetTrainerId={''} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
+      {((isAdmin || isBranchLeader) && selectedTrainer) && <CoachEvaluationForm profile={profile} targetTrainerId={selectedTrainer.id} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
+      {isBranchLeader && !selectedTrainer && <CoachEvaluationForm profile={profile} targetTrainerId={''} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
       <div className="table-actions"><ExportButton rows={visibleClientsRows} filename="clients.csv" t={t}/></div>
-      <Table title={isTrainer?t.myClients:t.clients} rows={visibleClientsRows} canManage={isAdmin} onEdit={r=>setEdit({type:'client',row:r})} onDelete={r=>del('clients',r,r.full_name)} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'full_name',label:t.clientName},{key:'phone',label:t.phone},{key:'goal',label:t.goal},{key:'level',label:t.level},{key:'status',label:t.status},{key:'next_followup_date',label:t.nextFollowupDate},{key:'need_director_support',label:t.needDirectorSupport}]}/>
+      <Table title={isTrainer?t.myClients:t.clients} rows={visibleClientsRows} canEdit={isAdmin || isBranchLeader} canDelete={isAdmin} onEdit={r=>setEdit({type:'client',row:r})} onDelete={r=>del('clients',r,r.full_name)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'full_name',label:t.clientName},{key:'phone',label:t.phone},{key:'goal',label:t.goal},{key:'level',label:t.level},{key:'status',label:t.status},{key:'next_followup_date',label:t.nextFollowupDate},{key:'need_director_support',label:t.needDirectorSupport}]}/>
       <div className="table-actions"><ExportButton rows={visibleAttendance} filename="attendance.csv" t={t}/></div>
-      <Table title={t.attendance} rows={visibleAttendance} canManage={false} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'attendance_date',label:t.date},{key:'shift',label:t.shift},{key:'check_in',label:t.checkIn},{key:'check_out',label:t.checkOut},{key:'late_minutes',label:t.lateMinutes},{key:'overtime_minutes',label:t.overtimeMinutes},{key:'notes',label:t.notes}]}/>
-      <Table title={isTrainer?t.myLogs:t.logs} rows={visibleLogsRows} canManage={isAdmin} onEdit={r=>setEdit({type:'log',row:r})} onDelete={r=>del('trainer_daily_logs',r,r.log_date)} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'log_date',label:t.date},{key:'shift',label:t.shift},{key:'rotation_count',label:t.rotation},{key:'pt_sessions_count',label:t.ptSessions},{key:'free_service_count',label:t.freeService},{key:'notes',label:t.notes}]}/>
-      <Table title={isTrainer?t.myPrograms:t.programs} rows={visiblePrograms} canManage={isAdmin} onEdit={r=>setEdit({type:'program',row:r})} onDelete={r=>del('pt_programs',r,r.program_name)} t={t} columns={[...(isAdmin?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'client_name',label:t.clientName},{key:'program_name',label:t.programName},{key:'goal',label:t.goal},{key:'duration_weeks',label:t.duration},{key:'status',label:t.status}]}/>
+      <Table title={t.attendance} rows={visibleAttendance} canEdit={isAdmin || isBranchLeader} canDelete={isAdmin} onEdit={r=>setEdit({type:'attendance',row:r})} onDelete={r=>del('attendance_logs',r,r.attendance_date)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'attendance_date',label:t.date},{key:'shift',label:t.shift},{key:'check_in',label:t.checkIn},{key:'check_out',label:t.checkOut},{key:'late_minutes',label:t.lateMinutes},{key:'overtime_minutes',label:t.overtimeMinutes},{key:'notes',label:t.notes}]}/>
+      <Table title={isTrainer?t.myLogs:t.logs} rows={visibleLogsRows} canEdit={isAdmin || isBranchLeader} canDelete={isAdmin} onEdit={r=>setEdit({type:'log',row:r})} onDelete={r=>del('trainer_daily_logs',r,r.log_date)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'log_date',label:t.date},{key:'shift',label:t.shift},{key:'rotation_count',label:t.rotation},{key:'pt_sessions_count',label:t.ptSessions},{key:'free_service_count',label:t.freeService},{key:'notes',label:t.notes}]}/>
+      <Table title={isTrainer?t.myPrograms:t.programs} rows={visiblePrograms} canEdit={isAdmin || isBranchLeader} canDelete={isAdmin} onEdit={r=>setEdit({type:'program',row:r})} onDelete={r=>del('pt_programs',r,r.program_name)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_email',label:t.trainerEmail}]:[]),{key:'client_name',label:t.clientName},{key:'program_name',label:t.programName},{key:'goal',label:t.goal},{key:'duration_weeks',label:t.duration},{key:'status',label:t.status}]}/>
     </>}
 
     {activeTab === 'inputs' && <>
-      {(isTrainer||isAdmin)&&<AddClientForm profile={profile} branches={branches} onSaved={load} lang={lang}/>}
+      {(isTrainer||isAdmin||isBranchLeader)&&<AddClientForm profile={profile} branches={branches} onSaved={load} lang={lang}/>}
       {(isTrainer || isSenior || isHeadCoach)&&<AttendanceForm profile={profile} onSaved={load} lang={lang}/>}
       {isTrainer&&<DailyLogForm profile={profile} onSaved={load} lang={lang}/>}
       {isSenior&&<SeniorDailyReportForm profile={profile} onSaved={load} lang={lang}/>}
@@ -1195,6 +1228,7 @@ function Dashboard({ profile, lang }) {
 
     {activeTab === 'reports' && <>
       {isAdmin && <MonthlyTrainerReport staff={staff} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} evaluations={evaluations} t={t}/>}
+      {isBranchLeader && <MonthlyTrainerReport staff={branchStaff} clients={visibleClients} logs={visibleLogs} programs={visibleProgramsRaw} attendanceLogs={visibleAttendanceRaw} evaluations={visibleEvaluationsRaw} t={t}/>}
       {(isAdmin || isSenior) && <Table title={t.seniorReport} rows={visibleSeniorReports} canManage={false} t={t} columns={[...(isAdmin?[{key:'senior_email',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'branch_pressure',label:t.branchPressure},{key:'total_sessions_done',label:t.totalSessionsDone},{key:'free_service_count',label:t.freeService},{key:'problem_description',label:t.problemDescription},{key:'floor_tasks',label:t.floorTasks},{key:'service_notes',label:t.serviceNotes},{key:'client_issues',label:t.clientIssues},{key:'actions_taken',label:t.actionsTaken},{key:'resolved',label:t.resolved},{key:'notes',label:t.notes}]}/>}
       {(isAdmin || isHeadCoach) && <Table title={t.headCoachReport} rows={visibleHeadReports} canManage={false} t={t} columns={[...(isAdmin?[{key:'head_coach_email',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'total_sessions_done',label:t.totalSessionsDone},{key:'free_service_count',label:t.freeService},{key:'rotation_count',label:t.rotation},{key:'tasks_done',label:t.tasksDone},{key:'follow_ups',label:t.followUps},{key:'trainer_issues',label:t.trainerIssues},{key:'branch_summary',label:t.branchSummary},{key:'notes',label:t.notes}]}/>}
       {(isAdmin || isHeadCoach) && <><div className="table-actions"><ExportButton rows={visibleEvaluations} filename="evaluations.csv" t={t}/></div><Table title={t.evaluationHistory} rows={visibleEvaluations} canManage={false} t={t} columns={[{key:'trainer_email',label:t.trainerEmail},{key:'evaluation_date',label:t.date},{key:'technical_score',label:t.technicalScore},{key:'behavior_score',label:t.behaviorScore},{key:'leadership_score',label:t.leadershipScore},{key:'service_score',label:t.serviceScore},{key:'final_score',label:t.finalScore},{key:'grade',label:t.grade},{key:'recommendation',label:t.recommendation},{key:'evaluator_notes',label:t.evaluatorNotes}]}/></>}
