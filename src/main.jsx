@@ -47,7 +47,7 @@ const TEXT = {
     tabOverview: 'Overview', tabTrainerData: 'بيانات المدربين', tabInputs: 'إدخال البيانات', tabReports: 'التقارير', tabStaff: 'إدارة الفريق',
     searchPlaceholder: 'بحث بالاسم / الهاتف / الملاحظات...', exportCsv: 'تصدير CSV', auditLog: 'سجل التعديلات',
     clientFollowup: 'متابعة العميل', lastContactDate: 'آخر تواصل', nextFollowupDate: 'ميعاد المتابعة القادم', followupNotes: 'ملاحظات المتابعة', needDirectorSupport: 'يحتاج تدخل المدير؟',
-    reception: 'الريسيبشن', sales: 'السيلز', receptionLog: 'تقرير الريسيبشن', salesLead: 'Lead سيلز', addReceptionLog: 'إضافة تقرير ريسيبشن', addSalesLead: 'إضافة Lead سيلز', visitorName: 'اسم الزائر / العميل', leadName: 'اسم العميل', source: 'المصدر', interest: 'الاهتمام', outcome: 'النتيجة', inquiryType: 'نوع الاستفسار', handledBy: 'تم بواسطة', nextAction: 'الخطوة القادمة', saveReceptionLog: 'حفظ تقرير الريسيبشن', saveSalesLead: 'حفظ Lead السيلز', receptionSaved: 'تم حفظ تقرير الريسيبشن بنجاح.', salesSaved: 'تم حفظ Lead السيلز بنجاح.', deleteReports: 'حذف التقارير',
+    reception: 'الريسيبشن', sales: 'السيلز', receptionLog: 'تقرير الريسيبشن', salesLead: 'Lead سيلز', addReceptionLog: 'إضافة تقرير ريسيبشن', addSalesLead: 'إضافة Lead سيلز', visitorName: 'اسم الزائر / العميل', leadName: 'اسم العميل', source: 'المصدر', interest: 'الاهتمام', outcome: 'النتيجة', inquiryType: 'نوع الاستفسار', handledBy: 'تم بواسطة', nextAction: 'الخطوة القادمة', assignedCoach: 'الكوتش المستلم', assignRotationToCoach: 'توزيع العميل على كوتش', saveReceptionLog: 'حفظ تقرير الريسيبشن', saveSalesLead: 'حفظ Lead السيلز', receptionSaved: 'تم حفظ تقرير الريسيبشن بنجاح.', salesSaved: 'تم حفظ Lead السيلز بنجاح.', deleteReports: 'حذف التقارير',
     entityType: 'نوع البيانات', action: 'الإجراء', changedBy: 'تم بواسطة', changedAt: 'وقت التعديل'
   },
   en: {
@@ -92,7 +92,7 @@ const TEXT = {
     tabOverview: 'Overview', tabTrainerData: 'Trainer Data', tabInputs: 'Data Entry', tabReports: 'Reports', tabStaff: 'Staff Management',
     searchPlaceholder: 'Search by name / phone / notes...', exportCsv: 'Export CSV', auditLog: 'Audit Log',
     clientFollowup: 'Client Follow-up', lastContactDate: 'Last Contact', nextFollowupDate: 'Next Follow-up', followupNotes: 'Follow-up Notes', needDirectorSupport: 'Need Director Support?',
-    reception: 'Reception', sales: 'Sales', receptionLog: 'Reception Log', salesLead: 'Sales Lead', addReceptionLog: 'Add Reception Log', addSalesLead: 'Add Sales Lead', visitorName: 'Visitor / Client Name', leadName: 'Client Name', source: 'Source', interest: 'Interest', outcome: 'Outcome', inquiryType: 'Inquiry Type', handledBy: 'Handled By', nextAction: 'Next Action', saveReceptionLog: 'Save Reception Log', saveSalesLead: 'Save Sales Lead', receptionSaved: 'Reception log saved successfully.', salesSaved: 'Sales lead saved successfully.', deleteReports: 'Delete Reports',
+    reception: 'Reception', sales: 'Sales', receptionLog: 'Reception Log', salesLead: 'Sales Lead', addReceptionLog: 'Add Reception Log', addSalesLead: 'Add Sales Lead', visitorName: 'Visitor / Client Name', leadName: 'Client Name', source: 'Source', interest: 'Interest', outcome: 'Outcome', inquiryType: 'Inquiry Type', handledBy: 'Handled By', nextAction: 'Next Action', assignedCoach: 'Assigned Coach', assignRotationToCoach: 'Assign Rotation to Coach', saveReceptionLog: 'Save Reception Log', saveSalesLead: 'Save Sales Lead', receptionSaved: 'Reception log saved successfully.', salesSaved: 'Sales lead saved successfully.', deleteReports: 'Delete Reports',
     entityType: 'Entity Type', action: 'Action', changedBy: 'Changed By', changedAt: 'Changed At'
   }
 }
@@ -250,7 +250,7 @@ function Layout({ profile, children, lang, setLang }) {
     <div className="app" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       <aside>
         <div className="side-brand"><div className="brand-mark small">GZ</div><div><h3>Gym Zaman</h3><p>{roleLabel}</p></div></div>
-        <nav><a><ShieldCheck size={18}/>{t.dashboard}</a><a><Users size={18}/>{t.clients}</a><a><Dumbbell size={18}/>{t.logs}</a><a><ClipboardList size={18}/>{t.programs}</a>{['reception','head_coach','fitness_director','owner'].includes(profile?.role) && <a><Users size={18}/>{t.reception}</a>}{['sales','head_coach','fitness_director','owner'].includes(profile?.role) && <a><PlusCircle size={18}/>{t.sales}</a>}{['senior','head_coach','fitness_director','owner'].includes(profile?.role) && <a><UserCog size={18}/>{t.staffManagement}</a>}</nav>
+        <nav><a><ShieldCheck size={18}/>{t.dashboard}</a><a><Users size={18}/>{t.clients}</a><a><Dumbbell size={18}/>{t.logs}</a><a><ClipboardList size={18}/>{t.programs}</a>{['reception','owner'].includes(profile?.role) && <a><Users size={18}/>{t.reception}</a>}{['sales','owner'].includes(profile?.role) && <a><PlusCircle size={18}/>{t.sales}</a>}{['senior','head_coach','fitness_director','owner'].includes(profile?.role) && <a><UserCog size={18}/>{t.staffManagement}</a>}</nav>
         <LanguageButton lang={lang} setLang={setLang}/>
         <button className="logout" onClick={()=>supabase.auth.signOut()}><LogOut size={18}/>{t.logout}</button>
       </aside>
@@ -1146,12 +1146,13 @@ function AuditLogPanel({ auditLogs, staff, t }) {
 }
 
 
-function ReceptionLogForm({ profile, onSaved, lang }) {
+function ReceptionLogForm({ profile, onSaved, lang, staff = [] }) {
   const t = TEXT[lang]
   const today = new Date().toISOString().slice(0,10)
-  const initial = { log_date: today, visitor_name: '', phone: '', inquiry_type: 'membership', outcome: 'follow_up', notes: '' }
+  const initial = { log_date: today, visitor_name: '', phone: '', inquiry_type: 'membership', outcome: 'follow_up', assigned_trainer_id: '', notes: '' }
   const [form, setForm, draftSaved, clearDraft] = useAutoSavedForm(`gymzaman_draft_reception_${profile.id}`, initial)
   const [msg, setMsg] = useState('')
+  const eligibleCoaches = staff.filter(s => s.branch_id === profile.branch_id && ['trainer','senior','head_coach'].includes(s.role) && (s.status || 'active') === 'active')
   function f(k,v){ setForm(p => ({...p, [k]: v})) }
   async function submit(e){
     e.preventDefault()
@@ -1163,6 +1164,8 @@ function ReceptionLogForm({ profile, onSaved, lang }) {
       phone: form.phone,
       inquiry_type: form.inquiry_type,
       outcome: form.outcome,
+      assigned_trainer_id: form.assigned_trainer_id || null,
+      assigned_trainer_name: eligibleCoaches.find(c => c.id === form.assigned_trainer_id)?.full_name || null,
       notes: form.notes
     }
     const { data, error } = await supabase.from('reception_logs').insert(payload).select('id').single()
@@ -1175,6 +1178,7 @@ function ReceptionLogForm({ profile, onSaved, lang }) {
     <div><label>{t.phone}</label><input value={form.phone} onChange={e=>f('phone',e.target.value)}/></div>
     <div><label>{t.inquiryType}</label><select value={form.inquiry_type} onChange={e=>f('inquiry_type',e.target.value)}><option value="membership">membership</option><option value="pt">PT</option><option value="complaint">complaint</option><option value="freeze">freeze</option><option value="other">other</option></select></div>
     <div><label>{t.outcome}</label><select value={form.outcome} onChange={e=>f('outcome',e.target.value)}><option value="done">done</option><option value="follow_up">follow_up</option><option value="sent_to_sales">sent_to_sales</option><option value="need_manager">need_manager</option></select></div>
+    <div><label>{t.assignRotationToCoach}</label><select value={form.assigned_trainer_id} onChange={e=>f('assigned_trainer_id',e.target.value)}><option value="">-</option>{eligibleCoaches.map(c => <option key={c.id} value={c.id}>{displayCoachName(c)}</option>)}</select></div>
     <div className="full"><label>{t.notes}</label><textarea value={form.notes} onChange={e=>f('notes',e.target.value)}/></div>
     {draftSaved && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}{msg && <div className={msg.includes('success') || msg.includes('بنجاح') ? 'success full' : 'error full'}>{msg}</div>}<button>{t.saveReceptionLog}</button>
   </form></div>
@@ -1186,6 +1190,7 @@ function SalesLeadForm({ profile, onSaved, lang }) {
   const initial = { lead_date: today, lead_name: '', phone: '', source: 'walk_in', interest: 'membership', status: 'new', next_followup_date: '', next_action: '', notes: '' }
   const [form, setForm, draftSaved, clearDraft] = useAutoSavedForm(`gymzaman_draft_sales_${profile.id}`, initial)
   const [msg, setMsg] = useState('')
+  const eligibleCoaches = staff.filter(s => s.branch_id === profile.branch_id && ['trainer','senior','head_coach'].includes(s.role) && (s.status || 'active') === 'active')
   function f(k,v){ setForm(p => ({...p, [k]: v})) }
   async function submit(e){
     e.preventDefault()
@@ -1224,7 +1229,7 @@ function Dashboard({ profile, lang }) {
   const t=TEXT[lang]
   const [clients,setClients]=useState([]), [logs,setLogs]=useState([]), [attendanceLogs,setAttendanceLogs]=useState([]), [branches,setBranches]=useState([]), [programs,setPrograms]=useState([]), [staff,setStaff]=useState([]), [seniorReports,setSeniorReports]=useState([]), [headReports,setHeadReports]=useState([]), [evaluations,setEvaluations]=useState([]), [receptionLogs,setReceptionLogs]=useState([]), [salesLeads,setSalesLeads]=useState([]), [auditLogs,setAuditLogs]=useState([])
   const [loading,setLoading]=useState(true), [notice,setNotice]=useState(''), [edit,setEdit]=useState(null), [selectedTrainerId,setSelectedTrainerId]=useState('all'), [activeTab,setActiveTab]=useState('overview'), [searchQuery,setSearchQuery]=useState('')
-  const isAdmin=profile.role==='owner'||profile.role==='fitness_director', isTrainer=profile.role==='trainer', isSenior=profile.role==='senior', isHeadCoach=profile.role==='head_coach', isBranchLeader=['senior','head_coach'].includes(profile.role), isReception=profile.role==='reception', isSales=profile.role==='sales'
+  const isOwner=profile.role==='owner', isAdmin=profile.role==='owner'||profile.role==='fitness_director', isTrainer=profile.role==='trainer', isSenior=profile.role==='senior', isHeadCoach=profile.role==='head_coach', isBranchLeader=['senior','head_coach'].includes(profile.role), isReception=profile.role==='reception', isSales=profile.role==='sales'
 
   async function load(){
     setLoading(true)
@@ -1237,9 +1242,9 @@ function Dashboard({ profile, lang }) {
       supabase.from('trainer_evaluations').select('*').order('created_at',{ascending:false}),
       supabase.from('head_coach_daily_reports').select('*').order('created_at',{ascending:false}),
       supabase.from('attendance_logs').select('*').order('created_at',{ascending:false}),
-      supabase.from('reception_logs').select('*').order('created_at',{ascending:false}),
-      supabase.from('sales_leads').select('*').order('created_at',{ascending:false}),
-      supabase.from('audit_logs').select('*').order('created_at',{ascending:false}).limit(100)
+      (isOwner || isReception) ? supabase.from('reception_logs').select('*').order('created_at',{ascending:false}) : Promise.resolve({data:[], error:null}),
+      (isOwner || isSales) ? supabase.from('sales_leads').select('*').order('created_at',{ascending:false}) : Promise.resolve({data:[], error:null}),
+      isOwner ? supabase.from('audit_logs').select('*').order('created_at',{ascending:false}).limit(100) : Promise.resolve({data:[], error:null})
     ]
     if (!isTrainer) calls.push(supabase.from('profiles').select('id, full_name, email, role, branch_id, status').order('full_name'))
     const res = await Promise.all(calls)
@@ -1287,10 +1292,10 @@ function Dashboard({ profile, lang }) {
       ? evaluations.filter(ev => ev.branch_id === profile.branch_id)
       : evaluations.filter(ev => ev.trainer_id === profile.id)
   const visibleEvaluationsBase = visibleEvaluationsRaw.map(ev => { const score = Math.round((Number(ev.technical_score||0)+Number(ev.behavior_score||0)+Number(ev.leadership_score||0)+Number(ev.service_score||0))/4); return {...ev, final_score: score, grade: gradeFromScore(score, t), recommendation: recommendationFromScore(score), trainer_name: trainerMap[ev.trainer_id] || '-', evaluator_name: trainerMap[ev.evaluator_id] || (ev.evaluator_id === profile.id ? displayCoachName(profile) : '-')} })
-  const scopeByBranchOrOwner = rows => isAdmin ? rows : (isBranchLeader || isReception || isSales) ? rows.filter(r => r.branch_id === profile.branch_id || r.reception_id === profile.id || r.sales_id === profile.id) : []
-  const visibleReceptionRaw = scopeByBranchOrOwner(receptionLogs)
-  const visibleSalesRaw = scopeByBranchOrOwner(salesLeads)
-  const visibleReceptionRowsBase = visibleReceptionRaw.map(r => ({...r, handled_by_name: trainerMap[r.reception_id] || '-'}))
+  const scopeByBranchOrOwner = (rows, type) => isOwner ? rows : type === 'reception' && isReception ? rows.filter(r => r.reception_id === profile.id) : type === 'sales' && isSales ? rows.filter(r => r.sales_id === profile.id) : []
+  const visibleReceptionRaw = scopeByBranchOrOwner(receptionLogs, 'reception')
+  const visibleSalesRaw = scopeByBranchOrOwner(salesLeads, 'sales')
+  const visibleReceptionRowsBase = visibleReceptionRaw.map(r => ({...r, handled_by_name: trainerMap[r.reception_id] || '-', assigned_trainer_name: trainerMap[r.assigned_trainer_id] || r.assigned_trainer_name || '-'}))
   const visibleSalesRowsBase = visibleSalesRaw.map(r => ({...r, handled_by_name: trainerMap[r.sales_id] || '-'}))
   const visiblePrograms = visibleProgramsBase.filter(r => rowMatches(r, searchQuery))
   const visibleClientsRows = visibleClientsRowsBase.filter(r => rowMatches(r, searchQuery))
@@ -1308,17 +1313,21 @@ function Dashboard({ profile, lang }) {
   const profileBranchName = branches.find(b => b.id === profile.branch_id)?.name || profile.branch_name || ''
   const loginBranchMismatch = selectedLoginBranch && profileBranchName && selectedLoginBranch !== profileBranchName && !isAdmin
   const title=profile.role==='owner'?t.owner:profile.role==='fitness_director'?t.director:profile.role==='head_coach'?t.headCoachReport:profile.role==='senior'?t.seniorReport:profile.role==='reception'?t.reception:profile.role==='sales'?t.sales:profile.role==='trainer'?t.trainer:t.dashboard
-  const tabs = isAdmin ? [
+  const tabs = isOwner ? [
     {key:'overview', label:t.tabOverview},
     {key:'trainerData', label:t.tabTrainerData},
     {key:'reports', label:t.tabReports},
     {key:'reception', label:t.reception},
     {key:'sales', label:t.sales},
     {key:'staff', label:t.tabStaff}
+  ] : isAdmin ? [
+    {key:'overview', label:t.tabOverview},
+    {key:'trainerData', label:t.tabTrainerData},
+    {key:'reports', label:t.tabReports}
   ] : [
     {key:'overview', label:t.tabOverview},
     {key:'inputs', label:t.tabInputs},
-    ...(['senior','head_coach'].includes(profile.role) ? [{key:'trainerData', label:t.tabTrainerData}, {key:'reception', label:t.reception}, {key:'sales', label:t.sales}] : []),
+    ...(['senior','head_coach'].includes(profile.role) ? [{key:'trainerData', label:t.tabTrainerData}] : []),
     ...(profile.role==='reception' ? [{key:'reception', label:t.reception}] : []),
     ...(profile.role==='sales' ? [{key:'sales', label:t.sales}] : []),
     {key:'reports', label:t.tabReports}
@@ -1348,11 +1357,11 @@ function Dashboard({ profile, lang }) {
       {((isAdmin || isBranchLeader) && selectedTrainer) && <CoachEvaluationForm profile={profile} targetTrainerId={selectedTrainer.id} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
       {isBranchLeader && !selectedTrainer && <CoachEvaluationForm profile={profile} targetTrainerId={''} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
       <div className="table-actions"><ExportButton rows={visibleClientsRows} filename="clients.csv" t={t}/></div>
-      <Table title={isTrainer?t.myClients:t.clients} rows={visibleClientsRows} canEdit={isAdmin || isBranchLeader} canDelete={isAdmin} onEdit={r=>setEdit({type:'client',row:r})} onDelete={r=>del('clients',r,r.full_name)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'full_name',label:t.clientName},{key:'phone',label:t.phone},{key:'goal',label:t.goal},{key:'level',label:t.level},{key:'status',label:t.status},{key:'next_followup_date',label:t.nextFollowupDate},{key:'need_director_support',label:t.needDirectorSupport}]}/>
+      <Table title={isTrainer?t.myClients:t.clients} rows={visibleClientsRows} canEdit={isAdmin || isBranchLeader} canDelete={isOwner} onEdit={r=>setEdit({type:'client',row:r})} onDelete={r=>del('clients',r,r.full_name)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'full_name',label:t.clientName},{key:'phone',label:t.phone},{key:'goal',label:t.goal},{key:'level',label:t.level},{key:'status',label:t.status},{key:'next_followup_date',label:t.nextFollowupDate},{key:'need_director_support',label:t.needDirectorSupport}]}/>
       <div className="table-actions"><ExportButton rows={visibleAttendance} filename="attendance.csv" t={t}/></div>
-      <Table title={t.attendance} rows={visibleAttendance} canEdit={isAdmin || isBranchLeader} canDelete={isAdmin} onEdit={r=>setEdit({type:'attendance',row:r})} onDelete={r=>del('attendance_logs',r,r.attendance_date)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'attendance_date',label:t.date},{key:'shift',label:t.shift},{key:'check_in',label:t.checkIn},{key:'check_out',label:t.checkOut},{key:'late_minutes',label:t.lateMinutes},{key:'overtime_minutes',label:t.overtimeMinutes},{key:'notes',label:t.notes}]}/>
-      <Table title={isTrainer?t.myLogs:t.logs} rows={visibleLogsRows} canEdit={isAdmin || isBranchLeader} canDelete={isAdmin} onEdit={r=>setEdit({type:'log',row:r})} onDelete={r=>del('trainer_daily_logs',r,r.log_date)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'log_date',label:t.date},{key:'shift',label:t.shift},{key:'rotation_count',label:t.rotation},{key:'pt_sessions_count',label:t.ptSessions},{key:'free_service_count',label:t.freeService},{key:'notes',label:t.notes}]}/>
-      <Table title={isTrainer?t.myPrograms:t.programs} rows={visiblePrograms} canEdit={isAdmin || isBranchLeader} canDelete={isAdmin} onEdit={r=>setEdit({type:'program',row:r})} onDelete={r=>del('pt_programs',r,r.program_name)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'client_name',label:t.clientName},{key:'program_name',label:t.programName},{key:'goal',label:t.goal},{key:'duration_weeks',label:t.duration},{key:'status',label:t.status}]}/>
+      <Table title={t.attendance} rows={visibleAttendance} canEdit={isAdmin || isBranchLeader} canDelete={isOwner} onEdit={r=>setEdit({type:'attendance',row:r})} onDelete={r=>del('attendance_logs',r,r.attendance_date)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'attendance_date',label:t.date},{key:'shift',label:t.shift},{key:'check_in',label:t.checkIn},{key:'check_out',label:t.checkOut},{key:'late_minutes',label:t.lateMinutes},{key:'overtime_minutes',label:t.overtimeMinutes},{key:'notes',label:t.notes}]}/>
+      <Table title={isTrainer?t.myLogs:t.logs} rows={visibleLogsRows} canEdit={isAdmin || isBranchLeader} canDelete={isOwner} onEdit={r=>setEdit({type:'log',row:r})} onDelete={r=>del('trainer_daily_logs',r,r.log_date)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'log_date',label:t.date},{key:'shift',label:t.shift},{key:'rotation_count',label:t.rotation},{key:'pt_sessions_count',label:t.ptSessions},{key:'free_service_count',label:t.freeService},{key:'notes',label:t.notes}]}/>
+      <Table title={isTrainer?t.myPrograms:t.programs} rows={visiblePrograms} canEdit={isAdmin || isBranchLeader} canDelete={isOwner} onEdit={r=>setEdit({type:'program',row:r})} onDelete={r=>del('pt_programs',r,r.program_name)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'client_name',label:t.clientName},{key:'program_name',label:t.programName},{key:'goal',label:t.goal},{key:'duration_weeks',label:t.duration},{key:'status',label:t.status}]}/>
     </>}
 
     {activeTab === 'inputs' && <>
@@ -1362,32 +1371,32 @@ function Dashboard({ profile, lang }) {
       {isSenior&&<SeniorDailyReportForm profile={profile} onSaved={load} lang={lang}/>}
       {isHeadCoach && <HeadCoachDailyReportForm profile={profile} onSaved={load} lang={lang}/>}
       {isTrainer&&<PTProgramForm profile={profile} clients={visibleClients} onSaved={load} lang={lang}/>}
-      {(isReception || isAdmin || isBranchLeader) && <ReceptionLogForm profile={profile} onSaved={load} lang={lang}/>}
-      {(isSales || isAdmin || isBranchLeader) && <SalesLeadForm profile={profile} onSaved={load} lang={lang}/>}
+      {(isReception || isOwner) && <ReceptionLogForm profile={profile} staff={staff} onSaved={load} lang={lang}/>}
+      {(isSales || isOwner) && <SalesLeadForm profile={profile} onSaved={load} lang={lang}/>}
     </>}
 
     {activeTab === 'reception' && <>
-      {(isReception || isAdmin || isBranchLeader) && <ReceptionLogForm profile={profile} onSaved={load} lang={lang}/>}      
+      {(isReception || isOwner) && <ReceptionLogForm profile={profile} staff={staff} onSaved={load} lang={lang}/>}      
       <div className="table-actions"><ExportButton rows={visibleReceptionRows} filename="reception-logs.csv" t={t}/></div>
-      <Table title={t.receptionLog} rows={visibleReceptionRows} canEdit={false} canDelete={isAdmin} onDelete={r=>del('reception_logs',r,r.visitor_name || r.log_date)} t={t} columns={[...(isAdmin?[{key:'handled_by_name',label:t.handledBy}]:[]),{key:'log_date',label:t.date},{key:'visitor_name',label:t.visitorName},{key:'phone',label:t.phone},{key:'inquiry_type',label:t.inquiryType},{key:'outcome',label:t.outcome},{key:'notes',label:t.notes}]} />
+      <Table title={t.receptionLog} rows={visibleReceptionRows} canEdit={false} canDelete={isOwner} onDelete={r=>del('reception_logs',r,r.visitor_name || r.log_date)} t={t} columns={[...(isOwner?[{key:'handled_by_name',label:t.handledBy}]:[]),{key:'log_date',label:t.date},{key:'visitor_name',label:t.visitorName},{key:'phone',label:t.phone},{key:'inquiry_type',label:t.inquiryType},{key:'assigned_trainer_name',label:t.assignedCoach},{key:'outcome',label:t.outcome},{key:'notes',label:t.notes}]} />
     </>}
 
     {activeTab === 'sales' && <>
-      {(isSales || isAdmin || isBranchLeader) && <SalesLeadForm profile={profile} onSaved={load} lang={lang}/>}      
+      {(isSales || isOwner) && <SalesLeadForm profile={profile} onSaved={load} lang={lang}/>}      
       <div className="table-actions"><ExportButton rows={visibleSalesRows} filename="sales-leads.csv" t={t}/></div>
-      <Table title={t.salesLead} rows={visibleSalesRows} canEdit={false} canDelete={isAdmin} onDelete={r=>del('sales_leads',r,r.lead_name || r.lead_date)} t={t} columns={[...(isAdmin?[{key:'handled_by_name',label:t.handledBy}]:[]),{key:'lead_date',label:t.date},{key:'lead_name',label:t.leadName},{key:'phone',label:t.phone},{key:'source',label:t.source},{key:'interest',label:t.interest},{key:'status',label:t.status},{key:'next_followup_date',label:t.nextFollowupDate},{key:'next_action',label:t.nextAction},{key:'notes',label:t.notes}]} />
+      <Table title={t.salesLead} rows={visibleSalesRows} canEdit={false} canDelete={isOwner} onDelete={r=>del('sales_leads',r,r.lead_name || r.lead_date)} t={t} columns={[...(isOwner?[{key:'handled_by_name',label:t.handledBy}]:[]),{key:'lead_date',label:t.date},{key:'lead_name',label:t.leadName},{key:'phone',label:t.phone},{key:'source',label:t.source},{key:'interest',label:t.interest},{key:'status',label:t.status},{key:'next_followup_date',label:t.nextFollowupDate},{key:'next_action',label:t.nextAction},{key:'notes',label:t.notes}]} />
     </>}
 
     {activeTab === 'reports' && <>
       {isAdmin && <MonthlyTrainerReport staff={staff} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} evaluations={evaluations} t={t}/>}
       {isBranchLeader && <MonthlyTrainerReport staff={branchStaff} clients={visibleClients} logs={visibleLogs} programs={visibleProgramsRaw} attendanceLogs={visibleAttendanceRaw} evaluations={visibleEvaluationsRaw} t={t}/>}
-      {(isAdmin || isSenior) && <Table title={t.seniorReport} rows={visibleSeniorReports} canEdit={false} canDelete={isAdmin} onDelete={r=>del('senior_daily_reports',r,r.report_date)} t={t} columns={[...(isAdmin?[{key:'senior_name',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'branch_pressure',label:t.branchPressure},{key:'total_sessions_done',label:t.totalSessionsDone},{key:'free_service_count',label:t.freeService},{key:'problem_description',label:t.problemDescription},{key:'floor_tasks',label:t.floorTasks},{key:'service_notes',label:t.serviceNotes},{key:'client_issues',label:t.clientIssues},{key:'actions_taken',label:t.actionsTaken},{key:'resolved',label:t.resolved},{key:'notes',label:t.notes}]}/>}
-      {(isAdmin || isHeadCoach) && <Table title={t.headCoachReport} rows={visibleHeadReports} canEdit={false} canDelete={isAdmin} onDelete={r=>del('head_coach_daily_reports',r,r.report_date)} t={t} columns={[...(isAdmin?[{key:'head_coach_name',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'total_sessions_done',label:t.totalSessionsDone},{key:'free_service_count',label:t.freeService},{key:'rotation_count',label:t.rotation},{key:'tasks_done',label:t.tasksDone},{key:'follow_ups',label:t.followUps},{key:'trainer_issues',label:t.trainerIssues},{key:'branch_summary',label:t.branchSummary},{key:'notes',label:t.notes}]}/>}
-      {(isAdmin || isHeadCoach) && <><div className="table-actions"><ExportButton rows={visibleEvaluations} filename="evaluations.csv" t={t}/></div><Table title={t.evaluationHistory} rows={visibleEvaluations} canEdit={false} canDelete={isAdmin} onDelete={r=>del('trainer_evaluations',r,r.evaluation_date)} t={t} columns={[{key:'trainer_name',label:t.trainerEmail},{key:'evaluation_date',label:t.date},{key:'technical_score',label:t.technicalScore},{key:'behavior_score',label:t.behaviorScore},{key:'leadership_score',label:t.leadershipScore},{key:'service_score',label:t.serviceScore},{key:'final_score',label:t.finalScore},{key:'grade',label:t.grade},{key:'recommendation',label:t.recommendation},{key:'evaluator_notes',label:t.evaluatorNotes}]}/></>}
+      {(isAdmin || isSenior) && <Table title={t.seniorReport} rows={visibleSeniorReports} canEdit={false} canDelete={isOwner} onDelete={r=>del('senior_daily_reports',r,r.report_date)} t={t} columns={[...(isAdmin?[{key:'senior_name',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'branch_pressure',label:t.branchPressure},{key:'total_sessions_done',label:t.totalSessionsDone},{key:'free_service_count',label:t.freeService},{key:'problem_description',label:t.problemDescription},{key:'floor_tasks',label:t.floorTasks},{key:'service_notes',label:t.serviceNotes},{key:'client_issues',label:t.clientIssues},{key:'actions_taken',label:t.actionsTaken},{key:'resolved',label:t.resolved},{key:'notes',label:t.notes}]}/>}
+      {(isAdmin || isHeadCoach) && <Table title={t.headCoachReport} rows={visibleHeadReports} canEdit={false} canDelete={isOwner} onDelete={r=>del('head_coach_daily_reports',r,r.report_date)} t={t} columns={[...(isAdmin?[{key:'head_coach_name',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'total_sessions_done',label:t.totalSessionsDone},{key:'free_service_count',label:t.freeService},{key:'rotation_count',label:t.rotation},{key:'tasks_done',label:t.tasksDone},{key:'follow_ups',label:t.followUps},{key:'trainer_issues',label:t.trainerIssues},{key:'branch_summary',label:t.branchSummary},{key:'notes',label:t.notes}]}/>}
+      {(isAdmin || isHeadCoach) && <><div className="table-actions"><ExportButton rows={visibleEvaluations} filename="evaluations.csv" t={t}/></div><Table title={t.evaluationHistory} rows={visibleEvaluations} canEdit={false} canDelete={isOwner} onDelete={r=>del('trainer_evaluations',r,r.evaluation_date)} t={t} columns={[{key:'trainer_name',label:t.trainerEmail},{key:'evaluation_date',label:t.date},{key:'technical_score',label:t.technicalScore},{key:'behavior_score',label:t.behaviorScore},{key:'leadership_score',label:t.leadershipScore},{key:'service_score',label:t.serviceScore},{key:'final_score',label:t.finalScore},{key:'grade',label:t.grade},{key:'recommendation',label:t.recommendation},{key:'evaluator_notes',label:t.evaluatorNotes}]}/></>}
       {isAdmin && <AuditLogPanel auditLogs={auditLogs} staff={staff} t={t}/>}
     </>}
 
-    {activeTab === 'staff' && isAdmin && <StaffManagement staff={staff} branches={branches} onSaved={load} t={t} currentProfile={profile}/>}
+    {activeTab === 'staff' && isOwner && <StaffManagement staff={staff} branches={branches} onSaved={load} t={t} currentProfile={profile}/>}
 
     {edit&&<EditForm type={edit.type} row={edit.row} onClose={()=>setEdit(null)} onSaved={load} lang={lang}/>}
   </>
