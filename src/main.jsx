@@ -105,6 +105,7 @@ Object.assign(TEXT.ar, {
   targetPlan: 'خطة تحقيق التارجت', targetMonth: 'شهر التارجت', monthlyTarget: 'التارجت الشهري', currentAchievement: 'المحقق حاليًا', actionPlan: 'خطة التنفيذ', expectedChallenges: 'التحديات المتوقعة', supportNeeded: 'الدعم المطلوب', targetPlanSaved: 'تم حفظ خطة التارجت بنجاح.',
   trainerTasks: 'مهام المدربين', assignTask: 'إضافة مهمة للمدرب', taskTitle: 'عنوان المهمة', taskDetails: 'تفاصيل المهمة', dueDate: 'تاريخ التسليم', priority: 'الأولوية', taskStatus: 'حالة المهمة', taskSaved: 'تم حفظ المهمة بنجاح.', markDone: 'تم التنفيذ',
   automaticAttendanceSummary: 'تجميع تلقائي للحضور', totalDelayMinutes: 'إجمالي دقائق التأخير', totalOvertimeMinutes: 'إجمالي دقائق الأوفر تايم', totalAbsenceDays: 'إجمالي أيام الغياب',
+  totalPermissionMinutes: 'إجمالي دقائق الأذونات', approvedPermissions: 'الأذونات المقبولة', pendingRequests: 'طلبات تحت المراجعة', approve: 'موافقة', reject: 'رفض', approvalNote: 'ملاحظة الموافقة / الرفض', approvedBy: 'تمت الموافقة بواسطة', reviewedAt: 'وقت المراجعة',
   separatePagesNote: 'كل قسم في صفحة مستقلة وواضحة، والحفظ والتجميع يتم تلقائيًا.'
 })
 Object.assign(TEXT.en, {
@@ -114,6 +115,7 @@ Object.assign(TEXT.en, {
   targetPlan: 'Monthly Target Plan', targetMonth: 'Target Month', monthlyTarget: 'Monthly Target', currentAchievement: 'Current Achievement', actionPlan: 'Action Plan', expectedChallenges: 'Expected Challenges', supportNeeded: 'Support Needed', targetPlanSaved: 'Target plan saved successfully.',
   trainerTasks: 'Trainer Tasks', assignTask: 'Assign Task', taskTitle: 'Task Title', taskDetails: 'Task Details', dueDate: 'Due Date', priority: 'Priority', taskStatus: 'Task Status', taskSaved: 'Task saved successfully.', markDone: 'Done',
   automaticAttendanceSummary: 'Automatic Attendance Summary', totalDelayMinutes: 'Total Delay Minutes', totalOvertimeMinutes: 'Total Overtime Minutes', totalAbsenceDays: 'Total Absence Days',
+  totalPermissionMinutes: 'Total Permission Minutes', approvedPermissions: 'Approved Permissions', pendingRequests: 'Pending Requests', approve: 'Approve', reject: 'Reject', approvalNote: 'Approval / Rejection Note', approvedBy: 'Approved By', reviewedAt: 'Reviewed At',
   separatePagesNote: 'Each module is placed on a separate clear page, with automatic saving and aggregation.'
 })
 
@@ -1420,7 +1422,7 @@ function ShiftPlannerPage({ profile, staff, branches, shifts, onSaved, lang }) {
   }
   const rows = shifts.map(r => ({...r, trainer_name: displayCoachName(staff.find(s => s.id === r.trainer_id)), branch_name: branches.find(b => b.id === r.branch_id)?.name || r.branch_name || '-'}))
   return <>
-    <div className="card section-intro"><h3><CalendarDays size={18}/>{t.shiftPlanner}</h3><p className="muted">{t.separatePagesNote}</p></div>
+    <div className="card section-intro"><h3><CalendarDays size={18}/>{t.shiftPlanner}</h3><p className="muted">التحكم في الشيفتات من خلال الأونر أو الفيتنس ديركتور فقط. بعد حفظ الشيفت يظهر للمدرب في صفحة تسجيل الحضور ويتم حساب التأخير والأوفر تايم تلقائيًا.</p></div>
     <div className="card compact-card"><h3>{t.addShift}</h3><form className="grid-form simple-form" onSubmit={submit}>
       <div><label>{t.trainerEmail}</label><select value={form.trainer_id} onChange={e=>f('trainer_id',e.target.value)}>{trainers.map(tr => <option key={tr.id} value={tr.id}>{displayCoachName(tr)} • {tr.branch_name || ''}</option>)}</select></div>
       <div><label>{t.date}</label><input type="date" value={form.shift_date} onChange={e=>f('shift_date',e.target.value)}/></div>
@@ -1436,7 +1438,7 @@ function ShiftPlannerPage({ profile, staff, branches, shifts, onSaved, lang }) {
   </>
 }
 
-function AttendancePunchPage({ profile, staff, shifts, attendanceLogs, onSaved, lang, canViewAll=false }) {
+function AttendancePunchPage({ profile, staff, shifts, attendanceLogs, requests=[], onSaved, lang, canViewAll=false }) {
   const t = TEXT[lang]
   const today = todayISO()
   const myShift = shifts.find(s => s.trainer_id === profile.id && s.shift_date === today)
@@ -1467,9 +1469,11 @@ function AttendancePunchPage({ profile, staff, shifts, attendanceLogs, onSaved, 
   }
   const month = thisMonthISO()
   const monthRows = attendanceLogs.filter(a => a.trainer_id === profile.id && monthOf(a.attendance_date) === month)
+  const permissionRows = requests.filter(r => (r.trainer_id === profile.id || r.coach_id === profile.id || r.requested_by === profile.id) && monthOf(r.request_date || r.created_at) === month && (r.status === 'approved' || r.status === 'accepted') && ['late_permission','permission','late'].includes(r.request_type))
   const summary = {
     late: monthRows.reduce((s,r)=>s+Number(r.late_minutes||0),0),
     overtime: monthRows.reduce((s,r)=>s+Number(r.overtime_minutes||0),0),
+    permissions: permissionRows.reduce((s,r)=>s+Number(r.requested_minutes||0),0),
     absence: shifts.filter(s => s.trainer_id === profile.id && monthOf(s.shift_date) === month && !s.is_off_day && !attendanceLogs.some(a => a.trainer_id === profile.id && a.attendance_date === s.shift_date)).length
   }
   const allRows = attendanceLogs.map(a => ({...a, trainer_name: displayCoachName(staff.find(s => s.id === a.trainer_id))}))
@@ -1488,7 +1492,7 @@ function AttendancePunchPage({ profile, staff, shifts, attendanceLogs, onSaved, 
       <div className="button-row"><button type="button" onClick={()=>punch('in')}>{t.punchIn}</button><button type="button" onClick={()=>punch('out')}>{t.punchOut}</button></div>
       {msg && <div className={msg.includes('success') || msg.includes('بنجاح') ? 'success' : 'error'}>{msg}</div>}
     </div>}
-    <div className="card"><h3>{t.automaticAttendanceSummary}</h3><div className="summary-grid"><div><span>{t.totalDelayMinutes}</span><b>{summary.late}</b></div><div><span>{t.totalOvertimeMinutes}</span><b>{summary.overtime}</b></div><div><span>{t.totalAbsenceDays}</span><b>{summary.absence}</b></div></div></div>
+    <div className="card"><h3>{t.automaticAttendanceSummary}</h3><div className="summary-grid"><div><span>{t.totalDelayMinutes}</span><b>{summary.late}</b></div><div><span>{t.totalOvertimeMinutes}</span><b>{summary.overtime}</b></div><div><span>{t.totalPermissionMinutes}</span><b>{summary.permissions}</b></div><div><span>{t.totalAbsenceDays}</span><b>{summary.absence}</b></div></div></div>
     {canViewAll && <Table title={t.attendance} rows={allRows} canManage={false} t={t} columns={[{key:'trainer_name',label:t.trainerEmail},{key:'attendance_date',label:t.date},{key:'shift',label:t.shift},{key:'expected_in',label:t.expectedIn},{key:'expected_out',label:t.expectedOut},{key:'check_in',label:t.checkIn},{key:'check_out',label:t.checkOut},{key:'late_minutes',label:t.lateMinutes},{key:'overtime_minutes',label:t.overtimeMinutes}]}/>} 
   </>
 }
@@ -1498,15 +1502,53 @@ function CoachRequestsPage({ profile, requests, onSaved, lang, canViewAll=false,
   const initial = { request_type: 'late_permission', request_date: todayISO(), requested_minutes: 0, amount: 0, reason: '' }
   const [form, setForm, draftSaved, clearDraft] = useAutoSavedForm(`gymzaman_requests_${profile.id}`, initial)
   const [msg, setMsg] = useState('')
+  const [reviewNote, setReviewNote] = useState('')
   function f(k,v){ setForm(p => ({...p,[k]:v})) }
   async function submit(e){
     e.preventDefault()
-    const payload = { trainer_id: profile.id, branch_id: profile.branch_id, request_type: form.request_type, request_date: form.request_date, requested_minutes: Number(form.requested_minutes||0), amount: Number(form.amount||0), reason: form.reason, status: 'pending', created_by: profile.id }
+    const payload = {
+      trainer_id: profile.id,
+      coach_id: profile.id,
+      requested_by: profile.id,
+      branch_id: profile.branch_id,
+      request_type: form.request_type,
+      request_date: form.request_date,
+      requested_minutes: Number(form.requested_minutes||0),
+      amount: Number(form.amount||0),
+      reason: form.reason,
+      status: 'pending',
+      created_by: profile.id
+    }
     const { data, error } = await supabase.from('coach_requests').insert(payload).select('id').single()
     if (error) setMsg(error.message)
     else { await logAudit(profile.id, 'insert', 'coach_request', data?.id, payload); setMsg(t.requestSaved); clearDraft(initial); onSaved() }
   }
-  const visible = canViewAll ? requests.map(r => ({...r, trainer_name: displayCoachName(staff.find(s => s.id === r.trainer_id))})) : requests.filter(r => r.trainer_id === profile.id)
+  async function reviewRequest(row, status) {
+    const payload = {
+      status,
+      admin_note: reviewNote || null,
+      reviewed_by: profile.id,
+      reviewed_at: new Date().toISOString(),
+      approved_by: status === 'approved' ? profile.id : null,
+      approved_at: status === 'approved' ? new Date().toISOString() : null,
+      updated_at: new Date().toISOString()
+    }
+    const { error } = await supabase.from('coach_requests').update(payload).eq('id', row.id)
+    if (error) alert(error.message)
+    else { await logAudit(profile.id, status, 'coach_request', row.id, payload); setReviewNote(''); onSaved() }
+  }
+  const visibleBase = canViewAll ? requests : requests.filter(r => r.trainer_id === profile.id || r.coach_id === profile.id || r.requested_by === profile.id)
+  const visible = visibleBase.map(r => ({
+    ...r,
+    trainer_name: displayCoachName(staff.find(s => s.id === (r.trainer_id || r.coach_id || r.requested_by))) || displayCoachName(profile),
+    status_label: r.status || 'pending'
+  }))
+  const month = thisMonthISO()
+  const ownMonth = requests.filter(r => (r.trainer_id === profile.id || r.coach_id === profile.id || r.requested_by === profile.id) && monthOf(r.request_date || r.created_at) === month)
+  const approvedPermissionMinutes = ownMonth
+    .filter(r => (r.status === 'approved' || r.status === 'accepted') && ['late_permission','permission','late'].includes(r.request_type))
+    .reduce((s,r)=>s+Number(r.requested_minutes || 0),0)
+  const pendingCount = ownMonth.filter(r => !r.status || r.status === 'pending').length
   return <>
     {['trainer','senior','head_coach'].includes(profile.role) && <div className="card compact-card"><h3><ClipboardList size={18}/>{t.requests}</h3><form className="grid-form simple-form" onSubmit={submit}>
       <div><label>{t.requestType}</label><select value={form.request_type} onChange={e=>f('request_type',e.target.value)}><option value="late_permission">{t.latePermission}</option><option value="vacation">{t.vacationRequest}</option><option value="advance">{t.advanceRequest}</option></select></div>
@@ -1516,7 +1558,9 @@ function CoachRequestsPage({ profile, requests, onSaved, lang, canViewAll=false,
       <div className="full"><label>{t.reason}</label><textarea value={form.reason} onChange={e=>f('reason',e.target.value)}/></div>
       {draftSaved && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}{msg && <div className={msg.includes('success') || msg.includes('بنجاح') ? 'success full' : 'error full'}>{msg}</div>}<button>{t.save}</button>
     </form></div>}
-    <Table title={t.requests} rows={visible} canManage={false} t={t} columns={[...(canViewAll?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'request_date',label:t.date},{key:'request_type',label:t.requestType},{key:'requested_minutes',label:t.requestedMinutes},{key:'amount',label:t.amount},{key:'reason',label:t.reason},{key:'status',label:t.approvalStatus}]}/>
+    <div className="card"><h3>{t.automaticAttendanceSummary}</h3><div className="summary-grid"><div><span>{t.totalPermissionMinutes}</span><b>{approvedPermissionMinutes}</b></div><div><span>{t.pendingRequests}</span><b>{pendingCount}</b></div><div><span>{t.reportMonth}</span><b>{month}</b></div></div></div>
+    {canViewAll && <div className="card compact-card"><h3>{t.approvalStatus}</h3><div className="grid-form simple-form"><div className="full"><label>{t.approvalNote}</label><textarea value={reviewNote} onChange={e=>setReviewNote(e.target.value)} placeholder={t.approvalNote}/></div></div><p className="muted">اختار الطلب من الجدول واضغط موافقة أو رفض. كل قرار بيتحفظ ويتسجل تلقائيًا.</p></div>}
+    <div className="card"><h3>{t.requests}</h3>{visible.length === 0 ? <p className="muted">{t.noData}</p> : <div className="table-wrap"><table><thead><tr>{canViewAll && <th>{t.trainerEmail}</th>}<th>{t.date}</th><th>{t.requestType}</th><th>{t.requestedMinutes}</th><th>{t.amount}</th><th>{t.reason}</th><th>{t.approvalStatus}</th>{canViewAll && <th>{t.control}</th>}</tr></thead><tbody>{visible.map((r,i)=><tr key={r.id || i}>{canViewAll && <td>{r.trainer_name}</td>}<td>{formatCell(r.request_date)}</td><td>{formatCell(r.request_type)}</td><td>{formatCell(r.requested_minutes)}</td><td>{formatCell(r.amount)}</td><td>{formatCell(r.reason)}</td><td>{formatCell(r.status_label)}</td>{canViewAll && <td><div className="row-actions"><button className="small-action save" type="button" onClick={()=>reviewRequest(r,'approved')}>{t.approve}</button><button className="small-action delete" type="button" onClick={()=>reviewRequest(r,'rejected')}>{t.reject}</button></div></td>}</tr>)}</tbody></table></div>}</div>
   </>
 }
 
@@ -1726,7 +1770,7 @@ function Dashboard({ profile, lang }) {
 
     {activeTab === 'shifts' && isControlAdmin && <ShiftPlannerPage profile={profile} staff={staff} branches={branches} shifts={coachShifts} onSaved={load} lang={lang}/>}
 
-    {activeTab === 'attendancePage' && <AttendancePunchPage profile={profile} staff={staff} shifts={coachShifts} attendanceLogs={attendanceLogs} onSaved={load} lang={lang} canViewAll={isControlAdmin}/>}
+    {activeTab === 'attendancePage' && <AttendancePunchPage profile={profile} staff={staff} shifts={coachShifts} attendanceLogs={attendanceLogs} requests={coachRequests} onSaved={load} lang={lang} canViewAll={isControlAdmin}/>}
 
     {activeTab === 'requests' && <CoachRequestsPage profile={profile} requests={coachRequests} onSaved={load} lang={lang} canViewAll={isControlAdmin} staff={staff}/>}
 
