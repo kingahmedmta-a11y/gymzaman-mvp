@@ -99,7 +99,7 @@ const TEXT = {
 
 
 Object.assign(TEXT.ar, {
-  shiftPlanner: 'جدول الشيفتات', addShift: 'إضافة شيفت', offDay: 'يوم أجازة', offDayWeekday: 'اختيار يوم الأجازة', appliesWeekly: 'يتكرر أسبوعيًا', shiftTemplate: 'قالب الشيفت', coachFullFile: 'ملف كامل لكل مدرب', openTrainerFile: 'فتح ملف المدرب', trainerDirectory: 'دليل المدربين', selectBranchFilter: 'فلترة حسب الفرع', allBranches: 'كل الفروع', professionalNote: 'كل مدرب له صفحة مستقلة تجمع الشيفتات والمهام والطلبات والحضور والتارجت والعملاء والتقييمات.', shiftSaved: 'تم حفظ الشيفت بنجاح.',
+  shiftPlanner: 'جدول الشيفتات', addShift: 'إضافة شيفت', offDay: 'هذا التاريخ أجازة استثنائية', offDayWeekday: 'يوم الأجازة الأسبوعي', appliesWeekly: 'تثبيت الجدول أسبوعيًا', shiftTemplate: 'قالب الشيفت', coachFullFile: 'ملف كامل لكل مدرب', openTrainerFile: 'فتح ملف المدرب', trainerDirectory: 'دليل المدربين', selectBranchFilter: 'فلترة حسب الفرع', allBranches: 'كل الفروع', professionalNote: 'كل مدرب له صفحة مستقلة تجمع الشيفتات والمهام والطلبات والحضور والتارجت والعملاء والتقييمات.', shiftSaved: 'تم حفظ الشيفت بنجاح.',
   attendancePage: 'تسجيل الحضور', punchIn: 'تسجيل حضور الآن', punchOut: 'تسجيل انصراف الآن', attendancePunchSaved: 'تم تسجيل الحضور/الانصراف تلقائيًا.', todayShift: 'شيفت اليوم', noShiftToday: 'لا يوجد شيفت مسجل لك اليوم.',
   requests: 'طلبات المدرب', requestType: 'نوع الطلب', latePermission: 'إذن تأخير', vacationRequest: 'طلب أجازة', advanceRequest: 'طلب سلفة', requestDate: 'تاريخ الطلب', requestedMinutes: 'الدقائق المطلوبة', amount: 'المبلغ', reason: 'السبب', requestSaved: 'تم حفظ الطلب بنجاح.', approvalStatus: 'حالة الموافقة',
   targetPlan: 'خطة تحقيق التارجت', targetMonth: 'شهر التارجت', monthlyTarget: 'التارجت الشهري', currentAchievement: 'المحقق حاليًا', actionPlan: 'خطة التنفيذ', expectedChallenges: 'التحديات المتوقعة', supportNeeded: 'الدعم المطلوب', targetPlanSaved: 'تم حفظ خطة التارجت بنجاح.',
@@ -109,7 +109,7 @@ Object.assign(TEXT.ar, {
   separatePagesNote: 'كل قسم في صفحة مستقلة وواضحة، والحفظ والتجميع يتم تلقائيًا.'
 })
 Object.assign(TEXT.en, {
-  shiftPlanner: 'Shift Planner', addShift: 'Add Shift', offDay: 'Off Day', offDayWeekday: 'Choose Off Day', appliesWeekly: 'Repeat Weekly', shiftTemplate: 'Shift Template', coachFullFile: 'Full Coach File', openTrainerFile: 'Open Coach File', trainerDirectory: 'Trainer Directory', selectBranchFilter: 'Filter by Branch', allBranches: 'All Branches', professionalNote: 'Each coach has a separate professional file combining shifts, tasks, requests, attendance, target plans, clients, and evaluations.', shiftSaved: 'Shift saved successfully.',
+  shiftPlanner: 'Shift Planner', addShift: 'Add Shift', offDay: 'Exceptional Day Off', offDayWeekday: 'Weekly Day Off', appliesWeekly: 'Apply Weekly Schedule', shiftTemplate: 'Shift Template', coachFullFile: 'Full Coach File', openTrainerFile: 'Open Coach File', trainerDirectory: 'Trainer Directory', selectBranchFilter: 'Filter by Branch', allBranches: 'All Branches', professionalNote: 'Each coach has a separate professional file combining shifts, tasks, requests, attendance, target plans, clients, and evaluations.', shiftSaved: 'Shift saved successfully.',
   attendancePage: 'Attendance Punch', punchIn: 'Check In Now', punchOut: 'Check Out Now', attendancePunchSaved: 'Attendance updated automatically.', todayShift: "Today's Shift", noShiftToday: 'No shift is scheduled for you today.',
   requests: 'Coach Requests', requestType: 'Request Type', latePermission: 'Late Permission', vacationRequest: 'Vacation Request', advanceRequest: 'Advance Request', requestDate: 'Request Date', requestedMinutes: 'Requested Minutes', amount: 'Amount', reason: 'Reason', requestSaved: 'Request saved successfully.', approvalStatus: 'Approval Status',
   targetPlan: 'Monthly Target Plan', targetMonth: 'Target Month', monthlyTarget: 'Monthly Target', currentAchievement: 'Current Achievement', actionPlan: 'Action Plan', expectedChallenges: 'Expected Challenges', supportNeeded: 'Support Needed', targetPlanSaved: 'Target plan saved successfully.',
@@ -1020,7 +1020,7 @@ function TrainerProfilePanel({ trainer, branches, clients, logs, programs, atten
         <div><span>{t.rotation}</span><b>{totalRotation}</b></div>
       </div>
       <div className="summary-grid">
-        <div><span>{t.shift}</span><b>{latestShift?.is_off_day ? t.offDay : (latestShift?.shift || latestShift?.shift_name || '-')}</b></div>
+        <div><span>{t.shift}</span><b>{isShiftOffDay(latestShift, todayISO()) ? t.offDay : (latestShift?.shift || latestShift?.shift_name || '-')}</b></div>
         <div><span>{t.expectedIn}</span><b>{latestShift?.expected_in || latestShift?.start_time || '-'}</b></div>
         <div><span>{t.expectedOut}</span><b>{latestShift?.expected_out || latestShift?.end_time || '-'}</b></div>
         <div><span>{t.offDayWeekday}</span><b>{weekdayLabel(latestShift?.off_day_weekday, lang)}</b></div>
@@ -1450,12 +1450,25 @@ function weekdayLabel(value, lang='ar') {
   const item = WEEKDAYS.find(d => d.value === value)
   return item ? item[lang === 'ar' ? 'ar' : 'en'] : (value || '-')
 }
+function isoWeekday(dateStr) {
+  const days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday']
+  const d = new Date(`${dateStr}T12:00:00`)
+  return days[d.getDay()]
+}
+function isShiftOffDay(shift, dateStr) {
+  if (!shift) return false
+  if (shift.is_off_day || shift.is_day_off || shift.day_off) return true
+  if ((shift.applies_weekly || shift.repeat_weekly) && (shift.off_day_weekday || shift.day_off_weekday)) {
+    return (shift.off_day_weekday || shift.day_off_weekday) === isoWeekday(dateStr)
+  }
+  return false
+}
 function getRowName(row) { return row?.full_name || row?.name || row?.email || '-' }
 
 function ShiftPlannerPage({ profile, staff, branches, shifts, onSaved, lang }) {
   const t = TEXT[lang]
   const trainers = staff.filter(s => ['trainer','senior','head_coach'].includes(s.role))
-  const initial = { trainer_id: trainers[0]?.id || '', shift_date: todayISO(), shift: 'PM', expected_in: '15:00', expected_out: '23:00', is_off_day: false, off_day_weekday: 'friday', applies_weekly: false, notes: '' }
+  const initial = { trainer_id: trainers[0]?.id || '', shift_date: todayISO(), shift: 'PM', expected_in: '15:00', expected_out: '23:00', is_off_day: false, off_day_weekday: 'friday', applies_weekly: true, notes: '' }
   const [form, setForm, draftSaved, clearDraft] = useAutoSavedForm(`gymzaman_shift_planner_${profile.id}`, initial)
   const [msg, setMsg] = useState('')
   useEffect(() => { if (!form.trainer_id && trainers[0]?.id) setForm(p => ({...p, trainer_id: trainers[0].id})) }, [staff.length])
@@ -1469,46 +1482,57 @@ function ShiftPlannerPage({ profile, staff, branches, shifts, onSaved, lang }) {
       shift_date: form.shift_date,
       shift: form.shift,
       shift_name: form.shift,
-      expected_in: form.is_off_day ? null : form.expected_in,
-      expected_out: form.is_off_day ? null : form.expected_out,
-      start_time: form.is_off_day ? null : form.expected_in,
-      end_time: form.is_off_day ? null : form.expected_out,
+      expected_in: form.expected_in,
+      expected_out: form.expected_out,
+      start_time: form.expected_in,
+      end_time: form.expected_out,
+      shift_start: form.expected_in,
+      shift_end: form.expected_out,
+      official_in: form.expected_in,
+      official_out: form.expected_out,
       is_off_day: !!form.is_off_day,
+      is_day_off: !!form.is_off_day,
       day_off: !!form.is_off_day,
-      off_day_weekday: form.is_off_day ? form.off_day_weekday : null,
+      off_day_weekday: form.off_day_weekday,
+      day_off_weekday: form.off_day_weekday,
       applies_weekly: !!form.applies_weekly,
       notes: form.notes,
       created_by: profile.id,
       updated_by: profile.id
     }
-    const { data, error } = await supabase.from('coach_shifts').upsert(payload, { onConflict: 'trainer_id,shift_date' }).select('id').single()
+    const existing = shifts.find(s => s.trainer_id === payload.trainer_id && s.shift_date === payload.shift_date)
+    const result = existing?.id
+      ? await supabase.from('coach_shifts').update(payload).eq('id', existing.id).select('id').single()
+      : await supabase.from('coach_shifts').insert(payload).select('id').single()
+    const { data, error } = result
     if (error) setMsg(error.message)
-    else { await logAudit(profile.id, 'upsert', 'coach_shift', data?.id, payload); setMsg(t.shiftSaved); clearDraft(initial); onSaved() }
+    else { await logAudit(profile.id, existing?.id ? 'update' : 'insert', 'coach_shift', data?.id, payload); setMsg(t.shiftSaved); clearDraft(initial); onSaved() }
   }
-  const rows = shifts.map(r => ({...r, trainer_name: displayCoachName(staff.find(s => s.id === r.trainer_id)), branch_name: branches.find(b => b.id === r.branch_id)?.name || r.branch_name || '-', off_day_name: weekdayLabel(r.off_day_weekday, lang)}))
+  const rows = shifts.map(r => ({...r, trainer_name: displayCoachName(staff.find(s => s.id === r.trainer_id)), branch_name: branches.find(b => b.id === r.branch_id)?.name || r.branch_name || '-', off_day_name: weekdayLabel(r.off_day_weekday || r.day_off_weekday, lang)}))
   return <>
-    <div className="card section-intro"><h3><CalendarDays size={18}/>{t.shiftPlanner}</h3><p className="muted">التحكم في الشيفتات من خلال الأونر أو الفيتنس ديركتور فقط. بعد حفظ الشيفت يظهر للمدرب في صفحة تسجيل الحضور ويتم حساب التأخير والأوفر تايم تلقائيًا.</p></div>
+    <div className="card section-intro"><h3><CalendarDays size={18}/>{t.shiftPlanner}</h3><p className="muted">جدول الشيفتات هنا ثابت: تحدد لكل كوتش شيفته ويوم الأجازة الأسبوعي مرة واحدة، ويتغير فقط لو حبيت تعدل شيفت أو يوم أجازة. طلب الأجازة/الإذن موجود في صفحة طلبات المدرب بشكل منفصل.</p></div>
     <div className="card compact-card"><h3>{t.addShift}</h3><form className="grid-form simple-form" onSubmit={submit}>
       <div><label>{t.trainerEmail}</label><select value={form.trainer_id} onChange={e=>f('trainer_id',e.target.value)}>{trainers.map(tr => <option key={tr.id} value={tr.id}>{displayCoachName(tr)} • {tr.branch_name || ''}</option>)}</select></div>
       <div><label>{t.date}</label><input type="date" value={form.shift_date} onChange={e=>f('shift_date',e.target.value)}/></div>
       <div><label>{t.shift}</label><select value={form.shift} onChange={e=>{ const v=e.target.value; f('shift',v); if(v==='AM'){setForm(p=>({...p,shift:v,expected_in:'07:00',expected_out:'15:00'}))} else if(v==='PM'){setForm(p=>({...p,shift:v,expected_in:'15:00',expected_out:'23:00'}))} else {setForm(p=>({...p,shift:v}))}}}><option>AM</option><option>PM</option><option>Split</option></select></div>
-      <div><label>{t.expectedIn}</label><input type="time" disabled={form.is_off_day} value={form.expected_in} onChange={e=>f('expected_in',e.target.value)}/></div>
-      <div><label>{t.expectedOut}</label><input type="time" disabled={form.is_off_day} value={form.expected_out} onChange={e=>f('expected_out',e.target.value)}/></div>
-      <div><label>{t.offDayWeekday}</label><select value={form.off_day_weekday} disabled={!form.is_off_day} onChange={e=>f('off_day_weekday',e.target.value)}>{WEEKDAYS.map(d=><option key={d.value} value={d.value}>{lang==='ar'?d.ar:d.en}</option>)}</select></div>
-      <div className="checkbox-line"><label><input type="checkbox" checked={!!form.is_off_day} onChange={e=>f('is_off_day',e.target.checked)}/> {t.offDay}</label></div>
+      <div><label>{t.expectedIn}</label><input type="time" value={form.expected_in} onChange={e=>f('expected_in',e.target.value)}/></div>
+      <div><label>{t.expectedOut}</label><input type="time" value={form.expected_out} onChange={e=>f('expected_out',e.target.value)}/></div>
+      <div><label>{t.offDayWeekday}</label><select value={form.off_day_weekday} onChange={e=>f('off_day_weekday',e.target.value)}>{WEEKDAYS.map(d=><option key={d.value} value={d.value}>{lang==='ar'?d.ar:d.en}</option>)}</select></div>
       <div className="checkbox-line"><label><input type="checkbox" checked={!!form.applies_weekly} onChange={e=>f('applies_weekly',e.target.checked)}/> {t.appliesWeekly}</label></div>
+      <div className="checkbox-line"><label><input type="checkbox" checked={!!form.is_off_day} onChange={e=>f('is_off_day',e.target.checked)}/> {t.offDay}</label></div>
+      <p className="muted full">يوم الأجازة الأسبوعي جزء من جدول الشيفت الثابت. طلب الأجازة أو الإذن يتم من صفحة طلبات المدرب وليس من هنا.</p>
       <div className="full"><label>{t.notes}</label><textarea value={form.notes} onChange={e=>f('notes',e.target.value)}/></div>
       {draftSaved && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}{msg && <div className={msg.includes('success') || msg.includes('بنجاح') ? 'success full' : 'error full'}>{msg}</div>}
       <button>{t.save}</button>
     </form></div>
-    <Table title={t.shiftPlanner} rows={rows} canEdit={false} canDelete={false} t={t} columns={[{key:'trainer_name',label:t.trainerEmail},{key:'branch_name',label:t.branch},{key:'shift_date',label:t.date},{key:'shift',label:t.shift},{key:'expected_in',label:t.expectedIn},{key:'expected_out',label:t.expectedOut},{key:'is_off_day',label:t.offDay},{key:'off_day_name',label:t.offDayWeekday},{key:'applies_weekly',label:t.appliesWeekly},{key:'notes',label:t.notes}]}/>
+    <Table title={t.shiftPlanner} rows={rows} canEdit={false} canDelete={false} t={t} columns={[{key:'trainer_name',label:t.trainerEmail},{key:'branch_name',label:t.branch},{key:'shift_date',label:t.date},{key:'shift',label:t.shift},{key:'expected_in',label:t.expectedIn},{key:'expected_out',label:t.expectedOut},{key:'off_day_name',label:t.offDayWeekday},{key:'applies_weekly',label:t.appliesWeekly},{key:'notes',label:t.notes}]}/>
   </>
 }
 
 function AttendancePunchPage({ profile, staff, shifts, attendanceLogs, requests=[], onSaved, lang, canViewAll=false }) {
   const t = TEXT[lang]
   const today = todayISO()
-  const myShift = shifts.find(s => s.trainer_id === profile.id && s.shift_date === today)
+  const myShift = shifts.find(s => s.trainer_id === profile.id && s.shift_date === today) || shifts.find(s => s.trainer_id === profile.id && (s.applies_weekly || s.repeat_weekly) && !s.is_off_day)
   const myLog = attendanceLogs.find(a => a.trainer_id === profile.id && a.attendance_date === today)
   const [msg, setMsg] = useState('')
   async function punch(kind) {
@@ -1522,7 +1546,7 @@ function AttendancePunchPage({ profile, staff, shifts, attendanceLogs, requests=
       shift: myShift?.shift || 'PM',
       expected_in: expectedIn,
       expected_out: expectedOut,
-      notes: myShift?.is_off_day ? t.offDay : ''
+      notes: isShiftOffDay(myShift, today) ? t.offDay : ''
     }
     const payload = kind === 'in' ? {...base, check_in: time, check_out: myLog?.check_out || null} : {...base, check_in: myLog?.check_in || expectedIn, check_out: time}
     const calc = calculateLateAndOvertime(payload.check_in || expectedIn, payload.check_out || expectedOut, expectedIn, expectedOut)
@@ -1541,7 +1565,7 @@ function AttendancePunchPage({ profile, staff, shifts, attendanceLogs, requests=
     late: monthRows.reduce((s,r)=>s+Number(r.late_minutes||0),0),
     overtime: monthRows.reduce((s,r)=>s+Number(r.overtime_minutes||0),0),
     permissions: permissionRows.reduce((s,r)=>s+Number(r.requested_minutes||0),0),
-    absence: shifts.filter(s => s.trainer_id === profile.id && monthOf(s.shift_date) === month && !s.is_off_day && !attendanceLogs.some(a => a.trainer_id === profile.id && a.attendance_date === s.shift_date)).length
+    absence: shifts.filter(s => s.trainer_id === profile.id && monthOf(s.shift_date) === month && !isShiftOffDay(s, s.shift_date) && !attendanceLogs.some(a => a.trainer_id === profile.id && a.attendance_date === s.shift_date)).length
   }
   const allRows = attendanceLogs.map(a => ({...a, trainer_name: displayCoachName(staff.find(s => s.id === a.trainer_id))}))
   return <>
@@ -1549,7 +1573,7 @@ function AttendancePunchPage({ profile, staff, shifts, attendanceLogs, requests=
     {['trainer','senior','head_coach'].includes(profile.role) && <div className="card punch-card">
       <h3>{t.todayShift}</h3>
       <div className="summary-grid">
-        <div><span>{t.shift}</span><b>{myShift?.is_off_day ? t.offDay : (myShift?.shift || '-')}</b></div>
+        <div><span>{t.shift}</span><b>{isShiftOffDay(myShift, today) ? t.offDay : (myShift?.shift || '-')}</b></div>
         <div><span>{t.expectedIn}</span><b>{myShift?.expected_in || '-'}</b></div>
         <div><span>{t.expectedOut}</span><b>{myShift?.expected_out || '-'}</b></div>
         <div><span>{t.checkIn}</span><b>{myLog?.check_in || '-'}</b></div>
