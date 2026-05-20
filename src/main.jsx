@@ -48,7 +48,7 @@ const TEXT = {
     searchPlaceholder: 'بحث بالاسم / الهاتف / الملاحظات...', exportCsv: 'تصدير CSV', auditLog: 'سجل التعديلات',
     clientFollowup: 'متابعة العميل', lastContactDate: 'آخر تواصل', nextFollowupDate: 'ميعاد المتابعة القادم', followupNotes: 'ملاحظات المتابعة', needDirectorSupport: 'يحتاج تدخل المدير؟',
     reception: 'الريسيبشن', sales: 'السيلز', receptionLog: 'تقرير الريسيبشن', salesLead: 'Lead سيلز', addReceptionLog: 'إضافة تقرير ريسيبشن', addSalesLead: 'إضافة Lead سيلز', visitorName: 'اسم الزائر / العميل', leadName: 'اسم العميل', source: 'المصدر', interest: 'الاهتمام', outcome: 'النتيجة', inquiryType: 'نوع الاستفسار', handledBy: 'تم بواسطة', nextAction: 'الخطوة القادمة', assignedCoach: 'الكوتش المستلم', assignRotationToCoach: 'توزيع العميل على كوتش', saveReceptionLog: 'حفظ تقرير الريسيبشن', saveSalesLead: 'حفظ Lead السيلز', receptionSaved: 'تم حفظ تقرير الريسيبشن بنجاح.', salesSaved: 'تم حفظ Lead السيلز بنجاح.', deleteReports: 'حذف التقارير', addClientPage: 'إضافة عميل جديد', clientFile: 'ملف العميل', clientProfile: 'صفحة العميل', parq7: 'PAR-Q7', fitnessTest: 'Fitness Test', ptProgramFile: 'برنامج PT داخل ملف العميل', age: 'العمر', heightCm: 'الطول سم', weightKg: 'الوزن كجم', bloodPressure: 'ضغط الدم', restingHr: 'نبض الراحة', medicalHistory: 'تاريخ مرضي / إصابات', currentPain: 'ألم حالي', medications: 'أدوية', emergencyContact: 'رقم طوارئ', chestPain: 'ألم في الصدر أثناء المجهود', dizziness: 'دوخة أو فقدان اتزان', heartCondition: 'مشكلة بالقلب', bloodPressureIssue: 'مشكلة ضغط', boneJointIssue: 'مشكلة عظام أو مفاصل', doctorRestriction: 'منع طبي من التمرين', otherMedical: 'مشكلة صحية أخرى', pushupTest: 'Push-up Test', plankTest: 'Plank Test', squatTest: 'Squat Test', flexibilityTest: 'Flexibility Test', cardioTest: 'Cardio Test', postureNotes: 'Posture Notes', clearanceStatus: 'حالة السماح بالتمرين', clearanceOk: 'مسموح بالتمرين', clearanceReview: 'محتاج مراجعة / متابعة', latestPtPrograms: 'برامج PT الخاصة بالعميل', selectClientFile: 'اختر عميل لفتح ملفه',
-    entityType: 'نوع البيانات', action: 'الإجراء', changedBy: 'تم بواسطة', changedAt: 'وقت التعديل'
+    entityType: 'نوع البيانات', action: 'الإجراء', changedBy: 'تم بواسطة', changedAt: 'وقت التعديل', backupData: 'حفظ نسخة من كل الداتا', exportAllData: 'تصدير كل البيانات JSON', securityStatus: 'حالة الأمان', autoSystem: 'النظام التلقائي', systemReady: 'السيستم جاهز ومؤمن', savedAutomatically: 'أي تسجيل بيتم حفظه وتحديث التقارير تلقائيًا', ownerDirectorControl: 'التحكم الكامل للأونر والفيتنس ديركتور فقط', quickActions: 'اختصارات سريعة', openClientIntake: 'فتح إضافة عميل', openDataEntry: 'فتح الإدخال اليومي', openReports: 'فتح التقارير'
   },
   en: {
     loginTitle: 'Gym Zaman', loginSub: 'Internal Management System', staffOnly: 'Staff access only', selectBranch: 'Select Branch', autoSavedDraft: 'Auto-saved as draft', branchLoginMismatch: 'Notice: the branch selected on login differs from your saved account branch. Your saved branch permission was applied.',
@@ -93,7 +93,7 @@ const TEXT = {
     searchPlaceholder: 'Search by name / phone / notes...', exportCsv: 'Export CSV', auditLog: 'Audit Log',
     clientFollowup: 'Client Follow-up', lastContactDate: 'Last Contact', nextFollowupDate: 'Next Follow-up', followupNotes: 'Follow-up Notes', needDirectorSupport: 'Need Director Support?',
     reception: 'Reception', sales: 'Sales', receptionLog: 'Reception Log', salesLead: 'Sales Lead', addReceptionLog: 'Add Reception Log', addSalesLead: 'Add Sales Lead', visitorName: 'Visitor / Client Name', leadName: 'Client Name', source: 'Source', interest: 'Interest', outcome: 'Outcome', inquiryType: 'Inquiry Type', handledBy: 'Handled By', nextAction: 'Next Action', assignedCoach: 'Assigned Coach', assignRotationToCoach: 'Assign Rotation to Coach', saveReceptionLog: 'Save Reception Log', saveSalesLead: 'Save Sales Lead', receptionSaved: 'Reception log saved successfully.', salesSaved: 'Sales lead saved successfully.', deleteReports: 'Delete Reports', addClientPage: 'Add New Client', clientFile: 'Client File', clientProfile: 'Client Page', parq7: 'PAR-Q7', fitnessTest: 'Fitness Test', ptProgramFile: 'PT Program in Client File', age: 'Age', heightCm: 'Height cm', weightKg: 'Weight kg', bloodPressure: 'Blood Pressure', restingHr: 'Resting HR', medicalHistory: 'Medical History / Injuries', currentPain: 'Current Pain', medications: 'Medications', emergencyContact: 'Emergency Contact', chestPain: 'Chest pain during exercise', dizziness: 'Dizziness or loss of balance', heartCondition: 'Heart condition', bloodPressureIssue: 'Blood pressure issue', boneJointIssue: 'Bone or joint issue', doctorRestriction: 'Doctor restriction', otherMedical: 'Other medical issue', pushupTest: 'Push-up Test', plankTest: 'Plank Test', squatTest: 'Squat Test', flexibilityTest: 'Flexibility Test', cardioTest: 'Cardio Test', postureNotes: 'Posture Notes', clearanceStatus: 'Clearance Status', clearanceOk: 'Clear to train', clearanceReview: 'Needs review / follow-up', latestPtPrograms: 'Client PT Programs', selectClientFile: 'Choose a client to open file',
-    entityType: 'Entity Type', action: 'Action', changedBy: 'Changed By', changedAt: 'Changed At'
+    entityType: 'Entity Type', action: 'Action', changedBy: 'Changed By', changedAt: 'Changed At', backupData: 'Save All Data Backup', exportAllData: 'Export All Data JSON', securityStatus: 'Security Status', autoSystem: 'Automatic System', systemReady: 'System ready and secured', savedAutomatically: 'Every entry is saved and reports update automatically', ownerDirectorControl: 'Full control is Owner and Fitness Director only', quickActions: 'Quick Actions', openClientIntake: 'Open Client Intake', openDataEntry: 'Open Daily Entry', openReports: 'Open Reports'
   }
 }
 
@@ -250,7 +250,7 @@ function Layout({ profile, children, lang, setLang }) {
     <div className="app" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       <aside>
         <div className="side-brand"><div className="brand-mark small">GZ</div><div><h3>Gym Zaman</h3><p>{roleLabel}</p></div></div>
-        <nav><a><ShieldCheck size={18}/>{t.dashboard}</a><a><Users size={18}/>{t.clients}</a><a><Dumbbell size={18}/>{t.logs}</a><a><ClipboardList size={18}/>{t.programs}</a>{['reception','owner'].includes(profile?.role) && <a><Users size={18}/>{t.reception}</a>}{['sales','owner'].includes(profile?.role) && <a><PlusCircle size={18}/>{t.sales}</a>}{['senior','head_coach','fitness_director','owner'].includes(profile?.role) && <a><UserCog size={18}/>{t.staffManagement}</a>}</nav>
+        <nav><a><ShieldCheck size={18}/>{t.dashboard}</a><a><Users size={18}/>{t.clients}</a><a><Dumbbell size={18}/>{t.logs}</a><a><ClipboardList size={18}/>{t.programs}</a>{['owner','fitness_director'].includes(profile?.role) && <a><Users size={18}/>{t.reception}</a>}{['owner','fitness_director'].includes(profile?.role) && <a><PlusCircle size={18}/>{t.sales}</a>}{['senior','head_coach','fitness_director','owner'].includes(profile?.role) && <a><UserCog size={18}/>{t.staffManagement}</a>}</nav>
         <LanguageButton lang={lang} setLang={setLang}/>
         <button className="logout" onClick={()=>supabase.auth.signOut()}><LogOut size={18}/>{t.logout}</button>
       </aside>
@@ -259,13 +259,20 @@ function Layout({ profile, children, lang, setLang }) {
   )
 }
 
+function formatCell(value) {
+  if (value === null || value === undefined || value === '') return '-'
+  if (typeof value === 'boolean') return value ? 'yes' : 'no'
+  if (typeof value === 'object') return JSON.stringify(value)
+  return String(value)
+}
+
 function Table({ title, rows, columns, canManage, canEdit, canDelete, onEdit, onDelete, t }) {
   const showEdit = canEdit ?? canManage
   const showDelete = canDelete ?? canManage
   const showControl = showEdit || showDelete
   return <div className="card"><h3>{title}</h3>{rows.length === 0 ? <p className="muted">{t.noData}</p> :
     <div className="table-wrap"><table><thead><tr>{columns.map(c=><th key={c.key}>{c.label}</th>)}{showControl && <th>{t.control}</th>}</tr></thead>
-      <tbody>{rows.map((r,i)=><tr key={r.id || i}>{columns.map(c=><td key={c.key}>{String(r[c.key] ?? '-')}</td>)}{showControl && <td><div className="row-actions">{showEdit && <button className="small-action edit" onClick={()=>onEdit(r)}><Pencil size={14}/>{t.edit}</button>}{showDelete && <button className="small-action delete" onClick={()=>onDelete(r)}><Trash2 size={14}/>{t.delete}</button>}</div></td>}</tr>)}</tbody>
+      <tbody>{rows.map((r,i)=><tr key={r.id || i}>{columns.map(c=><td key={c.key}>{formatCell(r[c.key])}</td>)}{showControl && <td><div className="row-actions">{showEdit && <button className="small-action edit" onClick={()=>onEdit(r)}><Pencil size={14}/>{t.edit}</button>}{showDelete && <button className="small-action delete" onClick={()=>onDelete(r)}><Trash2 size={14}/>{t.delete}</button>}</div></td>}</tr>)}</tbody>
     </table></div>}
   </div>
 }
@@ -426,14 +433,14 @@ function AddClientForm({ profile, branches, onSaved, lang }) {
 function DailyLogForm({ profile, onSaved, lang }) {
   const t=TEXT[lang], today=new Date().toISOString().slice(0,10); const logInitial={log_date:today,shift:'PM',check_in:'15:00',check_out:'23:00',rotation_count:0,new_clients_count:0,pt_sessions_count:0,free_service_count:0,notes:''}; const [form,setForm,draftSaved,clearDraft]=useAutoSavedForm(`gymzaman_draft_log_${profile.id}`, logInitial); const [msg,setMsg]=useState('')
   function f(k,v){setForm(p=>({...p,[k]:v}))}
-  async function submit(e){e.preventDefault(); const payload={...form,trainer_id:profile.id,branch_id:profile.branch_id,rotation_count:Number(form.rotation_count||0),new_clients_count:Number(form.new_clients_count||0),pt_sessions_count:Number(form.pt_sessions_count||0),free_service_count:Number(form.free_service_count||0)}; const {error}=await supabase.from('trainer_daily_logs').insert(payload); if(error)setMsg(error.message); else{setMsg(t.logSaved);clearDraft(logInitial);onSaved()}}
+  async function submit(e){e.preventDefault(); const payload={...form,trainer_id:profile.id,branch_id:profile.branch_id,rotation_count:Number(form.rotation_count||0),new_clients_count:Number(form.new_clients_count||0),pt_sessions_count:Number(form.pt_sessions_count||0),free_service_count:Number(form.free_service_count||0)}; const {error}=await supabase.from('trainer_daily_logs').insert(payload); if(error)setMsg(error.message); else{await logAudit(profile.id, 'insert', 'trainer_daily_log', null, { date: form.log_date, pt: payload.pt_sessions_count, free: payload.free_service_count }); setMsg(t.logSaved);clearDraft(logInitial);onSaved()}}
   return <div className="card compact-card"><h3><PlusCircle size={18}/>{t.addLog}</h3><form className="grid-form simple-form" onSubmit={submit}><div><label>{t.date}</label><input type="date" value={form.log_date} onChange={e=>f('log_date',e.target.value)}/></div><div><label>{t.shift}</label><select value={form.shift} onChange={e=>f('shift',e.target.value)}><option>AM</option><option>PM</option></select></div><div><label>{t.checkIn}</label><input type="time" value={form.check_in} onChange={e=>f('check_in',e.target.value)}/></div><div><label>{t.checkOut}</label><input type="time" value={form.check_out} onChange={e=>f('check_out',e.target.value)}/></div><div><label>{t.rotation}</label><input type="number" value={form.rotation_count} onChange={e=>f('rotation_count',e.target.value)}/></div><div><label>{t.newClients}</label><input type="number" value={form.new_clients_count} onChange={e=>f('new_clients_count',e.target.value)}/></div><div><label>{t.ptSessions}</label><input type="number" value={form.pt_sessions_count} onChange={e=>f('pt_sessions_count',e.target.value)}/></div><div><label>{t.freeService}</label><input type="number" value={form.free_service_count} onChange={e=>f('free_service_count',e.target.value)}/></div><div className="full"><label>{t.notes}</label><textarea value={form.notes} onChange={e=>f('notes',e.target.value)}/></div>{draftSaved && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}{msg && <div className="success full">{msg}</div>}<button>{t.saveLog}</button></form></div>
 }
 
 function PTProgramForm({ profile, clients, onSaved, lang }) {
   const t=TEXT[lang]; const programInitial={client_id:'',program_name:'Hypertrophy Program',goal:'Hypertrophy',duration_weeks:4,exercises:'',notes:''}; const [form,setForm,draftSaved,clearDraft]=useAutoSavedForm(`gymzaman_draft_program_${profile.id}`, programInitial); const [msg,setMsg]=useState('')
   function f(k,v){setForm(p=>({...p,[k]:v}))}
-  async function submit(e){e.preventDefault(); const client=clients.find(c=>c.id===form.client_id); const payload={...form,duration_weeks:Number(form.duration_weeks||0),trainer_id:profile.id,branch_id:profile.branch_id||client?.branch_id,status:'active',created_by:profile.id}; const {error}=await supabase.from('pt_programs').insert(payload); if(error)setMsg(error.message); else{setMsg(t.programSaved);clearDraft(programInitial);onSaved()}}
+  async function submit(e){e.preventDefault(); const client=clients.find(c=>c.id===form.client_id); const payload={...form,duration_weeks:Number(form.duration_weeks||0),trainer_id:profile.id,branch_id:profile.branch_id||client?.branch_id,status:'active',created_by:profile.id}; const {error}=await supabase.from('pt_programs').insert(payload); if(error)setMsg(error.message); else{await logAudit(profile.id, 'insert', 'pt_program', null, { client_id: form.client_id, program: form.program_name }); setMsg(t.programSaved);clearDraft(programInitial);onSaved()}}
   return <div className="card compact-card"><h3><PlusCircle size={18}/>{t.addProgram}</h3><form className="grid-form simple-form" onSubmit={submit}><div><label>{t.selectClient}</label><select required value={form.client_id} onChange={e=>f('client_id',e.target.value)}><option value="">---</option>{clients.map(c=><option key={c.id} value={c.id}>{c.full_name}</option>)}</select></div><div><label>{t.programName}</label><input value={form.program_name} onChange={e=>f('program_name',e.target.value)}/></div><div><label>{t.goal}</label><input value={form.goal} onChange={e=>f('goal',e.target.value)}/></div><div><label>{t.duration}</label><input type="number" value={form.duration_weeks} onChange={e=>f('duration_weeks',e.target.value)}/></div><div className="full"><label>{t.exercises}</label><textarea value={form.exercises} onChange={e=>f('exercises',e.target.value)} placeholder={'Day 1: Chest + Triceps\nDay 2: Back + Biceps'}/></div><div className="full"><label>{t.notes}</label><textarea value={form.notes} onChange={e=>f('notes',e.target.value)}/></div>{draftSaved && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}{msg && <div className="success full">{msg}</div>}<button>{t.saveProgram}</button></form></div>
 }
 
@@ -1299,11 +1306,51 @@ function SalesLeadForm({ profile, onSaved, lang, staff = [] }) {
   </form></div>
 }
 
+
+function QuickActions({ t, tabs, setActiveTab }) {
+  const has = key => tabs.some(tab => tab.key === key)
+  const actions = [
+    has('addClient') && { key: 'addClient', label: t.openClientIntake, icon: <Users size={18}/> },
+    has('inputs') && { key: 'inputs', label: t.openDataEntry, icon: <PlusCircle size={18}/> },
+    has('reports') && { key: 'reports', label: t.openReports, icon: <ClipboardList size={18}/> }
+  ].filter(Boolean)
+  if (!actions.length) return null
+  return <div className="quick-actions"><span>{t.quickActions}</span>{actions.map(a => <button key={a.key} type="button" onClick={() => setActiveTab(a.key)}>{a.icon}{a.label}</button>)}</div>
+}
+
+function SecurityStatusCard({ t }) {
+  return <div className="card security-card">
+    <h3><ShieldCheck size={18}/>{t.securityStatus}</h3>
+    <div className="security-grid">
+      <div><b>{t.systemReady}</b><p>{t.ownerDirectorControl}</p></div>
+      <div><b>{t.autoSystem}</b><p>{t.savedAutomatically}</p></div>
+    </div>
+  </div>
+}
+
+function BackupPanel({ t, data }) {
+  function downloadBackup() {
+    const payload = { exported_at: new Date().toISOString(), system: 'Gym Zaman MVP', data }
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `gymzaman-backup-${new Date().toISOString().slice(0,10)}.json`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+  return <div className="card backup-card">
+    <h3><Save size={18}/>{t.backupData}</h3>
+    <p className="muted">{t.savedAutomatically}</p>
+    <button type="button" className="print-btn" onClick={downloadBackup}>{t.exportAllData}</button>
+  </div>
+}
+
 function Dashboard({ profile, lang }) {
   const t=TEXT[lang]
   const [clients,setClients]=useState([]), [logs,setLogs]=useState([]), [attendanceLogs,setAttendanceLogs]=useState([]), [branches,setBranches]=useState([]), [programs,setPrograms]=useState([]), [staff,setStaff]=useState([]), [seniorReports,setSeniorReports]=useState([]), [headReports,setHeadReports]=useState([]), [evaluations,setEvaluations]=useState([]), [receptionLogs,setReceptionLogs]=useState([]), [salesLeads,setSalesLeads]=useState([]), [auditLogs,setAuditLogs]=useState([])
   const [loading,setLoading]=useState(true), [notice,setNotice]=useState(''), [edit,setEdit]=useState(null), [selectedTrainerId,setSelectedTrainerId]=useState('all'), [selectedClientId,setSelectedClientId]=useState(''), [activeTab,setActiveTab]=useState('overview'), [searchQuery,setSearchQuery]=useState('')
-  const isOwner=profile.role==='owner', isAdmin=profile.role==='owner'||profile.role==='fitness_director', isTrainer=profile.role==='trainer', isSenior=profile.role==='senior', isHeadCoach=profile.role==='head_coach', isBranchLeader=['senior','head_coach'].includes(profile.role), isReception=profile.role==='reception', isSales=profile.role==='sales'
+  const isOwner=profile.role==='owner', isDirector=profile.role==='fitness_director', isAdmin=profile.role==='owner'||profile.role==='fitness_director', isControlAdmin=profile.role==='owner'||profile.role==='fitness_director', isTrainer=profile.role==='trainer', isSenior=profile.role==='senior', isHeadCoach=profile.role==='head_coach', isBranchLeader=['senior','head_coach'].includes(profile.role), isReception=profile.role==='reception', isSales=profile.role==='sales'
 
   async function load(){
     setLoading(true)
@@ -1316,11 +1363,11 @@ function Dashboard({ profile, lang }) {
       supabase.from('trainer_evaluations').select('*').order('created_at',{ascending:false}),
       supabase.from('head_coach_daily_reports').select('*').order('created_at',{ascending:false}),
       supabase.from('attendance_logs').select('*').order('created_at',{ascending:false}),
-      (isOwner || isReception) ? supabase.from('reception_logs').select('*').order('created_at',{ascending:false}) : Promise.resolve({data:[], error:null}),
-      (isOwner || isSales) ? supabase.from('sales_leads').select('*').order('created_at',{ascending:false}) : Promise.resolve({data:[], error:null}),
-      isOwner ? supabase.from('audit_logs').select('*').order('created_at',{ascending:false}).limit(100) : Promise.resolve({data:[], error:null})
+      isControlAdmin ? supabase.from('reception_logs').select('*').order('created_at',{ascending:false}) : Promise.resolve({data:[], error:null}),
+      isControlAdmin ? supabase.from('sales_leads').select('*').order('created_at',{ascending:false}) : Promise.resolve({data:[], error:null}),
+      isControlAdmin ? supabase.from('audit_logs').select('*').order('created_at',{ascending:false}).limit(150) : Promise.resolve({data:[], error:null})
     ]
-    if (!isTrainer) calls.push(supabase.from('profiles').select('id, full_name, email, role, branch_id, status').order('full_name'))
+    if (!isTrainer) calls.push(supabase.from('profiles').select('id, full_name, email, role, branch_id, branch_name, status, active').order('full_name'))
     const res = await Promise.all(calls)
     const [c,l,b,p,sr,e,hr,a,rec,sales,au,s] = res
     if(c.error)setNotice(c.error.message); if(p.error)setNotice(p.error.message); if(sr.error)setNotice(sr.error.message); if(e.error)setNotice(e.error.message); if(hr.error)setNotice(hr.error.message); if(a.error)setNotice(a.error.message); if(rec.error)setNotice(rec.error.message); if(sales.error)setNotice(sales.error.message); if(au.error)setNotice(au.error.message); if(s?.error)setNotice(s.error.message)
@@ -1367,7 +1414,7 @@ function Dashboard({ profile, lang }) {
       ? evaluations.filter(ev => ev.branch_id === profile.branch_id)
       : evaluations.filter(ev => ev.trainer_id === profile.id)
   const visibleEvaluationsBase = visibleEvaluationsRaw.map(ev => { const score = Math.round((Number(ev.technical_score||0)+Number(ev.behavior_score||0)+Number(ev.leadership_score||0)+Number(ev.service_score||0))/4); return {...ev, final_score: score, grade: gradeFromScore(score, t), recommendation: recommendationFromScore(score), trainer_name: trainerMap[ev.trainer_id] || '-', evaluator_name: trainerMap[ev.evaluator_id] || (ev.evaluator_id === profile.id ? displayCoachName(profile) : '-')} })
-  const scopeByBranchOrOwner = (rows, type) => isOwner ? rows : type === 'reception' && isReception ? rows.filter(r => r.reception_id === profile.id) : type === 'sales' && isSales ? rows.filter(r => r.sales_id === profile.id) : []
+  const scopeByBranchOrOwner = (rows, type) => isControlAdmin ? rows : []
   const visibleReceptionRaw = scopeByBranchOrOwner(receptionLogs, 'reception')
   const visibleSalesRaw = scopeByBranchOrOwner(salesLeads, 'sales')
   const visibleReceptionRowsBase = visibleReceptionRaw.map(r => ({...r, handled_by_name: trainerMap[r.reception_id] || '-', assigned_trainer_name: trainerMap[r.assigned_trainer_id] || r.assigned_trainer_name || '-'}))
@@ -1388,7 +1435,7 @@ function Dashboard({ profile, lang }) {
   const profileBranchName = branches.find(b => b.id === profile.branch_id)?.name || profile.branch_name || ''
   const loginBranchMismatch = selectedLoginBranch && profileBranchName && selectedLoginBranch !== profileBranchName && !isAdmin
   const title=profile.role==='owner'?t.owner:profile.role==='fitness_director'?t.director:profile.role==='head_coach'?t.headCoachReport:profile.role==='senior'?t.seniorReport:profile.role==='reception'?t.reception:profile.role==='sales'?t.sales:profile.role==='trainer'?t.trainer:t.dashboard
-  const tabs = isOwner ? [
+  const tabs = isControlAdmin ? [
     {key:'overview', label:t.tabOverview},
     {key:'addClient', label:t.addClientPage},
     {key:'trainerData', label:t.tabTrainerData},
@@ -1396,11 +1443,6 @@ function Dashboard({ profile, lang }) {
     {key:'reception', label:t.reception},
     {key:'sales', label:t.sales},
     {key:'staff', label:t.tabStaff}
-  ] : isAdmin ? [
-    {key:'overview', label:t.tabOverview},
-    {key:'addClient', label:t.addClientPage},
-    {key:'trainerData', label:t.tabTrainerData},
-    {key:'reports', label:t.tabReports}
   ] : [
     {key:'overview', label:t.tabOverview},
     ...(!['reception','sales'].includes(profile.role) ? [{key:'addClient', label:t.addClientPage}] : []),
@@ -1417,11 +1459,14 @@ function Dashboard({ profile, lang }) {
     {notice&&<div className="error">{notice}</div>}
     {loginBranchMismatch && <div className="notice">{t.branchLoginMismatch}</div>}
     <TabBar tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab}/>
+    <QuickActions t={t} tabs={tabs} setActiveTab={setActiveTab}/>
     {!isTrainer && <SearchBox value={searchQuery} onChange={setSearchQuery} t={t}/>}
 
     {activeTab === 'overview' && <>
       <section className="stats-grid"><StatCard title={isAdmin?t.todayLogs:t.myLogs} value={totals.logs} icon={<CalendarDays/>}/><StatCard title={isAdmin?t.rotationToday:t.myClients} value={isAdmin?totals.rotation:visibleClients.length} icon={<Users/>}/><StatCard title={isAdmin?t.ptToday:t.myPrograms} value={isAdmin?totals.pt:visiblePrograms.length} icon={<Dumbbell/>}/><StatCard title={t.freeToday} value={totals.free} icon={<ClipboardList/>}/></section>
       {isAdmin && <div className="card note"><b>{t.adminNote}</b></div>}
+      {isControlAdmin && <SecurityStatusCard t={t}/>}
+      {isControlAdmin && <BackupPanel t={t} data={{clients, logs, attendanceLogs, programs, staff, seniorReports, headReports, evaluations, receptionLogs, salesLeads, auditLogs}}/>}
       {(isAdmin || isBranchLeader) && <PerformanceDashboard staff={isAdmin?staff:branchStaff} clients={visibleClients} logs={visibleLogs} attendanceLogs={visibleAttendanceRaw} t={t}/>}
       {(isAdmin || isBranchLeader) && <AlertsPanel staff={isAdmin?staff:branchStaff} logs={visibleLogs} attendanceLogs={visibleAttendanceRaw} seniorReports={visibleSeniorReportsRaw} evaluations={visibleEvaluationsRaw} t={t}/>}
       {isAdmin && <BranchComparisonDashboard branches={branches} staff={staff} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} seniorReports={seniorReports} headReports={headReports} t={t}/>}
@@ -1443,11 +1488,11 @@ function Dashboard({ profile, lang }) {
       {visibleClients.length > 0 && <div className="card filter-card"><h3><Search size={18}/>{t.selectClientFile}</h3><select value={selectedClient?.id || ''} onChange={e=>setSelectedClientId(e.target.value)}>{visibleClients.map(c => <option key={c.id} value={c.id}>{c.full_name}</option>)}</select></div>}
       <ClientFilePanel client={selectedClient} programs={programs} trainerName={trainerMap[selectedClient?.assigned_trainer_id]} t={t}/>
       <div className="table-actions"><ExportButton rows={visibleClientsRows} filename="clients.csv" t={t}/></div>
-      <Table title={isTrainer?t.myClients:t.clients} rows={visibleClientsRows} canEdit={isAdmin || isBranchLeader} canDelete={isOwner} onEdit={r=>setEdit({type:'client',row:r})} onDelete={r=>del('clients',r,r.full_name)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'full_name',label:t.clientName},{key:'phone',label:t.phone},{key:'age',label:t.age},{key:'weight_kg',label:t.weightKg},{key:'goal',label:t.goal},{key:'level',label:t.level},{key:'status',label:t.status},{key:'next_followup_date',label:t.nextFollowupDate},{key:'need_director_support',label:t.needDirectorSupport}]}/>
+      <Table title={isTrainer?t.myClients:t.clients} rows={visibleClientsRows} canEdit={isAdmin || isBranchLeader} canDelete={isControlAdmin} onEdit={r=>setEdit({type:'client',row:r})} onDelete={r=>del('clients',r,r.full_name)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'full_name',label:t.clientName},{key:'phone',label:t.phone},{key:'age',label:t.age},{key:'weight_kg',label:t.weightKg},{key:'goal',label:t.goal},{key:'level',label:t.level},{key:'status',label:t.status},{key:'next_followup_date',label:t.nextFollowupDate},{key:'need_director_support',label:t.needDirectorSupport}]}/>
       <div className="table-actions"><ExportButton rows={visibleAttendance} filename="attendance.csv" t={t}/></div>
-      <Table title={t.attendance} rows={visibleAttendance} canEdit={isAdmin || isBranchLeader} canDelete={isOwner} onEdit={r=>setEdit({type:'attendance',row:r})} onDelete={r=>del('attendance_logs',r,r.attendance_date)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'attendance_date',label:t.date},{key:'shift',label:t.shift},{key:'check_in',label:t.checkIn},{key:'check_out',label:t.checkOut},{key:'late_minutes',label:t.lateMinutes},{key:'overtime_minutes',label:t.overtimeMinutes},{key:'notes',label:t.notes}]}/>
-      <Table title={isTrainer?t.myLogs:t.logs} rows={visibleLogsRows} canEdit={isAdmin || isBranchLeader} canDelete={isOwner} onEdit={r=>setEdit({type:'log',row:r})} onDelete={r=>del('trainer_daily_logs',r,r.log_date)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'log_date',label:t.date},{key:'shift',label:t.shift},{key:'rotation_count',label:t.rotation},{key:'pt_sessions_count',label:t.ptSessions},{key:'free_service_count',label:t.freeService},{key:'notes',label:t.notes}]}/>
-      <Table title={isTrainer?t.myPrograms:t.programs} rows={visiblePrograms} canEdit={isAdmin || isBranchLeader} canDelete={isOwner} onEdit={r=>setEdit({type:'program',row:r})} onDelete={r=>del('pt_programs',r,r.program_name)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'client_name',label:t.clientName},{key:'program_name',label:t.programName},{key:'goal',label:t.goal},{key:'duration_weeks',label:t.duration},{key:'status',label:t.status}]}/>
+      <Table title={t.attendance} rows={visibleAttendance} canEdit={isAdmin || isBranchLeader} canDelete={isControlAdmin} onEdit={r=>setEdit({type:'attendance',row:r})} onDelete={r=>del('attendance_logs',r,r.attendance_date)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'attendance_date',label:t.date},{key:'shift',label:t.shift},{key:'check_in',label:t.checkIn},{key:'check_out',label:t.checkOut},{key:'late_minutes',label:t.lateMinutes},{key:'overtime_minutes',label:t.overtimeMinutes},{key:'notes',label:t.notes}]}/>
+      <Table title={isTrainer?t.myLogs:t.logs} rows={visibleLogsRows} canEdit={isAdmin || isBranchLeader} canDelete={isControlAdmin} onEdit={r=>setEdit({type:'log',row:r})} onDelete={r=>del('trainer_daily_logs',r,r.log_date)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'log_date',label:t.date},{key:'shift',label:t.shift},{key:'rotation_count',label:t.rotation},{key:'pt_sessions_count',label:t.ptSessions},{key:'free_service_count',label:t.freeService},{key:'notes',label:t.notes}]}/>
+      <Table title={isTrainer?t.myPrograms:t.programs} rows={visiblePrograms} canEdit={isAdmin || isBranchLeader} canDelete={isControlAdmin} onEdit={r=>setEdit({type:'program',row:r})} onDelete={r=>del('pt_programs',r,r.program_name)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'client_name',label:t.clientName},{key:'program_name',label:t.programName},{key:'goal',label:t.goal},{key:'duration_weeks',label:t.duration},{key:'status',label:t.status}]}/>
     </>}
 
     {activeTab === 'inputs' && <>
@@ -1456,32 +1501,32 @@ function Dashboard({ profile, lang }) {
       {isSenior&&<SeniorDailyReportForm profile={profile} onSaved={load} lang={lang}/>}
       {isHeadCoach && <HeadCoachDailyReportForm profile={profile} onSaved={load} lang={lang}/>}
       {isTrainer&&<PTProgramForm profile={profile} clients={visibleClients} onSaved={load} lang={lang}/>}
-      {(isReception || isOwner) && <ReceptionLogForm profile={profile} staff={staff} onSaved={load} lang={lang}/>}
-      {(isSales || isOwner) && <SalesLeadForm profile={profile} staff={staff} onSaved={load} lang={lang}/>}
+      {isControlAdmin && <ReceptionLogForm profile={profile} staff={staff} onSaved={load} lang={lang}/>}
+      {isControlAdmin && <SalesLeadForm profile={profile} staff={staff} onSaved={load} lang={lang}/>}
     </>}
 
     {activeTab === 'reception' && <>
-      {(isReception || isOwner) && <ReceptionLogForm profile={profile} staff={staff} onSaved={load} lang={lang}/>}      
+      {isControlAdmin && <ReceptionLogForm profile={profile} staff={staff} onSaved={load} lang={lang}/>}      
       <div className="table-actions"><ExportButton rows={visibleReceptionRows} filename="reception-logs.csv" t={t}/></div>
-      <Table title={t.receptionLog} rows={visibleReceptionRows} canEdit={false} canDelete={isOwner} onDelete={r=>del('reception_logs',r,r.visitor_name || r.log_date)} t={t} columns={[...(isOwner?[{key:'handled_by_name',label:t.handledBy}]:[]),{key:'log_date',label:t.date},{key:'visitor_name',label:t.visitorName},{key:'phone',label:t.phone},{key:'inquiry_type',label:t.inquiryType},{key:'assigned_trainer_name',label:t.assignedCoach},{key:'outcome',label:t.outcome},{key:'notes',label:t.notes}]} />
+      <Table title={t.receptionLog} rows={visibleReceptionRows} canEdit={false} canDelete={isControlAdmin} onDelete={r=>del('reception_logs',r,r.visitor_name || r.log_date)} t={t} columns={[...(isControlAdmin?[{key:'handled_by_name',label:t.handledBy}]:[]),{key:'log_date',label:t.date},{key:'visitor_name',label:t.visitorName},{key:'phone',label:t.phone},{key:'inquiry_type',label:t.inquiryType},{key:'assigned_trainer_name',label:t.assignedCoach},{key:'outcome',label:t.outcome},{key:'notes',label:t.notes}]} />
     </>}
 
     {activeTab === 'sales' && <>
-      {(isSales || isOwner) && <SalesLeadForm profile={profile} staff={staff} onSaved={load} lang={lang}/>}      
+      {isControlAdmin && <SalesLeadForm profile={profile} staff={staff} onSaved={load} lang={lang}/>}      
       <div className="table-actions"><ExportButton rows={visibleSalesRows} filename="sales-leads.csv" t={t}/></div>
-      <Table title={t.salesLead} rows={visibleSalesRows} canEdit={false} canDelete={isOwner} onDelete={r=>del('sales_leads',r,r.lead_name || r.lead_date)} t={t} columns={[...(isOwner?[{key:'handled_by_name',label:t.handledBy}]:[]),{key:'lead_date',label:t.date},{key:'lead_name',label:t.leadName},{key:'phone',label:t.phone},{key:'source',label:t.source},{key:'interest',label:t.interest},{key:'status',label:t.status},{key:'next_followup_date',label:t.nextFollowupDate},{key:'next_action',label:t.nextAction},{key:'notes',label:t.notes}]} />
+      <Table title={t.salesLead} rows={visibleSalesRows} canEdit={false} canDelete={isControlAdmin} onDelete={r=>del('sales_leads',r,r.lead_name || r.lead_date)} t={t} columns={[...(isControlAdmin?[{key:'handled_by_name',label:t.handledBy}]:[]),{key:'lead_date',label:t.date},{key:'lead_name',label:t.leadName},{key:'phone',label:t.phone},{key:'source',label:t.source},{key:'interest',label:t.interest},{key:'status',label:t.status},{key:'next_followup_date',label:t.nextFollowupDate},{key:'next_action',label:t.nextAction},{key:'notes',label:t.notes}]} />
     </>}
 
     {activeTab === 'reports' && <>
       {isAdmin && <MonthlyTrainerReport staff={staff} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} evaluations={evaluations} t={t}/>}
       {isBranchLeader && <MonthlyTrainerReport staff={branchStaff} clients={visibleClients} logs={visibleLogs} programs={visibleProgramsRaw} attendanceLogs={visibleAttendanceRaw} evaluations={visibleEvaluationsRaw} t={t}/>}
-      {(isAdmin || isSenior) && <Table title={t.seniorReport} rows={visibleSeniorReports} canEdit={false} canDelete={isOwner} onDelete={r=>del('senior_daily_reports',r,r.report_date)} t={t} columns={[...(isAdmin?[{key:'senior_name',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'branch_pressure',label:t.branchPressure},{key:'total_sessions_done',label:t.totalSessionsDone},{key:'free_service_count',label:t.freeService},{key:'problem_description',label:t.problemDescription},{key:'floor_tasks',label:t.floorTasks},{key:'service_notes',label:t.serviceNotes},{key:'client_issues',label:t.clientIssues},{key:'actions_taken',label:t.actionsTaken},{key:'resolved',label:t.resolved},{key:'notes',label:t.notes}]}/>}
-      {(isAdmin || isHeadCoach) && <Table title={t.headCoachReport} rows={visibleHeadReports} canEdit={false} canDelete={isOwner} onDelete={r=>del('head_coach_daily_reports',r,r.report_date)} t={t} columns={[...(isAdmin?[{key:'head_coach_name',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'total_sessions_done',label:t.totalSessionsDone},{key:'free_service_count',label:t.freeService},{key:'rotation_count',label:t.rotation},{key:'tasks_done',label:t.tasksDone},{key:'follow_ups',label:t.followUps},{key:'trainer_issues',label:t.trainerIssues},{key:'branch_summary',label:t.branchSummary},{key:'notes',label:t.notes}]}/>}
-      {(isAdmin || isHeadCoach) && <><div className="table-actions"><ExportButton rows={visibleEvaluations} filename="evaluations.csv" t={t}/></div><Table title={t.evaluationHistory} rows={visibleEvaluations} canEdit={false} canDelete={isOwner} onDelete={r=>del('trainer_evaluations',r,r.evaluation_date)} t={t} columns={[{key:'trainer_name',label:t.trainerEmail},{key:'evaluation_date',label:t.date},{key:'technical_score',label:t.technicalScore},{key:'behavior_score',label:t.behaviorScore},{key:'leadership_score',label:t.leadershipScore},{key:'service_score',label:t.serviceScore},{key:'final_score',label:t.finalScore},{key:'grade',label:t.grade},{key:'recommendation',label:t.recommendation},{key:'evaluator_notes',label:t.evaluatorNotes}]}/></>}
+      {(isAdmin || isSenior) && <Table title={t.seniorReport} rows={visibleSeniorReports} canEdit={false} canDelete={isControlAdmin} onDelete={r=>del('senior_daily_reports',r,r.report_date)} t={t} columns={[...(isAdmin?[{key:'senior_name',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'branch_pressure',label:t.branchPressure},{key:'total_sessions_done',label:t.totalSessionsDone},{key:'free_service_count',label:t.freeService},{key:'problem_description',label:t.problemDescription},{key:'floor_tasks',label:t.floorTasks},{key:'service_notes',label:t.serviceNotes},{key:'client_issues',label:t.clientIssues},{key:'actions_taken',label:t.actionsTaken},{key:'resolved',label:t.resolved},{key:'notes',label:t.notes}]}/>}
+      {(isAdmin || isHeadCoach) && <Table title={t.headCoachReport} rows={visibleHeadReports} canEdit={false} canDelete={isControlAdmin} onDelete={r=>del('head_coach_daily_reports',r,r.report_date)} t={t} columns={[...(isAdmin?[{key:'head_coach_name',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'total_sessions_done',label:t.totalSessionsDone},{key:'free_service_count',label:t.freeService},{key:'rotation_count',label:t.rotation},{key:'tasks_done',label:t.tasksDone},{key:'follow_ups',label:t.followUps},{key:'trainer_issues',label:t.trainerIssues},{key:'branch_summary',label:t.branchSummary},{key:'notes',label:t.notes}]}/>}
+      {(isAdmin || isHeadCoach) && <><div className="table-actions"><ExportButton rows={visibleEvaluations} filename="evaluations.csv" t={t}/></div><Table title={t.evaluationHistory} rows={visibleEvaluations} canEdit={false} canDelete={isControlAdmin} onDelete={r=>del('trainer_evaluations',r,r.evaluation_date)} t={t} columns={[{key:'trainer_name',label:t.trainerEmail},{key:'evaluation_date',label:t.date},{key:'technical_score',label:t.technicalScore},{key:'behavior_score',label:t.behaviorScore},{key:'leadership_score',label:t.leadershipScore},{key:'service_score',label:t.serviceScore},{key:'final_score',label:t.finalScore},{key:'grade',label:t.grade},{key:'recommendation',label:t.recommendation},{key:'evaluator_notes',label:t.evaluatorNotes}]}/></>}
       {isAdmin && <AuditLogPanel auditLogs={auditLogs} staff={staff} t={t}/>}
     </>}
 
-    {activeTab === 'staff' && isOwner && <StaffManagement staff={staff} branches={branches} onSaved={load} t={t} currentProfile={profile}/>}
+    {activeTab === 'staff' && isControlAdmin && <StaffManagement staff={staff} branches={branches} onSaved={load} t={t} currentProfile={profile}/>}
 
     {edit&&<EditForm type={edit.type} row={edit.row} onClose={()=>setEdit(null)} onSaved={load} lang={lang}/>}
   </>
@@ -1496,6 +1541,7 @@ function App() {
   if(!session)return <Login lang={lang} setLang={setLang}/>
   if(profileError)return <div className="login-page"><div className="login-card"><h2>Profile Error</h2><p className="error">{profileError}</p><button onClick={()=>supabase.auth.signOut()}>Logout</button></div></div>
   if(!profile)return <div className="loading">Loading profile...</div>
+  if((profile.status && profile.status !== 'active') || profile.active === false)return <div className="login-page"><div className="login-card"><h2>Account inactive</h2><p className="error">This account is inactive. Please contact the Owner or Fitness Director.</p><button onClick={()=>supabase.auth.signOut()}>Logout</button></div></div>
   return <Layout profile={profile} lang={lang} setLang={setLang}><Dashboard profile={profile} lang={lang}/></Layout>
 }
 
