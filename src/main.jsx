@@ -47,7 +47,7 @@ const TEXT = {
     tabOverview: 'Overview', tabTrainerData: 'بيانات المدربين', tabInputs: 'إدخال البيانات', tabReports: 'التقارير', tabStaff: 'إدارة الفريق',
     searchPlaceholder: 'بحث بالاسم / الهاتف / الملاحظات...', exportCsv: 'تصدير CSV', auditLog: 'سجل التعديلات',
     clientFollowup: 'متابعة العميل', lastContactDate: 'آخر تواصل', nextFollowupDate: 'ميعاد المتابعة القادم', followupNotes: 'ملاحظات المتابعة', needDirectorSupport: 'يحتاج تدخل المدير؟',
-    reception: 'الريسيبشن', sales: 'السيلز', receptionLog: 'تقرير الريسيبشن', salesLead: 'Lead سيلز', addReceptionLog: 'إضافة تقرير ريسيبشن', addSalesLead: 'إضافة Lead سيلز', visitorName: 'اسم الزائر / العميل', leadName: 'اسم العميل', source: 'المصدر', interest: 'الاهتمام', outcome: 'النتيجة', inquiryType: 'نوع الاستفسار', handledBy: 'تم بواسطة', nextAction: 'الخطوة القادمة', assignedCoach: 'الكوتش المستلم', assignRotationToCoach: 'توزيع العميل على كوتش', saveReceptionLog: 'حفظ تقرير الريسيبشن', saveSalesLead: 'حفظ Lead السيلز', receptionSaved: 'تم حفظ تقرير الريسيبشن بنجاح.', salesSaved: 'تم حفظ Lead السيلز بنجاح.', deleteReports: 'حذف التقارير',
+    reception: 'الريسيبشن', sales: 'السيلز', receptionLog: 'تقرير الريسيبشن', salesLead: 'Lead سيلز', addReceptionLog: 'إضافة تقرير ريسيبشن', addSalesLead: 'إضافة Lead سيلز', visitorName: 'اسم الزائر / العميل', leadName: 'اسم العميل', source: 'المصدر', interest: 'الاهتمام', outcome: 'النتيجة', inquiryType: 'نوع الاستفسار', handledBy: 'تم بواسطة', nextAction: 'الخطوة القادمة', assignedCoach: 'الكوتش المستلم', assignRotationToCoach: 'توزيع العميل على كوتش', saveReceptionLog: 'حفظ تقرير الريسيبشن', saveSalesLead: 'حفظ Lead السيلز', receptionSaved: 'تم حفظ تقرير الريسيبشن بنجاح.', salesSaved: 'تم حفظ Lead السيلز بنجاح.', deleteReports: 'حذف التقارير', addClientPage: 'إضافة عميل جديد', clientFile: 'ملف العميل', clientProfile: 'صفحة العميل', parq7: 'PAR-Q7', fitnessTest: 'Fitness Test', ptProgramFile: 'برنامج PT داخل ملف العميل', age: 'العمر', heightCm: 'الطول سم', weightKg: 'الوزن كجم', bloodPressure: 'ضغط الدم', restingHr: 'نبض الراحة', medicalHistory: 'تاريخ مرضي / إصابات', currentPain: 'ألم حالي', medications: 'أدوية', emergencyContact: 'رقم طوارئ', chestPain: 'ألم في الصدر أثناء المجهود', dizziness: 'دوخة أو فقدان اتزان', heartCondition: 'مشكلة بالقلب', bloodPressureIssue: 'مشكلة ضغط', boneJointIssue: 'مشكلة عظام أو مفاصل', doctorRestriction: 'منع طبي من التمرين', otherMedical: 'مشكلة صحية أخرى', pushupTest: 'Push-up Test', plankTest: 'Plank Test', squatTest: 'Squat Test', flexibilityTest: 'Flexibility Test', cardioTest: 'Cardio Test', postureNotes: 'Posture Notes', clearanceStatus: 'حالة السماح بالتمرين', clearanceOk: 'مسموح بالتمرين', clearanceReview: 'محتاج مراجعة / متابعة', latestPtPrograms: 'برامج PT الخاصة بالعميل', selectClientFile: 'اختر عميل لفتح ملفه',
     entityType: 'نوع البيانات', action: 'الإجراء', changedBy: 'تم بواسطة', changedAt: 'وقت التعديل'
   },
   en: {
@@ -92,7 +92,7 @@ const TEXT = {
     tabOverview: 'Overview', tabTrainerData: 'Trainer Data', tabInputs: 'Data Entry', tabReports: 'Reports', tabStaff: 'Staff Management',
     searchPlaceholder: 'Search by name / phone / notes...', exportCsv: 'Export CSV', auditLog: 'Audit Log',
     clientFollowup: 'Client Follow-up', lastContactDate: 'Last Contact', nextFollowupDate: 'Next Follow-up', followupNotes: 'Follow-up Notes', needDirectorSupport: 'Need Director Support?',
-    reception: 'Reception', sales: 'Sales', receptionLog: 'Reception Log', salesLead: 'Sales Lead', addReceptionLog: 'Add Reception Log', addSalesLead: 'Add Sales Lead', visitorName: 'Visitor / Client Name', leadName: 'Client Name', source: 'Source', interest: 'Interest', outcome: 'Outcome', inquiryType: 'Inquiry Type', handledBy: 'Handled By', nextAction: 'Next Action', assignedCoach: 'Assigned Coach', assignRotationToCoach: 'Assign Rotation to Coach', saveReceptionLog: 'Save Reception Log', saveSalesLead: 'Save Sales Lead', receptionSaved: 'Reception log saved successfully.', salesSaved: 'Sales lead saved successfully.', deleteReports: 'Delete Reports',
+    reception: 'Reception', sales: 'Sales', receptionLog: 'Reception Log', salesLead: 'Sales Lead', addReceptionLog: 'Add Reception Log', addSalesLead: 'Add Sales Lead', visitorName: 'Visitor / Client Name', leadName: 'Client Name', source: 'Source', interest: 'Interest', outcome: 'Outcome', inquiryType: 'Inquiry Type', handledBy: 'Handled By', nextAction: 'Next Action', assignedCoach: 'Assigned Coach', assignRotationToCoach: 'Assign Rotation to Coach', saveReceptionLog: 'Save Reception Log', saveSalesLead: 'Save Sales Lead', receptionSaved: 'Reception log saved successfully.', salesSaved: 'Sales lead saved successfully.', deleteReports: 'Delete Reports', addClientPage: 'Add New Client', clientFile: 'Client File', clientProfile: 'Client Page', parq7: 'PAR-Q7', fitnessTest: 'Fitness Test', ptProgramFile: 'PT Program in Client File', age: 'Age', heightCm: 'Height cm', weightKg: 'Weight kg', bloodPressure: 'Blood Pressure', restingHr: 'Resting HR', medicalHistory: 'Medical History / Injuries', currentPain: 'Current Pain', medications: 'Medications', emergencyContact: 'Emergency Contact', chestPain: 'Chest pain during exercise', dizziness: 'Dizziness or loss of balance', heartCondition: 'Heart condition', bloodPressureIssue: 'Blood pressure issue', boneJointIssue: 'Bone or joint issue', doctorRestriction: 'Doctor restriction', otherMedical: 'Other medical issue', pushupTest: 'Push-up Test', plankTest: 'Plank Test', squatTest: 'Squat Test', flexibilityTest: 'Flexibility Test', cardioTest: 'Cardio Test', postureNotes: 'Posture Notes', clearanceStatus: 'Clearance Status', clearanceOk: 'Clear to train', clearanceReview: 'Needs review / follow-up', latestPtPrograms: 'Client PT Programs', selectClientFile: 'Choose a client to open file',
     entityType: 'Entity Type', action: 'Action', changedBy: 'Changed By', changedAt: 'Changed At'
   }
 }
@@ -323,54 +323,101 @@ function EditForm({ type, row, onClose, onSaved, lang }) {
 
 function AddClientForm({ profile, branches, onSaved, lang }) {
   const t=TEXT[lang]
+  const today = new Date().toISOString().slice(0,10)
   const clientInitial={
-    full_name:'',
-    phone:'',
-    goal:'Hypertrophy',
-    level:'beginner',
-    status:'active',
-    last_contact_date:'',
-    next_followup_date:'',
-    need_director_support:'no',
-    followup_notes:''
+    full_name:'', phone:'', age:'', height_cm:'', weight_kg:'', emergency_contact:'',
+    goal:'Hypertrophy', level:'beginner', status:'active',
+    last_contact_date:today, next_followup_date:'', need_director_support:'no', followup_notes:'',
+    medical_history:'', current_pain:'', medications:'',
+    chest_pain:'no', dizziness:'no', heart_condition:'no', blood_pressure_issue:'no', bone_joint_issue:'no', doctor_restriction:'no', other_medical:'no',
+    blood_pressure:'', resting_hr:'', pushup_test:'', plank_test:'', squat_test:'', flexibility_test:'', cardio_test:'', posture_notes:'',
+    program_name:'Foundation PT Program', duration_weeks:4, exercises:'', program_notes:''
   }
   const [form,setForm,draftSaved,clearDraft]=useAutoSavedForm(`gymzaman_draft_client_${profile.id}`, clientInitial)
   const [msg,setMsg]=useState('')
   function f(k,v){setForm(p=>({...p,[k]:v}))}
+  const parqAnswers = ['chest_pain','dizziness','heart_condition','blood_pressure_issue','bone_joint_issue','doctor_restriction','other_medical']
+  const needsReview = parqAnswers.some(k => form[k] === 'yes')
   async function submit(e){
     e.preventDefault()
+    const parq7 = {
+      chest_pain: form.chest_pain, dizziness: form.dizziness, heart_condition: form.heart_condition,
+      blood_pressure_issue: form.blood_pressure_issue, bone_joint_issue: form.bone_joint_issue,
+      doctor_restriction: form.doctor_restriction, other_medical: form.other_medical,
+      clearance_status: needsReview ? 'review' : 'clear', completed_at: new Date().toISOString()
+    }
+    const fitness_test = {
+      blood_pressure: form.blood_pressure, resting_hr: form.resting_hr, pushup_test: form.pushup_test,
+      plank_test: form.plank_test, squat_test: form.squat_test, flexibility_test: form.flexibility_test,
+      cardio_test: form.cardio_test, posture_notes: form.posture_notes, completed_at: new Date().toISOString()
+    }
     const payload = {
-      full_name:form.full_name,
-      phone:form.phone,
-      goal:form.goal,
-      level:form.level,
-      status:form.status,
-      branch_id:profile.branch_id||branches[0]?.id,
-      assigned_trainer_id:profile.role==='trainer'?profile.id:null,
-      created_by:profile.id,
-      last_contact_date: form.last_contact_date || null,
-      next_followup_date: form.next_followup_date || null,
-      need_director_support: form.need_director_support === 'yes',
-      followup_notes: form.followup_notes
+      full_name:form.full_name, phone:form.phone, goal:form.goal, level:form.level, status:form.status,
+      branch_id:profile.branch_id||branches[0]?.id, assigned_trainer_id:profile.role==='trainer'?profile.id:null, created_by:profile.id,
+      age: form.age ? Number(form.age) : null, height_cm: form.height_cm ? Number(form.height_cm) : null, weight_kg: form.weight_kg ? Number(form.weight_kg) : null,
+      emergency_contact: form.emergency_contact, medical_history: form.medical_history, current_pain: form.current_pain, medications: form.medications,
+      parq7, fitness_test,
+      last_contact_date: form.last_contact_date || null, next_followup_date: form.next_followup_date || null,
+      need_director_support: form.need_director_support === 'yes' || needsReview, followup_notes: form.followup_notes
     }
     const {data,error}=await supabase.from('clients').insert(payload).select('id').single()
-    if(error)setMsg(error.message)
-    else{
-      await logAudit(profile.id, 'insert', 'client', data?.id, { email: profile.email, client: form.full_name })
-      setMsg(t.clientSaved)
-      clearDraft(clientInitial)
-      onSaved()
+    if(error){ setMsg(error.message); return }
+    if(form.exercises || form.program_name){
+      await supabase.from('pt_programs').insert({
+        client_id: data.id, trainer_id: profile.id, branch_id: profile.branch_id || branches[0]?.id,
+        program_name: form.program_name || 'PT Program', goal: form.goal, duration_weeks: Number(form.duration_weeks || 4),
+        exercises: form.exercises, notes: form.program_notes, status: 'active'
+      })
     }
+    await logAudit(profile.id, 'insert', 'client_file', data?.id, { client: form.full_name, parq_clearance: parq7.clearance_status })
+    setMsg(t.clientSaved)
+    clearDraft(clientInitial)
+    onSaved()
   }
-  return <div className="card compact-card"><h3><PlusCircle size={18}/>{t.addClient}</h3><form className="grid-form simple-form" onSubmit={submit}>
+  const yesNo = <><option value="no">no</option><option value="yes">yes</option></>
+  return <div className="card compact-card client-intake-card"><h3><PlusCircle size={18}/>{t.addClientPage}</h3><form className="grid-form simple-form" onSubmit={submit}>
+    <div className="section-title full">{t.clientProfile}</div>
     <div><label>{t.clientName}</label><input required value={form.full_name} onChange={e=>f('full_name',e.target.value)}/></div>
     <div><label>{t.phone}</label><input value={form.phone} onChange={e=>f('phone',e.target.value)}/></div>
+    <div><label>{t.age}</label><input type="number" value={form.age} onChange={e=>f('age',e.target.value)}/></div>
+    <div><label>{t.heightCm}</label><input type="number" value={form.height_cm} onChange={e=>f('height_cm',e.target.value)}/></div>
+    <div><label>{t.weightKg}</label><input type="number" value={form.weight_kg} onChange={e=>f('weight_kg',e.target.value)}/></div>
+    <div><label>{t.emergencyContact}</label><input value={form.emergency_contact} onChange={e=>f('emergency_contact',e.target.value)}/></div>
     <div><label>{t.goal}</label><input value={form.goal} onChange={e=>f('goal',e.target.value)}/></div>
     <div><label>{t.level}</label><select value={form.level} onChange={e=>f('level',e.target.value)}><option>beginner</option><option>intermediate</option><option>advanced</option></select></div>
     <div><label>{t.status}</label><select value={form.status} onChange={e=>f('status',e.target.value)}><option>active</option><option>follow_up</option><option>need_support</option><option>inactive</option></select></div>
     <div><label>{t.lastContactDate}</label><input type="date" value={form.last_contact_date} onChange={e=>f('last_contact_date',e.target.value)}/></div>
     <div><label>{t.nextFollowupDate}</label><input type="date" value={form.next_followup_date} onChange={e=>f('next_followup_date',e.target.value)}/></div>
     <div><label>{t.needDirectorSupport}</label><select value={form.need_director_support} onChange={e=>f('need_director_support',e.target.value)}><option value="no">no</option><option value="yes">yes</option></select></div>
+    <div className="full"><label>{t.medicalHistory}</label><textarea value={form.medical_history} onChange={e=>f('medical_history',e.target.value)}/></div>
+    <div><label>{t.currentPain}</label><input value={form.current_pain} onChange={e=>f('current_pain',e.target.value)}/></div>
+    <div><label>{t.medications}</label><input value={form.medications} onChange={e=>f('medications',e.target.value)}/></div>
+
+    <div className="section-title full">{t.parq7}</div>
+    <div><label>{t.chestPain}</label><select value={form.chest_pain} onChange={e=>f('chest_pain',e.target.value)}>{yesNo}</select></div>
+    <div><label>{t.dizziness}</label><select value={form.dizziness} onChange={e=>f('dizziness',e.target.value)}>{yesNo}</select></div>
+    <div><label>{t.heartCondition}</label><select value={form.heart_condition} onChange={e=>f('heart_condition',e.target.value)}>{yesNo}</select></div>
+    <div><label>{t.bloodPressureIssue}</label><select value={form.blood_pressure_issue} onChange={e=>f('blood_pressure_issue',e.target.value)}>{yesNo}</select></div>
+    <div><label>{t.boneJointIssue}</label><select value={form.bone_joint_issue} onChange={e=>f('bone_joint_issue',e.target.value)}>{yesNo}</select></div>
+    <div><label>{t.doctorRestriction}</label><select value={form.doctor_restriction} onChange={e=>f('doctor_restriction',e.target.value)}>{yesNo}</select></div>
+    <div><label>{t.otherMedical}</label><select value={form.other_medical} onChange={e=>f('other_medical',e.target.value)}>{yesNo}</select></div>
+    <div className={needsReview ? 'error full' : 'success full'}>{t.clearanceStatus}: {needsReview ? t.clearanceReview : t.clearanceOk}</div>
+
+    <div className="section-title full">{t.fitnessTest}</div>
+    <div><label>{t.bloodPressure}</label><input value={form.blood_pressure} onChange={e=>f('blood_pressure',e.target.value)} placeholder="120/80"/></div>
+    <div><label>{t.restingHr}</label><input value={form.resting_hr} onChange={e=>f('resting_hr',e.target.value)} placeholder="72 bpm"/></div>
+    <div><label>{t.pushupTest}</label><input value={form.pushup_test} onChange={e=>f('pushup_test',e.target.value)} placeholder="reps"/></div>
+    <div><label>{t.plankTest}</label><input value={form.plank_test} onChange={e=>f('plank_test',e.target.value)} placeholder="seconds"/></div>
+    <div><label>{t.squatTest}</label><input value={form.squat_test} onChange={e=>f('squat_test',e.target.value)} placeholder="reps / notes"/></div>
+    <div><label>{t.flexibilityTest}</label><input value={form.flexibility_test} onChange={e=>f('flexibility_test',e.target.value)} /></div>
+    <div><label>{t.cardioTest}</label><input value={form.cardio_test} onChange={e=>f('cardio_test',e.target.value)} /></div>
+    <div className="full"><label>{t.postureNotes}</label><textarea value={form.posture_notes} onChange={e=>f('posture_notes',e.target.value)}/></div>
+
+    <div className="section-title full">{t.ptProgramFile}</div>
+    <div><label>{t.programName}</label><input value={form.program_name} onChange={e=>f('program_name',e.target.value)}/></div>
+    <div><label>{t.duration}</label><input type="number" value={form.duration_weeks} onChange={e=>f('duration_weeks',e.target.value)}/></div>
+    <div className="full"><label>{t.exercises}</label><textarea value={form.exercises} onChange={e=>f('exercises',e.target.value)} placeholder={'Day 1: Push\nDay 2: Pull\nDay 3: Legs'}/></div>
+    <div className="full"><label>{t.notes}</label><textarea value={form.program_notes} onChange={e=>f('program_notes',e.target.value)}/></div>
     <div className="full"><label>{t.followupNotes}</label><textarea value={form.followup_notes} onChange={e=>f('followup_notes',e.target.value)}/></div>
     {draftSaved && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}{msg && <div className="success full">{msg}</div>}<button>{t.saveClient}</button>
   </form></div>
@@ -523,6 +570,33 @@ function SeniorDailyReportForm({ profile, onSaved, lang }) {
   )
 }
 
+
+function ClientFilePanel({ client, programs, trainerName, t }) {
+  if (!client) return <div className="card"><h3>{t.clientFile}</h3><p className="muted">{t.selectClientFile}</p></div>
+  const parq = client.parq7 || {}
+  const fit = client.fitness_test || {}
+  const clientPrograms = programs.filter(p => p.client_id === client.id)
+  const infoRows = [
+    [t.clientName, client.full_name], [t.phone, client.phone], [t.age, client.age], [t.heightCm, client.height_cm], [t.weightKg, client.weight_kg],
+    [t.goal, client.goal], [t.level, client.level], [t.status, client.status], [t.trainer, trainerName || '-'], [t.emergencyContact, client.emergency_contact],
+    [t.medicalHistory, client.medical_history], [t.currentPain, client.current_pain], [t.medications, client.medications]
+  ]
+  const parqRows = [
+    [t.chestPain, parq.chest_pain], [t.dizziness, parq.dizziness], [t.heartCondition, parq.heart_condition],
+    [t.bloodPressureIssue, parq.blood_pressure_issue], [t.boneJointIssue, parq.bone_joint_issue], [t.doctorRestriction, parq.doctor_restriction],
+    [t.otherMedical, parq.other_medical], [t.clearanceStatus, parq.clearance_status === 'review' ? t.clearanceReview : t.clearanceOk]
+  ]
+  const fitRows = [
+    [t.bloodPressure, fit.blood_pressure], [t.restingHr, fit.resting_hr], [t.pushupTest, fit.pushup_test], [t.plankTest, fit.plank_test],
+    [t.squatTest, fit.squat_test], [t.flexibilityTest, fit.flexibility_test], [t.cardioTest, fit.cardio_test], [t.postureNotes, fit.posture_notes]
+  ]
+  const MiniTable = ({title, rows}) => <div className="mini-section"><h4>{title}</h4><div className="table-wrap"><table><tbody>{rows.map(([k,v],i)=><tr key={i}><th>{k}</th><td>{String(v ?? '-')}</td></tr>)}</tbody></table></div></div>
+  return <div className="card client-file-card"><h3><UserRound size={18}/>{t.clientFile}: {client.full_name}</h3>
+    <div className="client-file-grid"><MiniTable title={t.clientProfile} rows={infoRows}/><MiniTable title={t.parq7} rows={parqRows}/><MiniTable title={t.fitnessTest} rows={fitRows}/></div>
+    <h4>{t.latestPtPrograms}</h4>
+    {clientPrograms.length === 0 ? <p className="muted">{t.noData}</p> : <div className="table-wrap"><table><thead><tr><th>{t.programName}</th><th>{t.goal}</th><th>{t.duration}</th><th>{t.exercises}</th><th>{t.notes}</th></tr></thead><tbody>{clientPrograms.map(p => <tr key={p.id}><td>{p.program_name}</td><td>{p.goal}</td><td>{p.duration_weeks}</td><td>{p.exercises}</td><td>{p.notes}</td></tr>)}</tbody></table></div>}
+  </div>
+}
 
 function TrainerFilter({ trainers, selectedTrainerId, setSelectedTrainerId, t }) {
   return <div className="card filter-card"><h3><Search size={18}/>{t.filterByTrainer}</h3><select value={selectedTrainerId} onChange={e=>setSelectedTrainerId(e.target.value)}><option value="all">{t.allTrainers}</option>{trainers.map(tr=><option key={tr.id} value={tr.id}>{displayCoachName(tr)}</option>)}</select></div>
@@ -883,7 +957,7 @@ function TrainerProfilePanel({ trainer, branches, clients, logs, programs, atten
         <div><span>{t.attendanceScore}</span><b>{auto.attendanceScore}%</b></div>
         <div><span>{t.reportingScore}</span><b>{auto.reportingScore}%</b></div>
       </div>
-      <Table title={t.clients} rows={trainerClients.slice(0, 10)} canManage={false} t={t} columns={[{key:'full_name',label:t.clientName},{key:'phone',label:t.phone},{key:'goal',label:t.goal},{key:'status',label:t.status},{key:'next_followup_date',label:t.nextFollowupDate}]} />
+      <Table title={t.clients} rows={trainerClients.slice(0, 10)} canManage={false} t={t} columns={[{key:'full_name',label:t.clientName},{key:'phone',label:t.phone},{key:'age',label:t.age},{key:'weight_kg',label:t.weightKg},{key:'goal',label:t.goal},{key:'status',label:t.status},{key:'next_followup_date',label:t.nextFollowupDate}]} />
       <Table title={t.attendance} rows={trainerAttendance.slice(0, 10)} canManage={false} t={t} columns={[{key:'attendance_date',label:t.date},{key:'shift',label:t.shift},{key:'check_in',label:t.checkIn},{key:'check_out',label:t.checkOut},{key:'late_minutes',label:t.lateMinutes},{key:'overtime_minutes',label:t.overtimeMinutes}]} />
       <Table title={t.logs} rows={trainerLogs.slice(0, 10)} canManage={false} t={t} columns={[{key:'log_date',label:t.date},{key:'shift',label:t.shift},{key:'rotation_count',label:t.rotation},{key:'pt_sessions_count',label:t.ptSessions},{key:'free_service_count',label:t.freeService},{key:'notes',label:t.notes}]} />
       <Table title={t.programs} rows={trainerPrograms.slice(0, 10)} canManage={false} t={t} columns={[{key:'program_name',label:t.programName},{key:'goal',label:t.goal},{key:'duration_weeks',label:t.duration},{key:'status',label:t.status}]} />
@@ -1184,7 +1258,7 @@ function ReceptionLogForm({ profile, onSaved, lang, staff = [] }) {
   </form></div>
 }
 
-function SalesLeadForm({ profile, onSaved, lang }) {
+function SalesLeadForm({ profile, onSaved, lang, staff = [] }) {
   const t = TEXT[lang]
   const today = new Date().toISOString().slice(0,10)
   const initial = { lead_date: today, lead_name: '', phone: '', source: 'walk_in', interest: 'membership', status: 'new', next_followup_date: '', next_action: '', notes: '' }
@@ -1228,7 +1302,7 @@ function SalesLeadForm({ profile, onSaved, lang }) {
 function Dashboard({ profile, lang }) {
   const t=TEXT[lang]
   const [clients,setClients]=useState([]), [logs,setLogs]=useState([]), [attendanceLogs,setAttendanceLogs]=useState([]), [branches,setBranches]=useState([]), [programs,setPrograms]=useState([]), [staff,setStaff]=useState([]), [seniorReports,setSeniorReports]=useState([]), [headReports,setHeadReports]=useState([]), [evaluations,setEvaluations]=useState([]), [receptionLogs,setReceptionLogs]=useState([]), [salesLeads,setSalesLeads]=useState([]), [auditLogs,setAuditLogs]=useState([])
-  const [loading,setLoading]=useState(true), [notice,setNotice]=useState(''), [edit,setEdit]=useState(null), [selectedTrainerId,setSelectedTrainerId]=useState('all'), [activeTab,setActiveTab]=useState('overview'), [searchQuery,setSearchQuery]=useState('')
+  const [loading,setLoading]=useState(true), [notice,setNotice]=useState(''), [edit,setEdit]=useState(null), [selectedTrainerId,setSelectedTrainerId]=useState('all'), [selectedClientId,setSelectedClientId]=useState(''), [activeTab,setActiveTab]=useState('overview'), [searchQuery,setSearchQuery]=useState('')
   const isOwner=profile.role==='owner', isAdmin=profile.role==='owner'||profile.role==='fitness_director', isTrainer=profile.role==='trainer', isSenior=profile.role==='senior', isHeadCoach=profile.role==='head_coach', isBranchLeader=['senior','head_coach'].includes(profile.role), isReception=profile.role==='reception', isSales=profile.role==='sales'
 
   async function load(){
@@ -1275,6 +1349,7 @@ function Dashboard({ profile, lang }) {
     : isBranchLeader
       ? clients.filter(c => c.branch_id === profile.branch_id)
       : clients.filter(c => c.assigned_trainer_id === profile.id || c.created_by === profile.id)
+  const selectedClient = selectedClientId ? visibleClients.find(c => c.id === selectedClientId) : visibleClients[0]
   const visibleLogs = scopeByTrainer(logs)
   const visibleProgramsRaw = scopeByTrainer(programs)
   const visibleProgramsBase = visibleProgramsRaw.map(p=>({...p,client_name:clientMapAll[p.client_id]||'-', trainer_name: trainerMap[p.trainer_id] || '-'}))
@@ -1315,6 +1390,7 @@ function Dashboard({ profile, lang }) {
   const title=profile.role==='owner'?t.owner:profile.role==='fitness_director'?t.director:profile.role==='head_coach'?t.headCoachReport:profile.role==='senior'?t.seniorReport:profile.role==='reception'?t.reception:profile.role==='sales'?t.sales:profile.role==='trainer'?t.trainer:t.dashboard
   const tabs = isOwner ? [
     {key:'overview', label:t.tabOverview},
+    {key:'addClient', label:t.addClientPage},
     {key:'trainerData', label:t.tabTrainerData},
     {key:'reports', label:t.tabReports},
     {key:'reception', label:t.reception},
@@ -1322,10 +1398,12 @@ function Dashboard({ profile, lang }) {
     {key:'staff', label:t.tabStaff}
   ] : isAdmin ? [
     {key:'overview', label:t.tabOverview},
+    {key:'addClient', label:t.addClientPage},
     {key:'trainerData', label:t.tabTrainerData},
     {key:'reports', label:t.tabReports}
   ] : [
     {key:'overview', label:t.tabOverview},
+    ...(!['reception','sales'].includes(profile.role) ? [{key:'addClient', label:t.addClientPage}] : []),
     {key:'inputs', label:t.tabInputs},
     ...(['senior','head_coach'].includes(profile.role) ? [{key:'trainerData', label:t.tabTrainerData}] : []),
     ...(profile.role==='reception' ? [{key:'reception', label:t.reception}] : []),
@@ -1350,14 +1428,22 @@ function Dashboard({ profile, lang }) {
       {isTrainer && <TrainerProfilePanel trainer={profile} showEmail={false} branches={branches} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} evaluations={evaluations} t={t}/>}
     </>}
 
+    {activeTab === 'addClient' && <>
+      {(isTrainer||isAdmin||isBranchLeader)&&<AddClientForm profile={profile} branches={branches} onSaved={load} lang={lang}/>} 
+      {visibleClients.length > 0 && <div className="card filter-card"><h3><Search size={18}/>{t.selectClientFile}</h3><select value={selectedClient?.id || ''} onChange={e=>setSelectedClientId(e.target.value)}>{visibleClients.map(c => <option key={c.id} value={c.id}>{c.full_name}</option>)}</select></div>}
+      <ClientFilePanel client={selectedClient} programs={programs} trainerName={trainerMap[selectedClient?.assigned_trainer_id]} t={t}/>
+    </>}
+
     {activeTab === 'trainerData' && <>
       {(isAdmin || isBranchLeader) && <TrainerFilter trainers={trainers} selectedTrainerId={selectedTrainerId} setSelectedTrainerId={setSelectedTrainerId} t={t}/>}
       {isBranchLeader && <Table title={t.staffManagement} rows={branchStaff.filter(r => rowMatches(r, searchQuery))} canManage={false} t={t} columns={[{key:'full_name',label:t.fullName},{key:'role',label:t.role},{key:'status',label:t.status}]}/>}
       {(isAdmin || isBranchLeader) && selectedTrainer && <TrainerProfilePanel trainer={selectedTrainer} showEmail={isAdmin} branches={branches} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} evaluations={evaluations} t={t}/>}
       {((isAdmin || isBranchLeader) && selectedTrainer) && <CoachEvaluationForm profile={profile} targetTrainerId={selectedTrainer.id} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
       {isBranchLeader && !selectedTrainer && <CoachEvaluationForm profile={profile} targetTrainerId={''} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
+      {visibleClients.length > 0 && <div className="card filter-card"><h3><Search size={18}/>{t.selectClientFile}</h3><select value={selectedClient?.id || ''} onChange={e=>setSelectedClientId(e.target.value)}>{visibleClients.map(c => <option key={c.id} value={c.id}>{c.full_name}</option>)}</select></div>}
+      <ClientFilePanel client={selectedClient} programs={programs} trainerName={trainerMap[selectedClient?.assigned_trainer_id]} t={t}/>
       <div className="table-actions"><ExportButton rows={visibleClientsRows} filename="clients.csv" t={t}/></div>
-      <Table title={isTrainer?t.myClients:t.clients} rows={visibleClientsRows} canEdit={isAdmin || isBranchLeader} canDelete={isOwner} onEdit={r=>setEdit({type:'client',row:r})} onDelete={r=>del('clients',r,r.full_name)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'full_name',label:t.clientName},{key:'phone',label:t.phone},{key:'goal',label:t.goal},{key:'level',label:t.level},{key:'status',label:t.status},{key:'next_followup_date',label:t.nextFollowupDate},{key:'need_director_support',label:t.needDirectorSupport}]}/>
+      <Table title={isTrainer?t.myClients:t.clients} rows={visibleClientsRows} canEdit={isAdmin || isBranchLeader} canDelete={isOwner} onEdit={r=>setEdit({type:'client',row:r})} onDelete={r=>del('clients',r,r.full_name)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'full_name',label:t.clientName},{key:'phone',label:t.phone},{key:'age',label:t.age},{key:'weight_kg',label:t.weightKg},{key:'goal',label:t.goal},{key:'level',label:t.level},{key:'status',label:t.status},{key:'next_followup_date',label:t.nextFollowupDate},{key:'need_director_support',label:t.needDirectorSupport}]}/>
       <div className="table-actions"><ExportButton rows={visibleAttendance} filename="attendance.csv" t={t}/></div>
       <Table title={t.attendance} rows={visibleAttendance} canEdit={isAdmin || isBranchLeader} canDelete={isOwner} onEdit={r=>setEdit({type:'attendance',row:r})} onDelete={r=>del('attendance_logs',r,r.attendance_date)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'attendance_date',label:t.date},{key:'shift',label:t.shift},{key:'check_in',label:t.checkIn},{key:'check_out',label:t.checkOut},{key:'late_minutes',label:t.lateMinutes},{key:'overtime_minutes',label:t.overtimeMinutes},{key:'notes',label:t.notes}]}/>
       <Table title={isTrainer?t.myLogs:t.logs} rows={visibleLogsRows} canEdit={isAdmin || isBranchLeader} canDelete={isOwner} onEdit={r=>setEdit({type:'log',row:r})} onDelete={r=>del('trainer_daily_logs',r,r.log_date)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'log_date',label:t.date},{key:'shift',label:t.shift},{key:'rotation_count',label:t.rotation},{key:'pt_sessions_count',label:t.ptSessions},{key:'free_service_count',label:t.freeService},{key:'notes',label:t.notes}]}/>
@@ -1365,14 +1451,13 @@ function Dashboard({ profile, lang }) {
     </>}
 
     {activeTab === 'inputs' && <>
-      {(isTrainer||isAdmin||isBranchLeader)&&<AddClientForm profile={profile} branches={branches} onSaved={load} lang={lang}/>}
       {(isTrainer || isSenior || isHeadCoach)&&<AttendanceForm profile={profile} onSaved={load} lang={lang}/>}
       {isTrainer&&<DailyLogForm profile={profile} onSaved={load} lang={lang}/>}
       {isSenior&&<SeniorDailyReportForm profile={profile} onSaved={load} lang={lang}/>}
       {isHeadCoach && <HeadCoachDailyReportForm profile={profile} onSaved={load} lang={lang}/>}
       {isTrainer&&<PTProgramForm profile={profile} clients={visibleClients} onSaved={load} lang={lang}/>}
       {(isReception || isOwner) && <ReceptionLogForm profile={profile} staff={staff} onSaved={load} lang={lang}/>}
-      {(isSales || isOwner) && <SalesLeadForm profile={profile} onSaved={load} lang={lang}/>}
+      {(isSales || isOwner) && <SalesLeadForm profile={profile} staff={staff} onSaved={load} lang={lang}/>}
     </>}
 
     {activeTab === 'reception' && <>
@@ -1382,7 +1467,7 @@ function Dashboard({ profile, lang }) {
     </>}
 
     {activeTab === 'sales' && <>
-      {(isSales || isOwner) && <SalesLeadForm profile={profile} onSaved={load} lang={lang}/>}      
+      {(isSales || isOwner) && <SalesLeadForm profile={profile} staff={staff} onSaved={load} lang={lang}/>}      
       <div className="table-actions"><ExportButton rows={visibleSalesRows} filename="sales-leads.csv" t={t}/></div>
       <Table title={t.salesLead} rows={visibleSalesRows} canEdit={false} canDelete={isOwner} onDelete={r=>del('sales_leads',r,r.lead_name || r.lead_date)} t={t} columns={[...(isOwner?[{key:'handled_by_name',label:t.handledBy}]:[]),{key:'lead_date',label:t.date},{key:'lead_name',label:t.leadName},{key:'phone',label:t.phone},{key:'source',label:t.source},{key:'interest',label:t.interest},{key:'status',label:t.status},{key:'next_followup_date',label:t.nextFollowupDate},{key:'next_action',label:t.nextAction},{key:'notes',label:t.notes}]} />
     </>}
