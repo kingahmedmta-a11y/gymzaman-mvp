@@ -1834,9 +1834,7 @@ function Dashboard({ profile, lang }) {
 
     {activeTab === 'overview' && <>
       <section className="stats-grid"><StatCard title={isAdmin?t.todayLogs:t.myLogs} value={totals.logs} icon={<CalendarDays/>}/><StatCard title={isAdmin?t.rotationToday:t.myClients} value={isAdmin?totals.rotation:visibleClients.length} icon={<Users/>}/><StatCard title={isAdmin?t.ptToday:t.myPrograms} value={isAdmin?totals.pt:visiblePrograms.length} icon={<Dumbbell/>}/><StatCard title={t.freeToday} value={totals.free} icon={<ClipboardList/>}/></section>
-      {isAdmin && <div className="card note"><b>{t.adminNote}</b></div>}
-      {isControlAdmin && <SecurityStatusCard t={t}/>}
-      {isControlAdmin && <BackupPanel t={t} data={{clients, logs, attendanceLogs, programs, staff, seniorReports, headReports, evaluations, receptionLogs, salesLeads, auditLogs, coachShifts, coachRequests, targetPlans, trainerTasks}}/>}
+      {/* Clean dashboard: removed explanatory/security/backup cards from overview */}
       {(isAdmin || isBranchLeader) && <PerformanceDashboard staff={isAdmin?staff:branchStaff} clients={visibleClients} logs={visibleLogs} attendanceLogs={visibleAttendanceRaw} t={t}/>}
       {(isAdmin || isBranchLeader) && <AlertsPanel staff={isAdmin?staff:branchStaff} logs={visibleLogs} attendanceLogs={visibleAttendanceRaw} seniorReports={visibleSeniorReportsRaw} evaluations={visibleEvaluationsRaw} t={t}/>}
       {isAdmin && <BranchComparisonDashboard branches={branches} staff={staff} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} seniorReports={seniorReports} headReports={headReports} t={t}/>}
