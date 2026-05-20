@@ -271,7 +271,8 @@ function Layout({ profile, children, lang, setLang }) {
   const isControlAdmin = ['owner','fitness_director'].includes(profile?.role)
   const navItems = [
     { key: 'overview', label: t.dashboard, icon: <ShieldCheck size={18}/> },
-    { key: 'addClient', label: t.addClientPage || t.clients, icon: <Users size={18}/> },
+    { key: 'addClient', label: t.addClientPage || t.clients, icon: <Users size={18}/>, roles: ['trainer','senior','head_coach','owner'] },
+    { key: 'clients', label: t.clients, icon: <Users size={18}/>, roles: ['owner','fitness_director','senior','head_coach'] },
     { key: 'trainerData', label: t.tabTrainerData, icon: <Dumbbell size={18}/>, roles: ['owner','fitness_director','senior','head_coach'] },
     { key: 'attendancePage', label: t.attendancePage, icon: <CalendarDays size={18}/> },
     { key: 'shifts', label: t.shiftPlanner, icon: <CalendarDays size={18}/>, roles: ['owner','fitness_director'] },
@@ -1023,7 +1024,7 @@ function TrainerProfilePanel({ trainer, branches, clients, logs, programs, atten
         <div><span>{t.shift}</span><b>{isShiftOffDay(latestShift, todayISO()) ? t.offDay : (latestShift?.shift || latestShift?.shift_name || '-')}</b></div>
         <div><span>{t.expectedIn}</span><b>{latestShift?.expected_in || latestShift?.start_time || '-'}</b></div>
         <div><span>{t.expectedOut}</span><b>{latestShift?.expected_out || latestShift?.end_time || '-'}</b></div>
-        <div><span>{t.offDayWeekday}</span><b>{weekdayLabel(latestShift?.off_day_weekday, lang)}</b></div>
+        <div><span>{t.offDayWeekday}</span><b>{weekdayLabel(latestShift?.off_day_weekday || latestShift?.day_off_weekday || latestShift?.weekly_day_off, lang)}</b></div>
         <div><span>{t.totalDelayMinutes}</span><b>{attendanceSummary.late}</b></div>
         <div><span>{t.totalOvertimeMinutes}</span><b>{attendanceSummary.overtime}</b></div>
         <div><span>{t.totalPermissionMinutes}</span><b>{attendanceSummary.permissions}</b></div>
@@ -1031,7 +1032,7 @@ function TrainerProfilePanel({ trainer, branches, clients, logs, programs, atten
         <div><span>{t.trainerTasks}</span><b>{openTasks} / {doneTasks}</b></div>
         <div><span>{t.targetPlan}</span><b>{currentPlan?.target_month || '-'}</b></div>
       </div>
-      <Table title={t.shiftPlanner} rows={trainerShifts.slice(0, 12).map(s=>({...s, off_day_name: weekdayLabel(s.off_day_weekday, lang)}))} canManage={false} t={t} columns={[{key:'shift_date',label:t.date},{key:'shift',label:t.shift},{key:'expected_in',label:t.expectedIn},{key:'expected_out',label:t.expectedOut},{key:'is_off_day',label:t.offDay},{key:'off_day_name',label:t.offDayWeekday},{key:'notes',label:t.notes}]} />
+      <Table title={t.shiftPlanner} rows={trainerShifts.slice(0, 12).map(s=>({...s, off_day_name: weekdayLabel(s.off_day_weekday || s.day_off_weekday || s.weekly_day_off, lang)}))} canManage={false} t={t} columns={[{key:'shift_date',label:t.date},{key:'shift',label:t.shift},{key:'expected_in',label:t.expectedIn},{key:'expected_out',label:t.expectedOut},{key:'is_off_day',label:t.offDay},{key:'off_day_name',label:t.offDayWeekday},{key:'notes',label:t.notes}]} />
       <Table title={t.requests} rows={trainerRequests.slice(0, 12)} canManage={false} t={t} columns={[{key:'request_date',label:t.date},{key:'request_type',label:t.requestType},{key:'requested_minutes',label:t.requestedMinutes},{key:'amount',label:t.amount},{key:'status',label:t.approvalStatus},{key:'reason',label:t.reason}]} />
       <Table title={t.trainerTasks} rows={trainerTaskRows.slice(0, 12)} canManage={false} t={t} columns={[{key:'task_title',label:t.taskTitle},{key:'due_date',label:t.dueDate},{key:'priority',label:t.priority},{key:'status',label:t.taskStatus},{key:'task_details',label:t.taskDetails}]} />
       <Table title={t.targetPlan} rows={trainerPlans.slice(0, 8)} canManage={false} t={t} columns={[{key:'target_month',label:t.targetMonth},{key:'monthly_target',label:t.monthlyTarget},{key:'current_achievement',label:t.currentAchievement},{key:'action_plan',label:t.actionPlan},{key:'support_needed',label:t.supportNeeded}]} />
@@ -1457,9 +1458,11 @@ function isoWeekday(dateStr) {
 }
 function isShiftOffDay(shift, dateStr) {
   if (!shift) return false
-  if (shift.is_off_day || shift.is_day_off || shift.day_off) return true
-  if ((shift.applies_weekly || shift.repeat_weekly) && (shift.off_day_weekday || shift.day_off_weekday)) {
-    return (shift.off_day_weekday || shift.day_off_weekday) === isoWeekday(dateStr)
+  const explicitSameDate = shift.shift_date === dateStr && (shift.is_off_day || shift.is_day_off || shift.day_off)
+  if (explicitSameDate) return true
+  const weekly = shift.off_day_weekday || shift.day_off_weekday || shift.weekly_day_off
+  if ((shift.applies_weekly || shift.repeat_weekly) && weekly) {
+    return weekly === isoWeekday(dateStr)
   }
   return false
 }
@@ -1468,7 +1471,7 @@ function getRowName(row) { return row?.full_name || row?.name || row?.email || '
 function ShiftPlannerPage({ profile, staff, branches, shifts, onSaved, lang }) {
   const t = TEXT[lang]
   const trainers = staff.filter(s => ['trainer','senior','head_coach'].includes(s.role))
-  const initial = { trainer_id: trainers[0]?.id || '', shift_date: todayISO(), shift: 'PM', expected_in: '15:00', expected_out: '23:00', is_off_day: false, off_day_weekday: 'friday', applies_weekly: true, notes: '' }
+  const initial = { trainer_id: trainers[0]?.id || '', shift_date: todayISO(), shift: 'PM', expected_in: '15:00', expected_out: '23:00', off_day_weekday: 'friday', applies_weekly: true, notes: '' }
   const [form, setForm, draftSaved, clearDraft] = useAutoSavedForm(`gymzaman_shift_planner_${profile.id}`, initial)
   const [msg, setMsg] = useState('')
   useEffect(() => { if (!form.trainer_id && trainers[0]?.id) setForm(p => ({...p, trainer_id: trainers[0].id})) }, [staff.length])
@@ -1490,11 +1493,12 @@ function ShiftPlannerPage({ profile, staff, branches, shifts, onSaved, lang }) {
       shift_end: form.expected_out,
       official_in: form.expected_in,
       official_out: form.expected_out,
-      is_off_day: !!form.is_off_day,
-      is_day_off: !!form.is_off_day,
-      day_off: !!form.is_off_day,
+      is_off_day: false,
+      is_day_off: false,
+      day_off: false,
       off_day_weekday: form.off_day_weekday,
       day_off_weekday: form.off_day_weekday,
+      weekly_day_off: form.off_day_weekday,
       applies_weekly: !!form.applies_weekly,
       notes: form.notes,
       created_by: profile.id,
@@ -1508,7 +1512,7 @@ function ShiftPlannerPage({ profile, staff, branches, shifts, onSaved, lang }) {
     if (error) setMsg(error.message)
     else { await logAudit(profile.id, existing?.id ? 'update' : 'insert', 'coach_shift', data?.id, payload); setMsg(t.shiftSaved); clearDraft(initial); onSaved() }
   }
-  const rows = shifts.map(r => ({...r, trainer_name: displayCoachName(staff.find(s => s.id === r.trainer_id)), branch_name: branches.find(b => b.id === r.branch_id)?.name || r.branch_name || '-', off_day_name: weekdayLabel(r.off_day_weekday || r.day_off_weekday, lang)}))
+  const rows = shifts.map(r => ({...r, trainer_name: displayCoachName(staff.find(s => s.id === r.trainer_id)), branch_name: branches.find(b => b.id === r.branch_id)?.name || r.branch_name || '-', off_day_name: weekdayLabel(r.off_day_weekday || r.day_off_weekday || r.weekly_day_off, lang)}))
   return <>
     <div className="card section-intro"><h3><CalendarDays size={18}/>{t.shiftPlanner}</h3><p className="muted">جدول الشيفتات هنا ثابت: تحدد لكل كوتش شيفته ويوم الأجازة الأسبوعي مرة واحدة، ويتغير فقط لو حبيت تعدل شيفت أو يوم أجازة. طلب الأجازة/الإذن موجود في صفحة طلبات المدرب بشكل منفصل.</p></div>
     <div className="card compact-card"><h3>{t.addShift}</h3><form className="grid-form simple-form" onSubmit={submit}>
@@ -1519,8 +1523,7 @@ function ShiftPlannerPage({ profile, staff, branches, shifts, onSaved, lang }) {
       <div><label>{t.expectedOut}</label><input type="time" value={form.expected_out} onChange={e=>f('expected_out',e.target.value)}/></div>
       <div><label>{t.offDayWeekday}</label><select value={form.off_day_weekday} onChange={e=>f('off_day_weekday',e.target.value)}>{WEEKDAYS.map(d=><option key={d.value} value={d.value}>{lang==='ar'?d.ar:d.en}</option>)}</select></div>
       <div className="checkbox-line"><label><input type="checkbox" checked={!!form.applies_weekly} onChange={e=>f('applies_weekly',e.target.checked)}/> {t.appliesWeekly}</label></div>
-      <div className="checkbox-line"><label><input type="checkbox" checked={!!form.is_off_day} onChange={e=>f('is_off_day',e.target.checked)}/> {t.offDay}</label></div>
-      <p className="muted full">يوم الأجازة الأسبوعي جزء من جدول الشيفت الثابت. طلب الأجازة أو الإذن يتم من صفحة طلبات المدرب وليس من هنا.</p>
+      <p className="muted full">يوم الأجازة هنا يوم أسبوعي ثابت داخل جدول الشيفتات. طلب الأجازة أو الإذن يتم من صفحة طلبات المدرب بشكل منفصل.</p>
       <div className="full"><label>{t.notes}</label><textarea value={form.notes} onChange={e=>f('notes',e.target.value)}/></div>
       {draftSaved && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}{msg && <div className={msg.includes('success') || msg.includes('بنجاح') ? 'success full' : 'error full'}>{msg}</div>}
       <button>{t.save}</button>
@@ -1532,7 +1535,7 @@ function ShiftPlannerPage({ profile, staff, branches, shifts, onSaved, lang }) {
 function AttendancePunchPage({ profile, staff, shifts, attendanceLogs, requests=[], onSaved, lang, canViewAll=false }) {
   const t = TEXT[lang]
   const today = todayISO()
-  const myShift = shifts.find(s => s.trainer_id === profile.id && s.shift_date === today) || shifts.find(s => s.trainer_id === profile.id && (s.applies_weekly || s.repeat_weekly) && !s.is_off_day)
+  const myShift = shifts.find(s => s.trainer_id === profile.id && s.shift_date === today) || shifts.find(s => s.trainer_id === profile.id && (s.applies_weekly || s.repeat_weekly) && !(s.is_off_day || s.is_day_off || s.day_off))
   const myLog = attendanceLogs.find(a => a.trainer_id === profile.id && a.attendance_date === today)
   const [msg, setMsg] = useState('')
   async function punch(kind) {
@@ -1793,7 +1796,8 @@ function Dashboard({ profile, lang }) {
   const title=profile.role==='owner'?t.owner:profile.role==='fitness_director'?t.director:profile.role==='head_coach'?t.headCoachReport:profile.role==='senior'?t.seniorReport:profile.role==='reception'?t.reception:profile.role==='sales'?t.sales:profile.role==='trainer'?t.trainer:t.dashboard
   const tabs = isControlAdmin ? [
     {key:'overview', label:t.tabOverview},
-    {key:'addClient', label:t.addClientPage},
+    ...(profile.role === 'owner' ? [{key:'addClient', label:t.addClientPage}] : []),
+    {key:'clients', label:t.clients},
     {key:'trainerData', label:t.tabTrainerData},
     {key:'shifts', label:t.shiftPlanner},
     {key:'attendancePage', label:t.attendancePage},
@@ -1806,7 +1810,8 @@ function Dashboard({ profile, lang }) {
     {key:'staff', label:t.tabStaff}
   ] : [
     {key:'overview', label:t.tabOverview},
-    ...(!['reception','sales'].includes(profile.role) ? [{key:'addClient', label:t.addClientPage}] : []),
+    ...(['trainer','senior','head_coach','owner'].includes(profile.role) ? [{key:'addClient', label:t.addClientPage}] : []),
+    ...(['senior','head_coach'].includes(profile.role) ? [{key:'clients', label:t.clients}] : []),
     {key:'attendancePage', label:t.attendancePage},
     {key:'requests', label:t.requests},
     {key:'targetPlan', label:t.targetPlan},
@@ -1839,9 +1844,17 @@ function Dashboard({ profile, lang }) {
     </>}
 
     {activeTab === 'addClient' && <>
-      {(isTrainer||isAdmin||isBranchLeader)&&<AddClientForm profile={profile} branches={branches} onSaved={load} lang={lang}/>} 
+      {(isTrainer||isBranchLeader||profile.role==='owner')&&<AddClientForm profile={profile} branches={branches} onSaved={load} lang={lang}/>} 
       {visibleClients.length > 0 && <div className="card filter-card"><h3><Search size={18}/>{t.selectClientFile}</h3><select value={selectedClient?.id || ''} onChange={e=>setSelectedClientId(e.target.value)}>{visibleClients.map(c => <option key={c.id} value={c.id}>{c.full_name}</option>)}</select></div>}
       <ClientFilePanel client={selectedClient} programs={programs} trainerName={trainerMap[selectedClient?.assigned_trainer_id]} t={t}/>
+    </>}
+
+    {activeTab === 'clients' && (isControlAdmin || isBranchLeader) && <>
+      <div className="card section-intro"><h3><Users size={18}/>{t.clients}</h3><p className="muted">بيانات العملاء هنا للمتابعة فقط. إضافة العملاء تتم من حسابات الكباتن، والفيتنس ديركتور يراجع البيانات والملفات بدون إنشاء عميل جديد.</p></div>
+      {visibleClients.length > 0 && <div className="card filter-card"><h3><Search size={18}/>{t.selectClientFile}</h3><select value={selectedClient?.id || ''} onChange={e=>setSelectedClientId(e.target.value)}>{visibleClients.map(c => <option key={c.id} value={c.id}>{c.full_name}</option>)}</select></div>}
+      <ClientFilePanel client={selectedClient} programs={programs} trainerName={trainerMap[selectedClient?.assigned_trainer_id]} t={t}/>
+      <div className="table-actions"><ExportButton rows={visibleClientsRows} filename="clients.csv" t={t}/></div>
+      <Table title={t.clients} rows={visibleClientsRows} canEdit={isControlAdmin || isBranchLeader} canDelete={profile.role === 'owner'} onEdit={r=>setEdit({type:'client',row:r})} onDelete={r=>del('clients',r,r.full_name)} t={t} columns={[...((isControlAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'full_name',label:t.clientName},{key:'phone',label:t.phone},{key:'age',label:t.age},{key:'weight_kg',label:t.weightKg},{key:'goal',label:t.goal},{key:'level',label:t.level},{key:'status',label:t.status},{key:'next_followup_date',label:t.nextFollowupDate},{key:'need_director_support',label:t.needDirectorSupport}]}/>
     </>}
 
     {activeTab === 'trainerData' && <>
