@@ -99,7 +99,7 @@ const TEXT = {
 
 
 Object.assign(TEXT.ar, {
-  shiftPlanner: 'جدول الشيفتات', addShift: 'إضافة شيفت', offDay: 'يوم أجازة', shiftSaved: 'تم حفظ الشيفت بنجاح.',
+  shiftPlanner: 'جدول الشيفتات', addShift: 'إضافة شيفت', offDay: 'يوم أجازة', offDayWeekday: 'اختيار يوم الأجازة', appliesWeekly: 'يتكرر أسبوعيًا', shiftTemplate: 'قالب الشيفت', coachFullFile: 'ملف كامل لكل مدرب', openTrainerFile: 'فتح ملف المدرب', trainerDirectory: 'دليل المدربين', selectBranchFilter: 'فلترة حسب الفرع', allBranches: 'كل الفروع', professionalNote: 'كل مدرب له صفحة مستقلة تجمع الشيفتات والمهام والطلبات والحضور والتارجت والعملاء والتقييمات.', shiftSaved: 'تم حفظ الشيفت بنجاح.',
   attendancePage: 'تسجيل الحضور', punchIn: 'تسجيل حضور الآن', punchOut: 'تسجيل انصراف الآن', attendancePunchSaved: 'تم تسجيل الحضور/الانصراف تلقائيًا.', todayShift: 'شيفت اليوم', noShiftToday: 'لا يوجد شيفت مسجل لك اليوم.',
   requests: 'طلبات المدرب', requestType: 'نوع الطلب', latePermission: 'إذن تأخير', vacationRequest: 'طلب أجازة', advanceRequest: 'طلب سلفة', requestDate: 'تاريخ الطلب', requestedMinutes: 'الدقائق المطلوبة', amount: 'المبلغ', reason: 'السبب', requestSaved: 'تم حفظ الطلب بنجاح.', approvalStatus: 'حالة الموافقة',
   targetPlan: 'خطة تحقيق التارجت', targetMonth: 'شهر التارجت', monthlyTarget: 'التارجت الشهري', currentAchievement: 'المحقق حاليًا', actionPlan: 'خطة التنفيذ', expectedChallenges: 'التحديات المتوقعة', supportNeeded: 'الدعم المطلوب', targetPlanSaved: 'تم حفظ خطة التارجت بنجاح.',
@@ -109,7 +109,7 @@ Object.assign(TEXT.ar, {
   separatePagesNote: 'كل قسم في صفحة مستقلة وواضحة، والحفظ والتجميع يتم تلقائيًا.'
 })
 Object.assign(TEXT.en, {
-  shiftPlanner: 'Shift Planner', addShift: 'Add Shift', offDay: 'Off Day', shiftSaved: 'Shift saved successfully.',
+  shiftPlanner: 'Shift Planner', addShift: 'Add Shift', offDay: 'Off Day', offDayWeekday: 'Choose Off Day', appliesWeekly: 'Repeat Weekly', shiftTemplate: 'Shift Template', coachFullFile: 'Full Coach File', openTrainerFile: 'Open Coach File', trainerDirectory: 'Trainer Directory', selectBranchFilter: 'Filter by Branch', allBranches: 'All Branches', professionalNote: 'Each coach has a separate professional file combining shifts, tasks, requests, attendance, target plans, clients, and evaluations.', shiftSaved: 'Shift saved successfully.',
   attendancePage: 'Attendance Punch', punchIn: 'Check In Now', punchOut: 'Check Out Now', attendancePunchSaved: 'Attendance updated automatically.', todayShift: "Today's Shift", noShiftToday: 'No shift is scheduled for you today.',
   requests: 'Coach Requests', requestType: 'Request Type', latePermission: 'Late Permission', vacationRequest: 'Vacation Request', advanceRequest: 'Advance Request', requestDate: 'Request Date', requestedMinutes: 'Requested Minutes', amount: 'Amount', reason: 'Reason', requestSaved: 'Request saved successfully.', approvalStatus: 'Approval Status',
   targetPlan: 'Monthly Target Plan', targetMonth: 'Target Month', monthlyTarget: 'Monthly Target', currentAchievement: 'Current Achievement', actionPlan: 'Action Plan', expectedChallenges: 'Expected Challenges', supportNeeded: 'Support Needed', targetPlanSaved: 'Target plan saved successfully.',
@@ -965,43 +965,76 @@ function calculateAutomaticTrainerScore(trainer, logs, attendanceLogs, evaluatio
   return { automaticScore, activityScore, attendanceScore, reportingScore, headCoachScore, totalPt, totalFree, totalRotation, lateMinutes, totalLogs: monthLogs.length }
 }
 
-function TrainerProfilePanel({ trainer, branches, clients, logs, programs, attendanceLogs = [], evaluations, t, showEmail = false }) {
+function TrainerProfilePanel({ trainer, branches, clients, logs, programs, attendanceLogs = [], evaluations, shifts = [], requests = [], targetPlans = [], tasks = [], t, showEmail = false, lang = 'ar' }) {
   if (!trainer) return null
   const branch = branches.find(b => b.id === trainer.branch_id)
-  const trainerClients = clients.filter(c => c.assigned_trainer_id === trainer.id)
+  const trainerClients = clients.filter(c => c.assigned_trainer_id === trainer.id || c.created_by === trainer.id)
   const trainerLogs = logs.filter(l => l.trainer_id === trainer.id)
   const trainerPrograms = programs.filter(p => p.trainer_id === trainer.id)
   const trainerEvaluations = evaluations.filter(e => e.trainer_id === trainer.id)
   const trainerAttendance = attendanceLogs.filter(a => a.trainer_id === trainer.id)
+  const trainerShifts = shifts.filter(s => s.trainer_id === trainer.id || s.coach_id === trainer.id)
+  const trainerRequests = requests.filter(r => r.trainer_id === trainer.id || r.coach_id === trainer.id || r.requested_by === trainer.id)
+  const trainerPlans = targetPlans.filter(p => p.trainer_id === trainer.id || p.coach_id === trainer.id)
+  const trainerTaskRows = tasks.filter(task => task.trainer_id === trainer.id || task.coach_id === trainer.id)
   const auto = calculateAutomaticTrainerScore(trainer, logs, attendanceLogs, evaluations)
   const totalPt = trainerLogs.reduce((s, r) => s + Number(r.pt_sessions_count || 0), 0)
   const totalFree = trainerLogs.reduce((s, r) => s + Number(r.free_service_count || 0), 0)
   const totalRotation = trainerLogs.reduce((s, r) => s + Number(r.rotation_count || 0), 0)
-
+  const month = thisMonthISO()
+  const monthAttendance = trainerAttendance.filter(a => monthOf(a.attendance_date || a.work_date || a.created_at) === month)
+  const monthRequests = trainerRequests.filter(r => monthOf(r.request_date || r.created_at) === month)
+  const attendanceSummary = {
+    late: monthAttendance.reduce((sum, r) => sum + Number(r.late_minutes || 0), 0),
+    overtime: monthAttendance.reduce((sum, r) => sum + Number(r.overtime_minutes || 0), 0),
+    permissions: monthRequests.filter(r => ['approved','accepted'].includes(r.status) && ['late_permission','permission','late'].includes(r.request_type)).reduce((sum, r) => sum + Number(r.requested_minutes || 0), 0),
+    pending: monthRequests.filter(r => !r.status || r.status === 'pending').length
+  }
+  const latestShift = [...trainerShifts].sort((a,b)=>String(b.shift_date||b.created_at||'').localeCompare(String(a.shift_date||a.created_at||'')))[0]
+  const currentPlan = trainerPlans.find(p => String(p.target_month || '').slice(0,7) === month) || trainerPlans[0]
+  const openTasks = trainerTaskRows.filter(x => (x.status || 'pending') !== 'done').length
+  const doneTasks = trainerTaskRows.filter(x => (x.status || '') === 'done').length
   return (
-    <div className="card trainer-profile-card">
-      <h3><UserRound size={18}/>{t.trainerProfile}</h3>
-      <div className="profile-grid">
-        <div><span>{t.fullName}</span><b>{trainer.full_name || '-'}</b></div>
+    <div className="card trainer-profile-card pro-trainer-file">
+      <div className="trainer-file-header">
+        <div>
+          <h3><UserRound size={18}/>{t.coachFullFile || t.trainerProfile}</h3>
+          <p className="muted">{t.professionalNote}</p>
+        </div>
+        <div className="file-badge">{displayCoachName(trainer)}</div>
+      </div>
+      <div className="summary-grid">
+        <div><span>{t.fullName}</span><b>{getRowName(trainer)}</b></div>
         {showEmail && <div><span>{t.email}</span><b>{trainer.email || '-'}</b></div>}
         <div><span>{t.role}</span><b>{trainer.role || '-'}</b></div>
-        <div><span>{t.branch}</span><b>{branch?.name || '-'}</b></div>
-        <div><span>{t.status}</span><b>{trainer.status || '-'}</b></div>
+        <div><span>{t.branch}</span><b>{branch?.name || trainer.branch_name || '-'}</b></div>
+        <div><span>{t.status}</span><b>{trainer.status || (trainer.active === false ? 'inactive' : 'active')}</b></div>
+        <div><span>{t.autoEvaluation}</span><b>{auto.total}% • {gradeFromScore(auto.total, t)}</b></div>
+      </div>
+      <div className="summary-grid">
         <div><span>{t.clients}</span><b>{trainerClients.length}</b></div>
         <div><span>{t.programs}</span><b>{trainerPrograms.length}</b></div>
-        <div><span>{t.logs}</span><b>{trainerLogs.length}</b></div>
+        <div><span>{t.totalLogs}</span><b>{trainerLogs.length}</b></div>
         <div><span>{t.ptSessions}</span><b>{totalPt}</b></div>
         <div><span>{t.freeService}</span><b>{totalFree}</b></div>
         <div><span>{t.rotation}</span><b>{totalRotation}</b></div>
-        <div><span>{t.evaluationHistory}</span><b>{trainerEvaluations.length}</b></div>
-        <div><span>{t.automaticScore}</span><b>{auto.automaticScore}% — {gradeFromScore(auto.automaticScore, t)}</b></div>
       </div>
-      <div className="profile-score-grid">
-        <div><span>{t.headCoachScore}</span><b>{auto.headCoachScore}%</b></div>
-        <div><span>{t.activityScore}</span><b>{auto.activityScore}%</b></div>
-        <div><span>{t.attendanceScore}</span><b>{auto.attendanceScore}%</b></div>
-        <div><span>{t.reportingScore}</span><b>{auto.reportingScore}%</b></div>
+      <div className="summary-grid">
+        <div><span>{t.shift}</span><b>{latestShift?.is_off_day ? t.offDay : (latestShift?.shift || latestShift?.shift_name || '-')}</b></div>
+        <div><span>{t.expectedIn}</span><b>{latestShift?.expected_in || latestShift?.start_time || '-'}</b></div>
+        <div><span>{t.expectedOut}</span><b>{latestShift?.expected_out || latestShift?.end_time || '-'}</b></div>
+        <div><span>{t.offDayWeekday}</span><b>{weekdayLabel(latestShift?.off_day_weekday, lang)}</b></div>
+        <div><span>{t.totalDelayMinutes}</span><b>{attendanceSummary.late}</b></div>
+        <div><span>{t.totalOvertimeMinutes}</span><b>{attendanceSummary.overtime}</b></div>
+        <div><span>{t.totalPermissionMinutes}</span><b>{attendanceSummary.permissions}</b></div>
+        <div><span>{t.pendingRequests}</span><b>{attendanceSummary.pending}</b></div>
+        <div><span>{t.trainerTasks}</span><b>{openTasks} / {doneTasks}</b></div>
+        <div><span>{t.targetPlan}</span><b>{currentPlan?.target_month || '-'}</b></div>
       </div>
+      <Table title={t.shiftPlanner} rows={trainerShifts.slice(0, 12).map(s=>({...s, off_day_name: weekdayLabel(s.off_day_weekday, lang)}))} canManage={false} t={t} columns={[{key:'shift_date',label:t.date},{key:'shift',label:t.shift},{key:'expected_in',label:t.expectedIn},{key:'expected_out',label:t.expectedOut},{key:'is_off_day',label:t.offDay},{key:'off_day_name',label:t.offDayWeekday},{key:'notes',label:t.notes}]} />
+      <Table title={t.requests} rows={trainerRequests.slice(0, 12)} canManage={false} t={t} columns={[{key:'request_date',label:t.date},{key:'request_type',label:t.requestType},{key:'requested_minutes',label:t.requestedMinutes},{key:'amount',label:t.amount},{key:'status',label:t.approvalStatus},{key:'reason',label:t.reason}]} />
+      <Table title={t.trainerTasks} rows={trainerTaskRows.slice(0, 12)} canManage={false} t={t} columns={[{key:'task_title',label:t.taskTitle},{key:'due_date',label:t.dueDate},{key:'priority',label:t.priority},{key:'status',label:t.taskStatus},{key:'task_details',label:t.taskDetails}]} />
+      <Table title={t.targetPlan} rows={trainerPlans.slice(0, 8)} canManage={false} t={t} columns={[{key:'target_month',label:t.targetMonth},{key:'monthly_target',label:t.monthlyTarget},{key:'current_achievement',label:t.currentAchievement},{key:'action_plan',label:t.actionPlan},{key:'support_needed',label:t.supportNeeded}]} />
       <Table title={t.clients} rows={trainerClients.slice(0, 10)} canManage={false} t={t} columns={[{key:'full_name',label:t.clientName},{key:'phone',label:t.phone},{key:'age',label:t.age},{key:'weight_kg',label:t.weightKg},{key:'goal',label:t.goal},{key:'status',label:t.status},{key:'next_followup_date',label:t.nextFollowupDate}]} />
       <Table title={t.attendance} rows={trainerAttendance.slice(0, 10)} canManage={false} t={t} columns={[{key:'attendance_date',label:t.date},{key:'shift',label:t.shift},{key:'check_in',label:t.checkIn},{key:'check_out',label:t.checkOut},{key:'late_minutes',label:t.lateMinutes},{key:'overtime_minutes',label:t.overtimeMinutes}]} />
       <Table title={t.logs} rows={trainerLogs.slice(0, 10)} canManage={false} t={t} columns={[{key:'log_date',label:t.date},{key:'shift',label:t.shift},{key:'rotation_count',label:t.rotation},{key:'pt_sessions_count',label:t.ptSessions},{key:'free_service_count',label:t.freeService},{key:'notes',label:t.notes}]} />
@@ -1009,6 +1042,17 @@ function TrainerProfilePanel({ trainer, branches, clients, logs, programs, atten
       <Table title={t.evaluationHistory} rows={trainerEvaluations.map(ev => { const score = Math.round((Number(ev.technical_score||0)+Number(ev.behavior_score||0)+Number(ev.leadership_score||0)+Number(ev.service_score||0))/4); return {...ev, final_score: score, grade: gradeFromScore(score, t)} }).slice(0,10)} canManage={false} t={t} columns={[{key:'evaluation_date',label:t.date},{key:'technical_score',label:t.technicalScore},{key:'behavior_score',label:t.behaviorScore},{key:'leadership_score',label:t.leadershipScore},{key:'service_score',label:t.serviceScore},{key:'final_score',label:t.finalScore},{key:'grade',label:t.grade},{key:'evaluator_notes',label:t.evaluatorNotes}]} />
     </div>
   )
+}
+
+function TrainerDirectory({ trainers, branches, selectedTrainerId, setSelectedTrainerId, t }) {
+  const [branchFilter, setBranchFilter] = useState('all')
+  const filtered = trainers.filter(tr => branchFilter === 'all' || tr.branch_id === branchFilter)
+  return <div className="card trainer-directory">
+    <div className="trainer-file-header"><h3><Users size={18}/>{t.trainerDirectory}</h3><select value={branchFilter} onChange={e=>setBranchFilter(e.target.value)}><option value="all">{t.allBranches}</option>{branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}</select></div>
+    <div className="trainer-card-grid">{filtered.map(tr => <button key={tr.id} type="button" className={selectedTrainerId === tr.id ? 'trainer-mini-card active' : 'trainer-mini-card'} onClick={() => setSelectedTrainerId(tr.id)}>
+      <b>{displayCoachName(tr)}</b><span>{tr.role || '-'}</span><small>{branches.find(b => b.id === tr.branch_id)?.name || tr.branch_name || '-'}</small><em>{t.openTrainerFile}</em>
+    </button>)}</div>
+  </div>
 }
 
 function CoachEvaluationForm({ profile, targetTrainerId, eligibleTrainers, onSaved, lang }) {
@@ -1393,10 +1437,25 @@ function nowTimeHHMM() {
 function todayISO() { return new Date().toISOString().slice(0,10) }
 function thisMonthISO() { return new Date().toISOString().slice(0,7) }
 
+const WEEKDAYS = [
+  { value: 'saturday', ar: 'السبت', en: 'Saturday' },
+  { value: 'sunday', ar: 'الأحد', en: 'Sunday' },
+  { value: 'monday', ar: 'الاثنين', en: 'Monday' },
+  { value: 'tuesday', ar: 'الثلاثاء', en: 'Tuesday' },
+  { value: 'wednesday', ar: 'الأربعاء', en: 'Wednesday' },
+  { value: 'thursday', ar: 'الخميس', en: 'Thursday' },
+  { value: 'friday', ar: 'الجمعة', en: 'Friday' }
+]
+function weekdayLabel(value, lang='ar') {
+  const item = WEEKDAYS.find(d => d.value === value)
+  return item ? item[lang === 'ar' ? 'ar' : 'en'] : (value || '-')
+}
+function getRowName(row) { return row?.full_name || row?.name || row?.email || '-' }
+
 function ShiftPlannerPage({ profile, staff, branches, shifts, onSaved, lang }) {
   const t = TEXT[lang]
   const trainers = staff.filter(s => ['trainer','senior','head_coach'].includes(s.role))
-  const initial = { trainer_id: trainers[0]?.id || '', shift_date: todayISO(), shift: 'PM', expected_in: '15:00', expected_out: '23:00', is_off_day: false, notes: '' }
+  const initial = { trainer_id: trainers[0]?.id || '', shift_date: todayISO(), shift: 'PM', expected_in: '15:00', expected_out: '23:00', is_off_day: false, off_day_weekday: 'friday', applies_weekly: false, notes: '' }
   const [form, setForm, draftSaved, clearDraft] = useAutoSavedForm(`gymzaman_shift_planner_${profile.id}`, initial)
   const [msg, setMsg] = useState('')
   useEffect(() => { if (!form.trainer_id && trainers[0]?.id) setForm(p => ({...p, trainer_id: trainers[0].id})) }, [staff.length])
@@ -1409,9 +1468,15 @@ function ShiftPlannerPage({ profile, staff, branches, shifts, onSaved, lang }) {
       branch_id: trainer?.branch_id || profile.branch_id,
       shift_date: form.shift_date,
       shift: form.shift,
+      shift_name: form.shift,
       expected_in: form.is_off_day ? null : form.expected_in,
       expected_out: form.is_off_day ? null : form.expected_out,
+      start_time: form.is_off_day ? null : form.expected_in,
+      end_time: form.is_off_day ? null : form.expected_out,
       is_off_day: !!form.is_off_day,
+      day_off: !!form.is_off_day,
+      off_day_weekday: form.is_off_day ? form.off_day_weekday : null,
+      applies_weekly: !!form.applies_weekly,
       notes: form.notes,
       created_by: profile.id,
       updated_by: profile.id
@@ -1420,21 +1485,23 @@ function ShiftPlannerPage({ profile, staff, branches, shifts, onSaved, lang }) {
     if (error) setMsg(error.message)
     else { await logAudit(profile.id, 'upsert', 'coach_shift', data?.id, payload); setMsg(t.shiftSaved); clearDraft(initial); onSaved() }
   }
-  const rows = shifts.map(r => ({...r, trainer_name: displayCoachName(staff.find(s => s.id === r.trainer_id)), branch_name: branches.find(b => b.id === r.branch_id)?.name || r.branch_name || '-'}))
+  const rows = shifts.map(r => ({...r, trainer_name: displayCoachName(staff.find(s => s.id === r.trainer_id)), branch_name: branches.find(b => b.id === r.branch_id)?.name || r.branch_name || '-', off_day_name: weekdayLabel(r.off_day_weekday, lang)}))
   return <>
     <div className="card section-intro"><h3><CalendarDays size={18}/>{t.shiftPlanner}</h3><p className="muted">التحكم في الشيفتات من خلال الأونر أو الفيتنس ديركتور فقط. بعد حفظ الشيفت يظهر للمدرب في صفحة تسجيل الحضور ويتم حساب التأخير والأوفر تايم تلقائيًا.</p></div>
     <div className="card compact-card"><h3>{t.addShift}</h3><form className="grid-form simple-form" onSubmit={submit}>
       <div><label>{t.trainerEmail}</label><select value={form.trainer_id} onChange={e=>f('trainer_id',e.target.value)}>{trainers.map(tr => <option key={tr.id} value={tr.id}>{displayCoachName(tr)} • {tr.branch_name || ''}</option>)}</select></div>
       <div><label>{t.date}</label><input type="date" value={form.shift_date} onChange={e=>f('shift_date',e.target.value)}/></div>
-      <div><label>{t.shift}</label><select value={form.shift} onChange={e=>f('shift',e.target.value)}><option>AM</option><option>PM</option><option>Split</option></select></div>
+      <div><label>{t.shift}</label><select value={form.shift} onChange={e=>{ const v=e.target.value; f('shift',v); if(v==='AM'){setForm(p=>({...p,shift:v,expected_in:'07:00',expected_out:'15:00'}))} else if(v==='PM'){setForm(p=>({...p,shift:v,expected_in:'15:00',expected_out:'23:00'}))} else {setForm(p=>({...p,shift:v}))}}}><option>AM</option><option>PM</option><option>Split</option></select></div>
       <div><label>{t.expectedIn}</label><input type="time" disabled={form.is_off_day} value={form.expected_in} onChange={e=>f('expected_in',e.target.value)}/></div>
       <div><label>{t.expectedOut}</label><input type="time" disabled={form.is_off_day} value={form.expected_out} onChange={e=>f('expected_out',e.target.value)}/></div>
+      <div><label>{t.offDayWeekday}</label><select value={form.off_day_weekday} disabled={!form.is_off_day} onChange={e=>f('off_day_weekday',e.target.value)}>{WEEKDAYS.map(d=><option key={d.value} value={d.value}>{lang==='ar'?d.ar:d.en}</option>)}</select></div>
       <div className="checkbox-line"><label><input type="checkbox" checked={!!form.is_off_day} onChange={e=>f('is_off_day',e.target.checked)}/> {t.offDay}</label></div>
+      <div className="checkbox-line"><label><input type="checkbox" checked={!!form.applies_weekly} onChange={e=>f('applies_weekly',e.target.checked)}/> {t.appliesWeekly}</label></div>
       <div className="full"><label>{t.notes}</label><textarea value={form.notes} onChange={e=>f('notes',e.target.value)}/></div>
       {draftSaved && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}{msg && <div className={msg.includes('success') || msg.includes('بنجاح') ? 'success full' : 'error full'}>{msg}</div>}
       <button>{t.save}</button>
     </form></div>
-    <Table title={t.shiftPlanner} rows={rows} canEdit={false} canDelete={false} t={t} columns={[{key:'trainer_name',label:t.trainerEmail},{key:'branch_name',label:t.branch},{key:'shift_date',label:t.date},{key:'shift',label:t.shift},{key:'expected_in',label:t.expectedIn},{key:'expected_out',label:t.expectedOut},{key:'is_off_day',label:t.offDay},{key:'notes',label:t.notes}]}/>
+    <Table title={t.shiftPlanner} rows={rows} canEdit={false} canDelete={false} t={t} columns={[{key:'trainer_name',label:t.trainerEmail},{key:'branch_name',label:t.branch},{key:'shift_date',label:t.date},{key:'shift',label:t.shift},{key:'expected_in',label:t.expectedIn},{key:'expected_out',label:t.expectedOut},{key:'is_off_day',label:t.offDay},{key:'off_day_name',label:t.offDayWeekday},{key:'applies_weekly',label:t.appliesWeekly},{key:'notes',label:t.notes}]}/>
   </>
 }
 
@@ -1640,12 +1707,13 @@ function Dashboard({ profile, lang }) {
 
   useEffect(()=>{load()},[])
   useEffect(()=>{ const handler = e => setActiveTab(e.detail); window.addEventListener('gymzaman:navigate', handler); return () => window.removeEventListener('gymzaman:navigate', handler) },[])
+  useEffect(()=>{ if((isControlAdmin || isBranchLeader) && activeTab === 'trainerData' && selectedTrainerId === 'all' && trainers[0]?.id) setSelectedTrainerId(trainers[0].id) }, [activeTab, staff.length])
 
   async function del(table,row,label){ if(!confirm(`Delete ${label}?`)) return; const {error}=await supabase.from(table).delete().eq('id',row.id); if(error)alert(error.message); else { await logAudit(profile.id, 'delete', table, row.id, { label }); load() } }
 
   const branchStaff = staff.filter(s => s.branch_id === profile.branch_id)
   const trainers = (isBranchLeader ? branchStaff : staff).filter(s => ['trainer','senior','head_coach'].includes(s.role))
-  const selectedTrainer = selectedTrainerId !== 'all' ? trainers.find(s => s.id === selectedTrainerId) : (isTrainer ? profile : null)
+  const selectedTrainer = selectedTrainerId !== 'all' ? trainers.find(s => s.id === selectedTrainerId) : (isTrainer ? profile : (trainers[0] || null))
   const evaluableTrainers = isBranchLeader ? branchStaff.filter(s => s.id !== profile.id && ['trainer','senior'].includes(s.role)) : trainers
   const clientMapAll = Object.fromEntries(clients.map(c=>[c.id,c.full_name]))
   const trainerMap = Object.fromEntries([...staff, profile].map(tr=>[tr.id,displayCoachName(tr)]))
@@ -1743,7 +1811,7 @@ function Dashboard({ profile, lang }) {
       {(isAdmin || isBranchLeader) && <PerformanceDashboard staff={isAdmin?staff:branchStaff} clients={visibleClients} logs={visibleLogs} attendanceLogs={visibleAttendanceRaw} t={t}/>}
       {(isAdmin || isBranchLeader) && <AlertsPanel staff={isAdmin?staff:branchStaff} logs={visibleLogs} attendanceLogs={visibleAttendanceRaw} seniorReports={visibleSeniorReportsRaw} evaluations={visibleEvaluationsRaw} t={t}/>}
       {isAdmin && <BranchComparisonDashboard branches={branches} staff={staff} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} seniorReports={seniorReports} headReports={headReports} t={t}/>}
-      {isTrainer && <TrainerProfilePanel trainer={profile} showEmail={false} branches={branches} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} evaluations={evaluations} t={t}/>}
+      {isTrainer && <TrainerProfilePanel trainer={profile} showEmail={false} branches={branches} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} evaluations={evaluations} shifts={coachShifts} requests={coachRequests} targetPlans={targetPlans} tasks={trainerTasks} t={t} lang={lang}/>}
     </>}
 
     {activeTab === 'addClient' && <>
@@ -1753,9 +1821,9 @@ function Dashboard({ profile, lang }) {
     </>}
 
     {activeTab === 'trainerData' && <>
-      {(isAdmin || isBranchLeader) && <TrainerFilter trainers={trainers} selectedTrainerId={selectedTrainerId} setSelectedTrainerId={setSelectedTrainerId} t={t}/>}
+      {(isAdmin || isBranchLeader) && <TrainerDirectory trainers={trainers} branches={branches} selectedTrainerId={selectedTrainerId} setSelectedTrainerId={setSelectedTrainerId} t={t}/>}
       {isBranchLeader && <Table title={t.staffManagement} rows={branchStaff.filter(r => rowMatches(r, searchQuery))} canManage={false} t={t} columns={[{key:'full_name',label:t.fullName},{key:'role',label:t.role},{key:'status',label:t.status}]}/>}
-      {(isAdmin || isBranchLeader) && selectedTrainer && <TrainerProfilePanel trainer={selectedTrainer} showEmail={isAdmin} branches={branches} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} evaluations={evaluations} t={t}/>}
+      {(isAdmin || isBranchLeader) && selectedTrainer && <TrainerProfilePanel trainer={selectedTrainer} showEmail={isAdmin} branches={branches} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} evaluations={evaluations} shifts={coachShifts} requests={coachRequests} targetPlans={targetPlans} tasks={trainerTasks} t={t} lang={lang}/>}
       {((isAdmin || isBranchLeader) && selectedTrainer) && <CoachEvaluationForm profile={profile} targetTrainerId={selectedTrainer.id} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
       {isBranchLeader && !selectedTrainer && <CoachEvaluationForm profile={profile} targetTrainerId={''} eligibleTrainers={evaluableTrainers} onSaved={load} lang={lang}/>}
       {visibleClients.length > 0 && <div className="card filter-card"><h3><Search size={18}/>{t.selectClientFile}</h3><select value={selectedClient?.id || ''} onChange={e=>setSelectedClientId(e.target.value)}>{visibleClients.map(c => <option key={c.id} value={c.id}>{c.full_name}</option>)}</select></div>}
