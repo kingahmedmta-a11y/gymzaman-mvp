@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { supabase } from './supabase'
 import { LogOut, Users, Dumbbell, ClipboardList, UserRound, ShieldCheck, PlusCircle, CalendarDays, Pencil, Trash2, X, Languages, LockKeyhole, Search, UserCog, Save } from 'lucide-react'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import './styles.css'
 
 const TEXT = {
@@ -1411,7 +1412,12 @@ function App() {
   if(!session)return <Login lang={lang} setLang={setLang}/>
   if(profileError)return <div className="login-page"><div className="login-card"><h2>Profile Error</h2><p className="error">{profileError}</p><button onClick={()=>supabase.auth.signOut()}>Logout</button></div></div>
   if(!profile)return <div className="loading">Loading profile...</div>
-  return <Layout profile={profile} lang={lang} setLang={setLang}><Dashboard profile={profile} lang={lang}/></Layout>
+  return (
+    <>
+      <Layout profile={profile} lang={lang} setLang={setLang}><Dashboard profile={profile} lang={lang}/></Layout>
+      <SpeedInsights />
+    </>
+  )
 }
 
 createRoot(document.getElementById('root')).render(<App/>)
