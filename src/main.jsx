@@ -97,6 +97,26 @@ const TEXT = {
   }
 }
 
+
+Object.assign(TEXT.ar, {
+  shiftPlanner: 'جدول الشيفتات', addShift: 'إضافة شيفت', offDay: 'يوم أجازة', shiftSaved: 'تم حفظ الشيفت بنجاح.',
+  attendancePage: 'تسجيل الحضور', punchIn: 'تسجيل حضور الآن', punchOut: 'تسجيل انصراف الآن', attendancePunchSaved: 'تم تسجيل الحضور/الانصراف تلقائيًا.', todayShift: 'شيفت اليوم', noShiftToday: 'لا يوجد شيفت مسجل لك اليوم.',
+  requests: 'طلبات المدرب', requestType: 'نوع الطلب', latePermission: 'إذن تأخير', vacationRequest: 'طلب أجازة', advanceRequest: 'طلب سلفة', requestDate: 'تاريخ الطلب', requestedMinutes: 'الدقائق المطلوبة', amount: 'المبلغ', reason: 'السبب', requestSaved: 'تم حفظ الطلب بنجاح.', approvalStatus: 'حالة الموافقة',
+  targetPlan: 'خطة تحقيق التارجت', targetMonth: 'شهر التارجت', monthlyTarget: 'التارجت الشهري', currentAchievement: 'المحقق حاليًا', actionPlan: 'خطة التنفيذ', expectedChallenges: 'التحديات المتوقعة', supportNeeded: 'الدعم المطلوب', targetPlanSaved: 'تم حفظ خطة التارجت بنجاح.',
+  trainerTasks: 'مهام المدربين', assignTask: 'إضافة مهمة للمدرب', taskTitle: 'عنوان المهمة', taskDetails: 'تفاصيل المهمة', dueDate: 'تاريخ التسليم', priority: 'الأولوية', taskStatus: 'حالة المهمة', taskSaved: 'تم حفظ المهمة بنجاح.', markDone: 'تم التنفيذ',
+  automaticAttendanceSummary: 'تجميع تلقائي للحضور', totalDelayMinutes: 'إجمالي دقائق التأخير', totalOvertimeMinutes: 'إجمالي دقائق الأوفر تايم', totalAbsenceDays: 'إجمالي أيام الغياب',
+  separatePagesNote: 'كل قسم في صفحة مستقلة وواضحة، والحفظ والتجميع يتم تلقائيًا.'
+})
+Object.assign(TEXT.en, {
+  shiftPlanner: 'Shift Planner', addShift: 'Add Shift', offDay: 'Off Day', shiftSaved: 'Shift saved successfully.',
+  attendancePage: 'Attendance Punch', punchIn: 'Check In Now', punchOut: 'Check Out Now', attendancePunchSaved: 'Attendance updated automatically.', todayShift: "Today's Shift", noShiftToday: 'No shift is scheduled for you today.',
+  requests: 'Coach Requests', requestType: 'Request Type', latePermission: 'Late Permission', vacationRequest: 'Vacation Request', advanceRequest: 'Advance Request', requestDate: 'Request Date', requestedMinutes: 'Requested Minutes', amount: 'Amount', reason: 'Reason', requestSaved: 'Request saved successfully.', approvalStatus: 'Approval Status',
+  targetPlan: 'Monthly Target Plan', targetMonth: 'Target Month', monthlyTarget: 'Monthly Target', currentAchievement: 'Current Achievement', actionPlan: 'Action Plan', expectedChallenges: 'Expected Challenges', supportNeeded: 'Support Needed', targetPlanSaved: 'Target plan saved successfully.',
+  trainerTasks: 'Trainer Tasks', assignTask: 'Assign Task', taskTitle: 'Task Title', taskDetails: 'Task Details', dueDate: 'Due Date', priority: 'Priority', taskStatus: 'Task Status', taskSaved: 'Task saved successfully.', markDone: 'Done',
+  automaticAttendanceSummary: 'Automatic Attendance Summary', totalDelayMinutes: 'Total Delay Minutes', totalOvertimeMinutes: 'Total Overtime Minutes', totalAbsenceDays: 'Total Absence Days',
+  separatePagesNote: 'Each module is placed on a separate clear page, with automatic saving and aggregation.'
+})
+
 const ROLE_OPTIONS = ['trainer', 'senior', 'head_coach', 'reception', 'sales', 'fitness_director', 'owner']
 const STATUS_OPTIONS = ['active', 'inactive']
 
@@ -246,11 +266,27 @@ function Login({ lang, setLang }) {
 function Layout({ profile, children, lang, setLang }) {
   const t = TEXT[lang]
   const roleLabel = profile?.role?.replaceAll('_', ' ')
+  const isControlAdmin = ['owner','fitness_director'].includes(profile?.role)
+  const navItems = [
+    { key: 'overview', label: t.dashboard, icon: <ShieldCheck size={18}/> },
+    { key: 'addClient', label: t.addClientPage || t.clients, icon: <Users size={18}/> },
+    { key: 'trainerData', label: t.tabTrainerData, icon: <Dumbbell size={18}/>, roles: ['owner','fitness_director','senior','head_coach'] },
+    { key: 'attendancePage', label: t.attendancePage, icon: <CalendarDays size={18}/> },
+    { key: 'shifts', label: t.shiftPlanner, icon: <CalendarDays size={18}/>, roles: ['owner','fitness_director'] },
+    { key: 'requests', label: t.requests, icon: <ClipboardList size={18}/> },
+    { key: 'targetPlan', label: t.targetPlan, icon: <ClipboardList size={18}/> },
+    { key: 'tasks', label: t.trainerTasks, icon: <UserCog size={18}/> },
+    { key: 'reports', label: t.tabReports, icon: <ClipboardList size={18}/> },
+    { key: 'reception', label: t.reception, icon: <Users size={18}/>, roles: ['owner','fitness_director','reception'] },
+    { key: 'sales', label: t.sales, icon: <PlusCircle size={18}/>, roles: ['owner','fitness_director','sales'] },
+    { key: 'staff', label: t.staffManagement, icon: <UserCog size={18}/>, roles: ['owner','fitness_director'] }
+  ].filter(item => !item.roles || item.roles.includes(profile?.role)).filter(item => !(['reception','sales'].includes(profile?.role) && !['overview', profile.role].includes(item.key)))
+  const navigate = key => window.dispatchEvent(new CustomEvent('gymzaman:navigate', { detail: key }))
   return (
     <div className="app" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       <aside>
         <div className="side-brand"><div className="brand-mark small">GZ</div><div><h3>Gym Zaman</h3><p>{roleLabel}</p></div></div>
-        <nav><a><ShieldCheck size={18}/>{t.dashboard}</a><a><Users size={18}/>{t.clients}</a><a><Dumbbell size={18}/>{t.logs}</a><a><ClipboardList size={18}/>{t.programs}</a>{['owner','fitness_director'].includes(profile?.role) && <a><Users size={18}/>{t.reception}</a>}{['owner','fitness_director'].includes(profile?.role) && <a><PlusCircle size={18}/>{t.sales}</a>}{['senior','head_coach','fitness_director','owner'].includes(profile?.role) && <a><UserCog size={18}/>{t.staffManagement}</a>}</nav>
+        <nav className="side-nav">{navItems.map(item => <button key={item.key} type="button" onClick={() => navigate(item.key)}>{item.icon}{item.label}</button>)}</nav>
         <LanguageButton lang={lang} setLang={setLang}/>
         <button className="logout" onClick={()=>supabase.auth.signOut()}><LogOut size={18}/>{t.logout}</button>
       </aside>
@@ -1346,9 +1382,188 @@ function BackupPanel({ t, data }) {
   </div>
 }
 
+
+function nowTimeHHMM() {
+  const d = new Date()
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
+}
+
+function todayISO() { return new Date().toISOString().slice(0,10) }
+function thisMonthISO() { return new Date().toISOString().slice(0,7) }
+
+function ShiftPlannerPage({ profile, staff, branches, shifts, onSaved, lang }) {
+  const t = TEXT[lang]
+  const trainers = staff.filter(s => ['trainer','senior','head_coach'].includes(s.role))
+  const initial = { trainer_id: trainers[0]?.id || '', shift_date: todayISO(), shift: 'PM', expected_in: '15:00', expected_out: '23:00', is_off_day: false, notes: '' }
+  const [form, setForm, draftSaved, clearDraft] = useAutoSavedForm(`gymzaman_shift_planner_${profile.id}`, initial)
+  const [msg, setMsg] = useState('')
+  useEffect(() => { if (!form.trainer_id && trainers[0]?.id) setForm(p => ({...p, trainer_id: trainers[0].id})) }, [staff.length])
+  function f(k,v){ setForm(p => ({...p,[k]:v})) }
+  async function submit(e) {
+    e.preventDefault()
+    const trainer = trainers.find(x => x.id === form.trainer_id)
+    const payload = {
+      trainer_id: form.trainer_id,
+      branch_id: trainer?.branch_id || profile.branch_id,
+      shift_date: form.shift_date,
+      shift: form.shift,
+      expected_in: form.is_off_day ? null : form.expected_in,
+      expected_out: form.is_off_day ? null : form.expected_out,
+      is_off_day: !!form.is_off_day,
+      notes: form.notes,
+      created_by: profile.id,
+      updated_by: profile.id
+    }
+    const { data, error } = await supabase.from('coach_shifts').upsert(payload, { onConflict: 'trainer_id,shift_date' }).select('id').single()
+    if (error) setMsg(error.message)
+    else { await logAudit(profile.id, 'upsert', 'coach_shift', data?.id, payload); setMsg(t.shiftSaved); clearDraft(initial); onSaved() }
+  }
+  const rows = shifts.map(r => ({...r, trainer_name: displayCoachName(staff.find(s => s.id === r.trainer_id)), branch_name: branches.find(b => b.id === r.branch_id)?.name || r.branch_name || '-'}))
+  return <>
+    <div className="card section-intro"><h3><CalendarDays size={18}/>{t.shiftPlanner}</h3><p className="muted">{t.separatePagesNote}</p></div>
+    <div className="card compact-card"><h3>{t.addShift}</h3><form className="grid-form simple-form" onSubmit={submit}>
+      <div><label>{t.trainerEmail}</label><select value={form.trainer_id} onChange={e=>f('trainer_id',e.target.value)}>{trainers.map(tr => <option key={tr.id} value={tr.id}>{displayCoachName(tr)} • {tr.branch_name || ''}</option>)}</select></div>
+      <div><label>{t.date}</label><input type="date" value={form.shift_date} onChange={e=>f('shift_date',e.target.value)}/></div>
+      <div><label>{t.shift}</label><select value={form.shift} onChange={e=>f('shift',e.target.value)}><option>AM</option><option>PM</option><option>Split</option></select></div>
+      <div><label>{t.expectedIn}</label><input type="time" disabled={form.is_off_day} value={form.expected_in} onChange={e=>f('expected_in',e.target.value)}/></div>
+      <div><label>{t.expectedOut}</label><input type="time" disabled={form.is_off_day} value={form.expected_out} onChange={e=>f('expected_out',e.target.value)}/></div>
+      <div className="checkbox-line"><label><input type="checkbox" checked={!!form.is_off_day} onChange={e=>f('is_off_day',e.target.checked)}/> {t.offDay}</label></div>
+      <div className="full"><label>{t.notes}</label><textarea value={form.notes} onChange={e=>f('notes',e.target.value)}/></div>
+      {draftSaved && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}{msg && <div className={msg.includes('success') || msg.includes('بنجاح') ? 'success full' : 'error full'}>{msg}</div>}
+      <button>{t.save}</button>
+    </form></div>
+    <Table title={t.shiftPlanner} rows={rows} canEdit={false} canDelete={false} t={t} columns={[{key:'trainer_name',label:t.trainerEmail},{key:'branch_name',label:t.branch},{key:'shift_date',label:t.date},{key:'shift',label:t.shift},{key:'expected_in',label:t.expectedIn},{key:'expected_out',label:t.expectedOut},{key:'is_off_day',label:t.offDay},{key:'notes',label:t.notes}]}/>
+  </>
+}
+
+function AttendancePunchPage({ profile, staff, shifts, attendanceLogs, onSaved, lang, canViewAll=false }) {
+  const t = TEXT[lang]
+  const today = todayISO()
+  const myShift = shifts.find(s => s.trainer_id === profile.id && s.shift_date === today)
+  const myLog = attendanceLogs.find(a => a.trainer_id === profile.id && a.attendance_date === today)
+  const [msg, setMsg] = useState('')
+  async function punch(kind) {
+    const time = nowTimeHHMM()
+    const expectedIn = myShift?.expected_in || '15:00'
+    const expectedOut = myShift?.expected_out || '23:00'
+    const base = {
+      trainer_id: profile.id,
+      branch_id: profile.branch_id,
+      attendance_date: today,
+      shift: myShift?.shift || 'PM',
+      expected_in: expectedIn,
+      expected_out: expectedOut,
+      notes: myShift?.is_off_day ? t.offDay : ''
+    }
+    const payload = kind === 'in' ? {...base, check_in: time, check_out: myLog?.check_out || null} : {...base, check_in: myLog?.check_in || expectedIn, check_out: time}
+    const calc = calculateLateAndOvertime(payload.check_in || expectedIn, payload.check_out || expectedOut, expectedIn, expectedOut)
+    payload.late_minutes = calc.late
+    payload.overtime_minutes = calc.overtime
+    let result
+    if (myLog?.id) result = await supabase.from('attendance_logs').update(payload).eq('id', myLog.id).select('id').single()
+    else result = await supabase.from('attendance_logs').insert(payload).select('id').single()
+    if (result.error) setMsg(result.error.message)
+    else { await logAudit(profile.id, kind === 'in' ? 'check_in' : 'check_out', 'attendance_log', result.data?.id, payload); setMsg(t.attendancePunchSaved); onSaved() }
+  }
+  const month = thisMonthISO()
+  const monthRows = attendanceLogs.filter(a => a.trainer_id === profile.id && monthOf(a.attendance_date) === month)
+  const summary = {
+    late: monthRows.reduce((s,r)=>s+Number(r.late_minutes||0),0),
+    overtime: monthRows.reduce((s,r)=>s+Number(r.overtime_minutes||0),0),
+    absence: shifts.filter(s => s.trainer_id === profile.id && monthOf(s.shift_date) === month && !s.is_off_day && !attendanceLogs.some(a => a.trainer_id === profile.id && a.attendance_date === s.shift_date)).length
+  }
+  const allRows = attendanceLogs.map(a => ({...a, trainer_name: displayCoachName(staff.find(s => s.id === a.trainer_id))}))
+  return <>
+    <div className="card section-intro"><h3><CalendarDays size={18}/>{t.attendancePage}</h3><p className="muted">{t.automaticAttendanceSummary}</p></div>
+    {['trainer','senior','head_coach'].includes(profile.role) && <div className="card punch-card">
+      <h3>{t.todayShift}</h3>
+      <div className="summary-grid">
+        <div><span>{t.shift}</span><b>{myShift?.is_off_day ? t.offDay : (myShift?.shift || '-')}</b></div>
+        <div><span>{t.expectedIn}</span><b>{myShift?.expected_in || '-'}</b></div>
+        <div><span>{t.expectedOut}</span><b>{myShift?.expected_out || '-'}</b></div>
+        <div><span>{t.checkIn}</span><b>{myLog?.check_in || '-'}</b></div>
+        <div><span>{t.checkOut}</span><b>{myLog?.check_out || '-'}</b></div>
+      </div>
+      {!myShift && <p className="muted">{t.noShiftToday}</p>}
+      <div className="button-row"><button type="button" onClick={()=>punch('in')}>{t.punchIn}</button><button type="button" onClick={()=>punch('out')}>{t.punchOut}</button></div>
+      {msg && <div className={msg.includes('success') || msg.includes('بنجاح') ? 'success' : 'error'}>{msg}</div>}
+    </div>}
+    <div className="card"><h3>{t.automaticAttendanceSummary}</h3><div className="summary-grid"><div><span>{t.totalDelayMinutes}</span><b>{summary.late}</b></div><div><span>{t.totalOvertimeMinutes}</span><b>{summary.overtime}</b></div><div><span>{t.totalAbsenceDays}</span><b>{summary.absence}</b></div></div></div>
+    {canViewAll && <Table title={t.attendance} rows={allRows} canManage={false} t={t} columns={[{key:'trainer_name',label:t.trainerEmail},{key:'attendance_date',label:t.date},{key:'shift',label:t.shift},{key:'expected_in',label:t.expectedIn},{key:'expected_out',label:t.expectedOut},{key:'check_in',label:t.checkIn},{key:'check_out',label:t.checkOut},{key:'late_minutes',label:t.lateMinutes},{key:'overtime_minutes',label:t.overtimeMinutes}]}/>} 
+  </>
+}
+
+function CoachRequestsPage({ profile, requests, onSaved, lang, canViewAll=false, staff=[] }) {
+  const t = TEXT[lang]
+  const initial = { request_type: 'late_permission', request_date: todayISO(), requested_minutes: 0, amount: 0, reason: '' }
+  const [form, setForm, draftSaved, clearDraft] = useAutoSavedForm(`gymzaman_requests_${profile.id}`, initial)
+  const [msg, setMsg] = useState('')
+  function f(k,v){ setForm(p => ({...p,[k]:v})) }
+  async function submit(e){
+    e.preventDefault()
+    const payload = { trainer_id: profile.id, branch_id: profile.branch_id, request_type: form.request_type, request_date: form.request_date, requested_minutes: Number(form.requested_minutes||0), amount: Number(form.amount||0), reason: form.reason, status: 'pending', created_by: profile.id }
+    const { data, error } = await supabase.from('coach_requests').insert(payload).select('id').single()
+    if (error) setMsg(error.message)
+    else { await logAudit(profile.id, 'insert', 'coach_request', data?.id, payload); setMsg(t.requestSaved); clearDraft(initial); onSaved() }
+  }
+  const visible = canViewAll ? requests.map(r => ({...r, trainer_name: displayCoachName(staff.find(s => s.id === r.trainer_id))})) : requests.filter(r => r.trainer_id === profile.id)
+  return <>
+    {['trainer','senior','head_coach'].includes(profile.role) && <div className="card compact-card"><h3><ClipboardList size={18}/>{t.requests}</h3><form className="grid-form simple-form" onSubmit={submit}>
+      <div><label>{t.requestType}</label><select value={form.request_type} onChange={e=>f('request_type',e.target.value)}><option value="late_permission">{t.latePermission}</option><option value="vacation">{t.vacationRequest}</option><option value="advance">{t.advanceRequest}</option></select></div>
+      <div><label>{t.requestDate}</label><input type="date" value={form.request_date} onChange={e=>f('request_date',e.target.value)}/></div>
+      <div><label>{t.requestedMinutes}</label><input type="number" value={form.requested_minutes} onChange={e=>f('requested_minutes',e.target.value)}/></div>
+      <div><label>{t.amount}</label><input type="number" value={form.amount} onChange={e=>f('amount',e.target.value)}/></div>
+      <div className="full"><label>{t.reason}</label><textarea value={form.reason} onChange={e=>f('reason',e.target.value)}/></div>
+      {draftSaved && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}{msg && <div className={msg.includes('success') || msg.includes('بنجاح') ? 'success full' : 'error full'}>{msg}</div>}<button>{t.save}</button>
+    </form></div>}
+    <Table title={t.requests} rows={visible} canManage={false} t={t} columns={[...(canViewAll?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'request_date',label:t.date},{key:'request_type',label:t.requestType},{key:'requested_minutes',label:t.requestedMinutes},{key:'amount',label:t.amount},{key:'reason',label:t.reason},{key:'status',label:t.approvalStatus}]}/>
+  </>
+}
+
+function TargetPlanPage({ profile, plans, onSaved, lang, canViewAll=false, staff=[] }) {
+  const t = TEXT[lang]
+  const initial = { target_month: thisMonthISO(), monthly_target: 0, current_achievement: 0, action_plan: '', expected_challenges: '', support_needed: '' }
+  const [form, setForm, draftSaved, clearDraft] = useAutoSavedForm(`gymzaman_target_plan_${profile.id}`, initial)
+  const [msg, setMsg] = useState('')
+  function f(k,v){ setForm(p => ({...p,[k]:v})) }
+  async function submit(e){ e.preventDefault(); const payload = { trainer_id: profile.id, branch_id: profile.branch_id, target_month: form.target_month, monthly_target: Number(form.monthly_target||0), current_achievement: Number(form.current_achievement||0), action_plan: form.action_plan, expected_challenges: form.expected_challenges, support_needed: form.support_needed, created_by: profile.id, updated_by: profile.id }; const { data, error } = await supabase.from('monthly_target_plans').upsert(payload, { onConflict: 'trainer_id,target_month' }).select('id').single(); if(error)setMsg(error.message); else { await logAudit(profile.id, 'upsert', 'monthly_target_plan', data?.id, payload); setMsg(t.targetPlanSaved); clearDraft(initial); onSaved() } }
+  const visible = canViewAll ? plans.map(r => ({...r, trainer_name: displayCoachName(staff.find(s => s.id === r.trainer_id))})) : plans.filter(r => r.trainer_id === profile.id)
+  return <>
+    {['trainer','senior','head_coach'].includes(profile.role) && <div className="card compact-card"><h3><ClipboardList size={18}/>{t.targetPlan}</h3><form className="grid-form simple-form" onSubmit={submit}>
+      <div><label>{t.targetMonth}</label><input type="month" value={form.target_month} onChange={e=>f('target_month',e.target.value)}/></div><div><label>{t.monthlyTarget}</label><input type="number" value={form.monthly_target} onChange={e=>f('monthly_target',e.target.value)}/></div><div><label>{t.currentAchievement}</label><input type="number" value={form.current_achievement} onChange={e=>f('current_achievement',e.target.value)}/></div>
+      <div className="full"><label>{t.actionPlan}</label><textarea value={form.action_plan} onChange={e=>f('action_plan',e.target.value)}/></div><div className="full"><label>{t.expectedChallenges}</label><textarea value={form.expected_challenges} onChange={e=>f('expected_challenges',e.target.value)}/></div><div className="full"><label>{t.supportNeeded}</label><textarea value={form.support_needed} onChange={e=>f('support_needed',e.target.value)}/></div>
+      {draftSaved && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}{msg && <div className={msg.includes('success') || msg.includes('بنجاح') ? 'success full' : 'error full'}>{msg}</div>}<button>{t.save}</button>
+    </form></div>}
+    <Table title={t.targetPlan} rows={visible} canManage={false} t={t} columns={[...(canViewAll?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'target_month',label:t.targetMonth},{key:'monthly_target',label:t.monthlyTarget},{key:'current_achievement',label:t.currentAchievement},{key:'action_plan',label:t.actionPlan},{key:'support_needed',label:t.supportNeeded}]}/>
+  </>
+}
+
+function TrainerTasksPage({ profile, staff, tasks, onSaved, lang, canAssign=false, canViewAll=false }) {
+  const t = TEXT[lang]
+  const trainers = staff.filter(s => ['trainer','senior','head_coach'].includes(s.role))
+  const initial = { trainer_id: trainers[0]?.id || '', task_title: '', task_details: '', due_date: todayISO(), priority: 'normal' }
+  const [form, setForm, draftSaved, clearDraft] = useAutoSavedForm(`gymzaman_tasks_${profile.id}`, initial)
+  const [msg, setMsg] = useState('')
+  useEffect(() => { if (!form.trainer_id && trainers[0]?.id) setForm(p => ({...p, trainer_id: trainers[0].id})) }, [staff.length])
+  function f(k,v){ setForm(p => ({...p,[k]:v})) }
+  async function submit(e){ e.preventDefault(); const tr = trainers.find(x => x.id === form.trainer_id); const payload = { trainer_id: form.trainer_id, branch_id: tr?.branch_id || profile.branch_id, task_title: form.task_title, task_details: form.task_details, due_date: form.due_date || null, priority: form.priority, status: 'pending', assigned_by: profile.id }; const { data, error } = await supabase.from('trainer_tasks').insert(payload).select('id').single(); if(error)setMsg(error.message); else { await logAudit(profile.id, 'insert', 'trainer_task', data?.id, payload); setMsg(t.taskSaved); clearDraft(initial); onSaved() } }
+  async function markDone(task){ const { error } = await supabase.from('trainer_tasks').update({ status: 'done', completed_at: new Date().toISOString(), completed_by: profile.id }).eq('id', task.id); if(error) alert(error.message); else { await logAudit(profile.id, 'done', 'trainer_task', task.id, {}); onSaved() } }
+  const visibleBase = canViewAll ? tasks : tasks.filter(r => r.trainer_id === profile.id)
+  const visible = visibleBase.map(r => ({...r, trainer_name: displayCoachName(staff.find(s => s.id === r.trainer_id))}))
+  return <>
+    {canAssign && <div className="card compact-card"><h3><UserCog size={18}/>{t.assignTask}</h3><form className="grid-form simple-form" onSubmit={submit}>
+      <div><label>{t.trainerEmail}</label><select value={form.trainer_id} onChange={e=>f('trainer_id',e.target.value)}>{trainers.map(tr => <option key={tr.id} value={tr.id}>{displayCoachName(tr)} • {tr.branch_name || ''}</option>)}</select></div>
+      <div><label>{t.taskTitle}</label><input value={form.task_title} onChange={e=>f('task_title',e.target.value)}/></div><div><label>{t.dueDate}</label><input type="date" value={form.due_date} onChange={e=>f('due_date',e.target.value)}/></div><div><label>{t.priority}</label><select value={form.priority} onChange={e=>f('priority',e.target.value)}><option>low</option><option>normal</option><option>high</option><option>urgent</option></select></div>
+      <div className="full"><label>{t.taskDetails}</label><textarea value={form.task_details} onChange={e=>f('task_details',e.target.value)}/></div>
+      {draftSaved && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}{msg && <div className={msg.includes('success') || msg.includes('بنجاح') ? 'success full' : 'error full'}>{msg}</div>}<button>{t.save}</button>
+    </form></div>}
+    <div className="card"><h3>{t.trainerTasks}</h3>{visible.length===0?<p className="muted">{t.noData}</p>:<div className="table-wrap"><table><thead><tr>{canViewAll&&<th>{t.trainerEmail}</th>}<th>{t.taskTitle}</th><th>{t.dueDate}</th><th>{t.priority}</th><th>{t.taskStatus}</th><th>{t.taskDetails}</th>{!canViewAll&&<th>{t.control}</th>}</tr></thead><tbody>{visible.map(task=><tr key={task.id}>{canViewAll&&<td>{task.trainer_name}</td>}<td>{task.task_title}</td><td>{task.due_date}</td><td>{task.priority}</td><td>{task.status}</td><td>{task.task_details}</td>{!canViewAll&&<td>{task.status!=='done' && <button className="small-action edit" type="button" onClick={()=>markDone(task)}>{t.markDone}</button>}</td>}</tr>)}</tbody></table></div>}</div>
+  </>
+}
+
 function Dashboard({ profile, lang }) {
   const t=TEXT[lang]
-  const [clients,setClients]=useState([]), [logs,setLogs]=useState([]), [attendanceLogs,setAttendanceLogs]=useState([]), [branches,setBranches]=useState([]), [programs,setPrograms]=useState([]), [staff,setStaff]=useState([]), [seniorReports,setSeniorReports]=useState([]), [headReports,setHeadReports]=useState([]), [evaluations,setEvaluations]=useState([]), [receptionLogs,setReceptionLogs]=useState([]), [salesLeads,setSalesLeads]=useState([]), [auditLogs,setAuditLogs]=useState([])
+  const [clients,setClients]=useState([]), [logs,setLogs]=useState([]), [attendanceLogs,setAttendanceLogs]=useState([]), [branches,setBranches]=useState([]), [programs,setPrograms]=useState([]), [staff,setStaff]=useState([]), [seniorReports,setSeniorReports]=useState([]), [headReports,setHeadReports]=useState([]), [evaluations,setEvaluations]=useState([]), [receptionLogs,setReceptionLogs]=useState([]), [salesLeads,setSalesLeads]=useState([]), [auditLogs,setAuditLogs]=useState([]), [coachShifts,setCoachShifts]=useState([]), [coachRequests,setCoachRequests]=useState([]), [targetPlans,setTargetPlans]=useState([]), [trainerTasks,setTrainerTasks]=useState([])
   const [loading,setLoading]=useState(true), [notice,setNotice]=useState(''), [edit,setEdit]=useState(null), [selectedTrainerId,setSelectedTrainerId]=useState('all'), [selectedClientId,setSelectedClientId]=useState(''), [activeTab,setActiveTab]=useState('overview'), [searchQuery,setSearchQuery]=useState('')
   const isOwner=profile.role==='owner', isDirector=profile.role==='fitness_director', isAdmin=profile.role==='owner'||profile.role==='fitness_director', isControlAdmin=profile.role==='owner'||profile.role==='fitness_director', isTrainer=profile.role==='trainer', isSenior=profile.role==='senior', isHeadCoach=profile.role==='head_coach', isBranchLeader=['senior','head_coach'].includes(profile.role), isReception=profile.role==='reception', isSales=profile.role==='sales'
 
@@ -1365,17 +1580,22 @@ function Dashboard({ profile, lang }) {
       supabase.from('attendance_logs').select('*').order('created_at',{ascending:false}),
       isControlAdmin ? supabase.from('reception_logs').select('*').order('created_at',{ascending:false}) : Promise.resolve({data:[], error:null}),
       isControlAdmin ? supabase.from('sales_leads').select('*').order('created_at',{ascending:false}) : Promise.resolve({data:[], error:null}),
-      isControlAdmin ? supabase.from('audit_logs').select('*').order('created_at',{ascending:false}).limit(150) : Promise.resolve({data:[], error:null})
+      isControlAdmin ? supabase.from('audit_logs').select('*').order('created_at',{ascending:false}).limit(150) : Promise.resolve({data:[], error:null}),
+      supabase.from('coach_shifts').select('*').order('shift_date',{ascending:false}),
+      supabase.from('coach_requests').select('*').order('created_at',{ascending:false}),
+      supabase.from('monthly_target_plans').select('*').order('target_month',{ascending:false}),
+      supabase.from('trainer_tasks').select('*').order('created_at',{ascending:false})
     ]
     if (!isTrainer) calls.push(supabase.from('profiles').select('id, full_name, email, role, branch_id, branch_name, status, active').order('full_name'))
     const res = await Promise.all(calls)
-    const [c,l,b,p,sr,e,hr,a,rec,sales,au,s] = res
-    if(c.error)setNotice(c.error.message); if(p.error)setNotice(p.error.message); if(sr.error)setNotice(sr.error.message); if(e.error)setNotice(e.error.message); if(hr.error)setNotice(hr.error.message); if(a.error)setNotice(a.error.message); if(rec.error)setNotice(rec.error.message); if(sales.error)setNotice(sales.error.message); if(au.error)setNotice(au.error.message); if(s?.error)setNotice(s.error.message)
-    setClients(c.data||[]); setLogs(l.data||[]); setBranches(b.data||[]); setPrograms(p.data||[]); setSeniorReports(sr.data||[]); setEvaluations(e.data||[]); setHeadReports(hr.data||[]); setAttendanceLogs(a.data||[]); setReceptionLogs(rec.data||[]); setSalesLeads(sales.data||[]); setAuditLogs(au.data||[]); setStaff(s?.data||[])
+    const [c,l,b,p,sr,e,hr,a,rec,sales,au,shifts,requests,plans,tasks,s] = res
+    if(c.error)setNotice(c.error.message); if(p.error)setNotice(p.error.message); if(sr.error)setNotice(sr.error.message); if(e.error)setNotice(e.error.message); if(hr.error)setNotice(hr.error.message); if(a.error)setNotice(a.error.message); if(rec.error)setNotice(rec.error.message); if(sales.error)setNotice(sales.error.message); if(au.error)setNotice(au.error.message); if(shifts.error)setNotice(shifts.error.message); if(requests.error)setNotice(requests.error.message); if(plans.error)setNotice(plans.error.message); if(tasks.error)setNotice(tasks.error.message); if(s?.error)setNotice(s.error.message)
+    setClients(c.data||[]); setLogs(l.data||[]); setBranches(b.data||[]); setPrograms(p.data||[]); setSeniorReports(sr.data||[]); setEvaluations(e.data||[]); setHeadReports(hr.data||[]); setAttendanceLogs(a.data||[]); setReceptionLogs(rec.data||[]); setSalesLeads(sales.data||[]); setAuditLogs(au.data||[]); setCoachShifts(shifts.data||[]); setCoachRequests(requests.data||[]); setTargetPlans(plans.data||[]); setTrainerTasks(tasks.data||[]); setStaff(s?.data||[])
     setLoading(false)
   }
 
   useEffect(()=>{load()},[])
+  useEffect(()=>{ const handler = e => setActiveTab(e.detail); window.addEventListener('gymzaman:navigate', handler); return () => window.removeEventListener('gymzaman:navigate', handler) },[])
 
   async function del(table,row,label){ if(!confirm(`Delete ${label}?`)) return; const {error}=await supabase.from(table).delete().eq('id',row.id); if(error)alert(error.message); else { await logAudit(profile.id, 'delete', table, row.id, { label }); load() } }
 
@@ -1439,6 +1659,11 @@ function Dashboard({ profile, lang }) {
     {key:'overview', label:t.tabOverview},
     {key:'addClient', label:t.addClientPage},
     {key:'trainerData', label:t.tabTrainerData},
+    {key:'shifts', label:t.shiftPlanner},
+    {key:'attendancePage', label:t.attendancePage},
+    {key:'requests', label:t.requests},
+    {key:'targetPlan', label:t.targetPlan},
+    {key:'tasks', label:t.trainerTasks},
     {key:'reports', label:t.tabReports},
     {key:'reception', label:t.reception},
     {key:'sales', label:t.sales},
@@ -1446,6 +1671,10 @@ function Dashboard({ profile, lang }) {
   ] : [
     {key:'overview', label:t.tabOverview},
     ...(!['reception','sales'].includes(profile.role) ? [{key:'addClient', label:t.addClientPage}] : []),
+    {key:'attendancePage', label:t.attendancePage},
+    {key:'requests', label:t.requests},
+    {key:'targetPlan', label:t.targetPlan},
+    {key:'tasks', label:t.trainerTasks},
     {key:'inputs', label:t.tabInputs},
     ...(['senior','head_coach'].includes(profile.role) ? [{key:'trainerData', label:t.tabTrainerData}] : []),
     ...(profile.role==='reception' ? [{key:'reception', label:t.reception}] : []),
@@ -1466,7 +1695,7 @@ function Dashboard({ profile, lang }) {
       <section className="stats-grid"><StatCard title={isAdmin?t.todayLogs:t.myLogs} value={totals.logs} icon={<CalendarDays/>}/><StatCard title={isAdmin?t.rotationToday:t.myClients} value={isAdmin?totals.rotation:visibleClients.length} icon={<Users/>}/><StatCard title={isAdmin?t.ptToday:t.myPrograms} value={isAdmin?totals.pt:visiblePrograms.length} icon={<Dumbbell/>}/><StatCard title={t.freeToday} value={totals.free} icon={<ClipboardList/>}/></section>
       {isAdmin && <div className="card note"><b>{t.adminNote}</b></div>}
       {isControlAdmin && <SecurityStatusCard t={t}/>}
-      {isControlAdmin && <BackupPanel t={t} data={{clients, logs, attendanceLogs, programs, staff, seniorReports, headReports, evaluations, receptionLogs, salesLeads, auditLogs}}/>}
+      {isControlAdmin && <BackupPanel t={t} data={{clients, logs, attendanceLogs, programs, staff, seniorReports, headReports, evaluations, receptionLogs, salesLeads, auditLogs, coachShifts, coachRequests, targetPlans, trainerTasks}}/>}
       {(isAdmin || isBranchLeader) && <PerformanceDashboard staff={isAdmin?staff:branchStaff} clients={visibleClients} logs={visibleLogs} attendanceLogs={visibleAttendanceRaw} t={t}/>}
       {(isAdmin || isBranchLeader) && <AlertsPanel staff={isAdmin?staff:branchStaff} logs={visibleLogs} attendanceLogs={visibleAttendanceRaw} seniorReports={visibleSeniorReportsRaw} evaluations={visibleEvaluationsRaw} t={t}/>}
       {isAdmin && <BranchComparisonDashboard branches={branches} staff={staff} clients={clients} logs={logs} programs={programs} attendanceLogs={attendanceLogs} seniorReports={seniorReports} headReports={headReports} t={t}/>}
@@ -1494,6 +1723,16 @@ function Dashboard({ profile, lang }) {
       <Table title={isTrainer?t.myLogs:t.logs} rows={visibleLogsRows} canEdit={isAdmin || isBranchLeader} canDelete={isControlAdmin} onEdit={r=>setEdit({type:'log',row:r})} onDelete={r=>del('trainer_daily_logs',r,r.log_date)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'log_date',label:t.date},{key:'shift',label:t.shift},{key:'rotation_count',label:t.rotation},{key:'pt_sessions_count',label:t.ptSessions},{key:'free_service_count',label:t.freeService},{key:'notes',label:t.notes}]}/>
       <Table title={isTrainer?t.myPrograms:t.programs} rows={visiblePrograms} canEdit={isAdmin || isBranchLeader} canDelete={isControlAdmin} onEdit={r=>setEdit({type:'program',row:r})} onDelete={r=>del('pt_programs',r,r.program_name)} t={t} columns={[...((isAdmin||isBranchLeader)?[{key:'trainer_name',label:t.trainerEmail}]:[]),{key:'client_name',label:t.clientName},{key:'program_name',label:t.programName},{key:'goal',label:t.goal},{key:'duration_weeks',label:t.duration},{key:'status',label:t.status}]}/>
     </>}
+
+    {activeTab === 'shifts' && isControlAdmin && <ShiftPlannerPage profile={profile} staff={staff} branches={branches} shifts={coachShifts} onSaved={load} lang={lang}/>}
+
+    {activeTab === 'attendancePage' && <AttendancePunchPage profile={profile} staff={staff} shifts={coachShifts} attendanceLogs={attendanceLogs} onSaved={load} lang={lang} canViewAll={isControlAdmin}/>}
+
+    {activeTab === 'requests' && <CoachRequestsPage profile={profile} requests={coachRequests} onSaved={load} lang={lang} canViewAll={isControlAdmin} staff={staff}/>}
+
+    {activeTab === 'targetPlan' && <TargetPlanPage profile={profile} plans={targetPlans} onSaved={load} lang={lang} canViewAll={isControlAdmin} staff={staff}/>}
+
+    {activeTab === 'tasks' && <TrainerTasksPage profile={profile} staff={staff} tasks={trainerTasks} onSaved={load} lang={lang} canAssign={isControlAdmin} canViewAll={isControlAdmin}/>}
 
     {activeTab === 'inputs' && <>
       {(isTrainer || isSenior || isHeadCoach)&&<AttendanceForm profile={profile} onSaved={load} lang={lang}/>}
