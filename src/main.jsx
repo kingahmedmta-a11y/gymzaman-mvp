@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { supabase } from './supabase'
-import { LogOut, Users, Dumbbell, ClipboardList, UserRound, ShieldCheck, PlusCircle, CalendarDays, Pencil, Trash2, X, Languages, LockKeyhole, Search, UserCog, Save } from 'lucide-react'
+import { LogOut, Users, Dumbbell, ClipboardList, UserRound, ShieldCheck, PlusCircle, CalendarDays, Pencil, Trash2, X, Languages, LockKeyhole, Search, UserCog, Save, Download, RefreshCw } from 'lucide-react'
 import './styles.css'
 
 const TEXT = {
@@ -117,6 +117,14 @@ Object.assign(TEXT.en, {
   automaticAttendanceSummary: 'Automatic Attendance Summary', totalDelayMinutes: 'Total Delay Minutes', totalOvertimeMinutes: 'Total Overtime Minutes', totalAbsenceDays: 'Total Absence Days',
   totalPermissionMinutes: 'Total Permission Minutes', approvedPermissions: 'Approved Permissions', pendingRequests: 'Pending Requests', approve: 'Approve', reject: 'Reject', approvalNote: 'Approval / Rejection Note', approvedBy: 'Approved By', reviewedAt: 'Reviewed At',
   separatePagesNote: 'Each module is placed on a separate clear page, with automatic saving and aggregation.'
+})
+
+
+Object.assign(TEXT.ar, {
+  headCoachReportsPage: 'تقارير الهيد كوتش', trainerBranchReport: 'تقرير عن مدرب', branchDailyReport: 'تقرير يومي عن الفرع', saveTrainerReport: 'حفظ تقرير المدرب', saveBranchReport: 'حفظ تقرير الفرع', trainerReportSaved: 'تم حفظ تقرير المدرب بنجاح.', branchReportSaved: 'تم حفظ تقرير الفرع بنجاح.', trainerPerformance: 'أداء المدرب', trainerCommitment: 'التزام المدرب', serviceQuality: 'جودة الخدمة', coachIssue: 'مشكلة أو ملاحظة على المدرب', actionRequired: 'الإجراء المطلوب', branchTraffic: 'ضغط الفرع', presentTrainers: 'المدربين الحاضرين', absentTrainers: 'المدربين الغائبين', branchMainIssues: 'أهم مشاكل الفرع', branchActions: 'إجراءات تمت اليوم', systemTools: 'حفظ وبدء شهر جديد', exportBranchBackup: 'حفظ نسخة الفرع', exportSystemBackup: 'حفظ نسخة كل السيستم', resetNewMonth: 'تصفير وبداية شهر جديد', resetWarning: 'تنبيه مهم: التصفير يحذف بيانات التشغيل الشهرية فقط ولا يحذف حسابات المدربين أو الفروع.', resetScope: 'نطاق التصفير', includeClientsReset: 'حذف العملاء والبرامج أيضًا', resetConfirmText: 'اكتب RESET للتأكيد', resetDone: 'تم تصفير البيانات المختارة بنجاح.', backupDone: 'تم تحميل النسخة الاحتياطية بنجاح.'
+})
+Object.assign(TEXT.en, {
+  headCoachReportsPage: 'Head Coach Reports', trainerBranchReport: 'Trainer Report', branchDailyReport: 'Daily Branch Report', saveTrainerReport: 'Save Trainer Report', saveBranchReport: 'Save Branch Report', trainerReportSaved: 'Trainer report saved successfully.', branchReportSaved: 'Branch report saved successfully.', trainerPerformance: 'Trainer Performance', trainerCommitment: 'Trainer Commitment', serviceQuality: 'Service Quality', coachIssue: 'Coach Issue / Note', actionRequired: 'Required Action', branchTraffic: 'Branch Traffic', presentTrainers: 'Present Trainers', absentTrainers: 'Absent Trainers', branchMainIssues: 'Main Branch Issues', branchActions: 'Actions Taken Today', systemTools: 'Backup & New Month', exportBranchBackup: 'Export Branch Backup', exportSystemBackup: 'Export Full System Backup', resetNewMonth: 'Reset and Start New Month', resetWarning: 'Important: reset deletes operational monthly data only. It does not delete trainer accounts or branches.', resetScope: 'Reset Scope', includeClientsReset: 'Also delete clients and programs', resetConfirmText: 'Type RESET to confirm', resetDone: 'Selected data reset successfully.', backupDone: 'Backup downloaded successfully.'
 })
 
 const ROLE_OPTIONS = ['trainer', 'senior', 'head_coach', 'reception', 'sales', 'fitness_director', 'owner']
@@ -279,7 +287,9 @@ function Layout({ profile, children, lang, setLang }) {
     { key: 'requests', label: t.requests, icon: <ClipboardList size={18}/> },
     { key: 'targetPlan', label: t.targetPlan, icon: <ClipboardList size={18}/> },
     { key: 'tasks', label: t.trainerTasks, icon: <UserCog size={18}/> },
+    { key: 'headCoachReports', label: t.headCoachReportsPage, icon: <ClipboardList size={18}/>, roles: ['head_coach','owner','fitness_director'] },
     { key: 'reports', label: t.tabReports, icon: <ClipboardList size={18}/> },
+    { key: 'systemTools', label: t.systemTools, icon: <RefreshCw size={18}/>, roles: ['owner','fitness_director'] },
     { key: 'reception', label: t.reception, icon: <Users size={18}/>, roles: ['owner','fitness_director','reception'] },
     { key: 'sales', label: t.sales, icon: <PlusCircle size={18}/>, roles: ['owner','fitness_director','sales'] },
     { key: 'staff', label: t.staffManagement, icon: <UserCog size={18}/>, roles: ['owner','fitness_director'] }
@@ -1699,9 +1709,154 @@ function TrainerTasksPage({ profile, staff, tasks, onSaved, lang, canAssign=fals
   </>
 }
 
+
+function HeadCoachReportsPage({ profile, staff, branches, trainerReports, branchReports, onSaved, lang, canViewAll=false }) {
+  const t = TEXT[lang]
+  const branchTrainers = staff.filter(s => ['trainer','senior'].includes(s.role) && (canViewAll || s.branch_id === profile.branch_id))
+  const initialTrainer = { trainer_id: branchTrainers[0]?.id || '', report_date: todayISO(), performance_score: 80, commitment_score: 80, service_score: 80, issue: '', action_required: '', notes: '' }
+  const initialBranch = { report_date: todayISO(), branch_id: profile.branch_id || branches[0]?.id || '', present_trainers: 0, absent_trainers: 0, branch_traffic: 'normal', main_issues: '', actions_taken: '', notes: '' }
+  const [trainerForm, setTrainerForm, trainerDraft, clearTrainerDraft] = useAutoSavedForm(`gymzaman_head_trainer_report_${profile.id}`, initialTrainer)
+  const [branchForm, setBranchForm, branchDraft, clearBranchDraft] = useAutoSavedForm(`gymzaman_branch_daily_report_${profile.id}`, initialBranch)
+  const [msg, setMsg] = useState('')
+  useEffect(() => { if (!trainerForm.trainer_id && branchTrainers[0]?.id) setTrainerForm(p => ({...p, trainer_id: branchTrainers[0].id})) }, [branchTrainers.length])
+  function ft(k,v){ setTrainerForm(p => ({...p,[k]:v})) }
+  function fb(k,v){ setBranchForm(p => ({...p,[k]:v})) }
+  async function submitTrainer(e) {
+    e.preventDefault()
+    const tr = branchTrainers.find(x => x.id === trainerForm.trainer_id)
+    const payload = {
+      head_coach_id: profile.id,
+      trainer_id: trainerForm.trainer_id,
+      branch_id: tr?.branch_id || profile.branch_id,
+      report_date: trainerForm.report_date,
+      performance_score: Number(trainerForm.performance_score||0),
+      commitment_score: Number(trainerForm.commitment_score||0),
+      service_score: Number(trainerForm.service_score||0),
+      issue: trainerForm.issue,
+      action_required: trainerForm.action_required,
+      notes: trainerForm.notes,
+      created_by: profile.id,
+      updated_by: profile.id
+    }
+    const { data, error } = await supabase.from('head_coach_trainer_reports').insert(payload).select('id').single()
+    if (error) setMsg(error.message)
+    else { await logAudit(profile.id, 'insert', 'head_coach_trainer_report', data?.id, payload); setMsg(t.trainerReportSaved); clearTrainerDraft(initialTrainer); onSaved() }
+  }
+  async function submitBranch(e) {
+    e.preventDefault()
+    const payload = {
+      head_coach_id: profile.id,
+      branch_id: branchForm.branch_id || profile.branch_id,
+      report_date: branchForm.report_date,
+      present_trainers: Number(branchForm.present_trainers||0),
+      absent_trainers: Number(branchForm.absent_trainers||0),
+      branch_traffic: branchForm.branch_traffic,
+      main_issues: branchForm.main_issues,
+      actions_taken: branchForm.actions_taken,
+      notes: branchForm.notes,
+      created_by: profile.id,
+      updated_by: profile.id
+    }
+    const { data, error } = await supabase.from('branch_daily_reports').insert(payload).select('id').single()
+    if (error) setMsg(error.message)
+    else { await logAudit(profile.id, 'insert', 'branch_daily_report', data?.id, payload); setMsg(t.branchReportSaved); clearBranchDraft(initialBranch); onSaved() }
+  }
+  const trainerRows = (canViewAll ? trainerReports : trainerReports.filter(r => r.branch_id === profile.branch_id || r.head_coach_id === profile.id)).map(r => ({...r, trainer_name: displayCoachName(staff.find(s => s.id === r.trainer_id)), head_name: displayCoachName(staff.find(s => s.id === r.head_coach_id))}))
+  const branchRows = (canViewAll ? branchReports : branchReports.filter(r => r.branch_id === profile.branch_id || r.head_coach_id === profile.id)).map(r => ({...r, branch_name: branches.find(b => b.id === r.branch_id)?.name || '-', head_name: displayCoachName(staff.find(s => s.id === r.head_coach_id))}))
+  return <>
+    <div className="card section-intro"><h3><ClipboardList size={18}/>{t.headCoachReportsPage}</h3><p className="muted">الهيد كوتش يقدر يبعت تقرير عن كل مدرب في فرعه، وتقرير يومي عام عن المدربين والفرع. الأونر والفيتنس ديركتور يشوفوا كل الفروع.</p></div>
+    {profile.role === 'head_coach' && <>
+      <div className="card compact-card"><h3>{t.trainerBranchReport}</h3><form className="grid-form simple-form" onSubmit={submitTrainer}>
+        <div><label>{t.trainerEmail}</label><select value={trainerForm.trainer_id} onChange={e=>ft('trainer_id',e.target.value)}>{branchTrainers.map(tr=><option key={tr.id} value={tr.id}>{displayCoachName(tr)}</option>)}</select></div>
+        <div><label>{t.date}</label><input type="date" value={trainerForm.report_date} onChange={e=>ft('report_date',e.target.value)}/></div>
+        <div><label>{t.trainerPerformance}</label><input type="number" min="0" max="100" value={trainerForm.performance_score} onChange={e=>ft('performance_score',e.target.value)}/></div>
+        <div><label>{t.trainerCommitment}</label><input type="number" min="0" max="100" value={trainerForm.commitment_score} onChange={e=>ft('commitment_score',e.target.value)}/></div>
+        <div><label>{t.serviceQuality}</label><input type="number" min="0" max="100" value={trainerForm.service_score} onChange={e=>ft('service_score',e.target.value)}/></div>
+        <div className="full"><label>{t.coachIssue}</label><textarea value={trainerForm.issue} onChange={e=>ft('issue',e.target.value)}/></div>
+        <div className="full"><label>{t.actionRequired}</label><textarea value={trainerForm.action_required} onChange={e=>ft('action_required',e.target.value)}/></div>
+        <div className="full"><label>{t.notes}</label><textarea value={trainerForm.notes} onChange={e=>ft('notes',e.target.value)}/></div>
+        {trainerDraft && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}<button>{t.saveTrainerReport}</button>
+      </form></div>
+      <div className="card compact-card"><h3>{t.branchDailyReport}</h3><form className="grid-form simple-form" onSubmit={submitBranch}>
+        <div><label>{t.date}</label><input type="date" value={branchForm.report_date} onChange={e=>fb('report_date',e.target.value)}/></div>
+        <div><label>{t.presentTrainers}</label><input type="number" value={branchForm.present_trainers} onChange={e=>fb('present_trainers',e.target.value)}/></div>
+        <div><label>{t.absentTrainers}</label><input type="number" value={branchForm.absent_trainers} onChange={e=>fb('absent_trainers',e.target.value)}/></div>
+        <div><label>{t.branchTraffic}</label><select value={branchForm.branch_traffic} onChange={e=>fb('branch_traffic',e.target.value)}><option>low</option><option>normal</option><option>high</option><option>very high</option></select></div>
+        <div className="full"><label>{t.branchMainIssues}</label><textarea value={branchForm.main_issues} onChange={e=>fb('main_issues',e.target.value)}/></div>
+        <div className="full"><label>{t.branchActions}</label><textarea value={branchForm.actions_taken} onChange={e=>fb('actions_taken',e.target.value)}/></div>
+        <div className="full"><label>{t.notes}</label><textarea value={branchForm.notes} onChange={e=>fb('notes',e.target.value)}/></div>
+        {branchDraft && <div className="draft-hint full"><Save size={14}/>{t.autoSavedDraft}</div>}<button>{t.saveBranchReport}</button>
+      </form></div>
+    </>}
+    {msg && <div className={msg.includes('success') || msg.includes('بنجاح') ? 'success' : 'error'}>{msg}</div>}
+    <Table title={t.trainerBranchReport} rows={trainerRows} canManage={false} t={t} columns={[...(canViewAll?[{key:'head_name',label:t.headCoachReport}]:[]),{key:'trainer_name',label:t.trainerEmail},{key:'report_date',label:t.date},{key:'performance_score',label:t.trainerPerformance},{key:'commitment_score',label:t.trainerCommitment},{key:'service_score',label:t.serviceQuality},{key:'issue',label:t.coachIssue},{key:'action_required',label:t.actionRequired},{key:'notes',label:t.notes}]}/>
+    <Table title={t.branchDailyReport} rows={branchRows} canManage={false} t={t} columns={[...(canViewAll?[{key:'branch_name',label:t.branch}]:[]),{key:'report_date',label:t.date},{key:'present_trainers',label:t.presentTrainers},{key:'absent_trainers',label:t.absentTrainers},{key:'branch_traffic',label:t.branchTraffic},{key:'main_issues',label:t.branchMainIssues},{key:'actions_taken',label:t.branchActions},{key:'notes',label:t.notes}]}/>
+  </>
+}
+
+function SystemToolsPage({ profile, branches, dataBundle, onSaved, lang }) {
+  const t = TEXT[lang]
+  const [branchId, setBranchId] = useState('all')
+  const [includeClients, setIncludeClients] = useState(false)
+  const [confirmText, setConfirmText] = useState('')
+  const [msg, setMsg] = useState('')
+  const selectedBranchName = branchId === 'all' ? 'all-branches' : (branches.find(b => b.id === branchId)?.name || 'branch')
+  function branchFilter(rows, branchField='branch_id') { return branchId === 'all' ? rows : rows.filter(r => r[branchField] === branchId) }
+  function downloadJson(obj, filename) {
+    const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url)
+  }
+  function exportBackup() {
+    const backup = {
+      exported_at: new Date().toISOString(),
+      exported_by: profile.id,
+      branch_scope: branchId,
+      branches: branchId === 'all' ? branches : branches.filter(b => b.id === branchId),
+      profiles: branchId === 'all' ? dataBundle.staff : dataBundle.staff.filter(r => r.branch_id === branchId),
+      clients: branchFilter(dataBundle.clients),
+      trainer_daily_logs: branchFilter(dataBundle.logs),
+      attendance_logs: branchFilter(dataBundle.attendanceLogs),
+      coach_shifts: branchFilter(dataBundle.coachShifts),
+      coach_requests: branchFilter(dataBundle.coachRequests),
+      trainer_tasks: branchFilter(dataBundle.trainerTasks),
+      monthly_target_plans: branchFilter(dataBundle.targetPlans),
+      pt_programs: branchFilter(dataBundle.programs),
+      head_coach_trainer_reports: branchFilter(dataBundle.headTrainerReports),
+      branch_daily_reports: branchFilter(dataBundle.branchDailyReports),
+      reception_logs: branchFilter(dataBundle.receptionLogs),
+      sales_leads: branchFilter(dataBundle.salesLeads)
+    }
+    downloadJson(backup, `gym-zaman-backup-${selectedBranchName}-${todayISO()}.json`)
+    setMsg(t.backupDone)
+  }
+  async function resetMonth() {
+    if (confirmText !== 'RESET') { setMsg('اكتب RESET للتأكيد'); return }
+    if (!confirm('هل أنت متأكد؟ سيتم حذف بيانات التشغيل المختارة وبدء شهر جديد.')) return
+    const { data, error } = await supabase.rpc('gymzaman_reset_operational_data', { p_branch_id: branchId === 'all' ? null : branchId, p_include_clients: includeClients })
+    if (error) setMsg(error.message)
+    else { await logAudit(profile.id, 'reset_new_month', 'system', null, { branchId, includeClients }); setMsg(t.resetDone); setConfirmText(''); onSaved() }
+  }
+  return <>
+    <div className="card section-intro"><h3><RefreshCw size={18}/>{t.systemTools}</h3><p className="muted">الأونر والفيتنس ديركتور يقدروا يحفظوا نسخة JSON لكل فرع أو لكل السيستم، وبعدها يبدأوا شهر جديد بتصفير بيانات التشغيل فقط.</p></div>
+    <div className="card compact-card"><h3><Download size={18}/>{t.exportSystemBackup}</h3><div className="grid-form simple-form">
+      <div><label>{t.branch}</label><select value={branchId} onChange={e=>setBranchId(e.target.value)}><option value="all">{t.allBranches}</option>{branches.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}</select></div>
+      <div className="button-row"><button type="button" onClick={exportBackup}>{branchId === 'all' ? t.exportSystemBackup : t.exportBranchBackup}</button></div>
+    </div></div>
+    <div className="card compact-card danger-zone"><h3><RefreshCw size={18}/>{t.resetNewMonth}</h3><p className="muted">{t.resetWarning}</p><div className="grid-form simple-form">
+      <div><label>{t.resetScope}</label><select value={branchId} onChange={e=>setBranchId(e.target.value)}><option value="all">{t.allBranches}</option>{branches.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}</select></div>
+      <div className="checkbox-line"><label><input type="checkbox" checked={includeClients} onChange={e=>setIncludeClients(e.target.checked)}/> {t.includeClientsReset}</label></div>
+      <div><label>{t.resetConfirmText}</label><input value={confirmText} onChange={e=>setConfirmText(e.target.value)} placeholder="RESET"/></div>
+      <div className="button-row"><button className="danger-btn" type="button" onClick={resetMonth}>{t.resetNewMonth}</button></div>
+    </div></div>
+    {msg && <div className={msg.includes('success') || msg.includes('بنجاح') || msg.includes('تم') ? 'success' : 'error'}>{msg}</div>}
+  </>
+}
+
 function Dashboard({ profile, lang }) {
   const t=TEXT[lang]
-  const [clients,setClients]=useState([]), [logs,setLogs]=useState([]), [attendanceLogs,setAttendanceLogs]=useState([]), [branches,setBranches]=useState([]), [programs,setPrograms]=useState([]), [staff,setStaff]=useState([]), [seniorReports,setSeniorReports]=useState([]), [headReports,setHeadReports]=useState([]), [evaluations,setEvaluations]=useState([]), [receptionLogs,setReceptionLogs]=useState([]), [salesLeads,setSalesLeads]=useState([]), [auditLogs,setAuditLogs]=useState([]), [coachShifts,setCoachShifts]=useState([]), [coachRequests,setCoachRequests]=useState([]), [targetPlans,setTargetPlans]=useState([]), [trainerTasks,setTrainerTasks]=useState([])
+  const [clients,setClients]=useState([]), [logs,setLogs]=useState([]), [attendanceLogs,setAttendanceLogs]=useState([]), [branches,setBranches]=useState([]), [programs,setPrograms]=useState([]), [staff,setStaff]=useState([]), [seniorReports,setSeniorReports]=useState([]), [headReports,setHeadReports]=useState([]), [evaluations,setEvaluations]=useState([]), [receptionLogs,setReceptionLogs]=useState([]), [salesLeads,setSalesLeads]=useState([]), [auditLogs,setAuditLogs]=useState([]), [coachShifts,setCoachShifts]=useState([]), [coachRequests,setCoachRequests]=useState([]), [targetPlans,setTargetPlans]=useState([]), [trainerTasks,setTrainerTasks]=useState([]), [headTrainerReports,setHeadTrainerReports]=useState([]), [branchDailyReports,setBranchDailyReports]=useState([])
   const [loading,setLoading]=useState(true), [notice,setNotice]=useState(''), [edit,setEdit]=useState(null), [selectedTrainerId,setSelectedTrainerId]=useState('all'), [selectedClientId,setSelectedClientId]=useState(''), [activeTab,setActiveTab]=useState('overview'), [searchQuery,setSearchQuery]=useState('')
   const isOwner=profile.role==='owner', isDirector=profile.role==='fitness_director', isAdmin=profile.role==='owner'||profile.role==='fitness_director', isControlAdmin=profile.role==='owner'||profile.role==='fitness_director', isTrainer=profile.role==='trainer', isSenior=profile.role==='senior', isHeadCoach=profile.role==='head_coach', isBranchLeader=['senior','head_coach'].includes(profile.role), isReception=profile.role==='reception', isSales=profile.role==='sales'
 
@@ -1722,13 +1877,15 @@ function Dashboard({ profile, lang }) {
       supabase.from('coach_shifts').select('*').order('shift_date',{ascending:false}),
       supabase.from('coach_requests').select('*').order('created_at',{ascending:false}),
       supabase.from('monthly_target_plans').select('*').order('target_month',{ascending:false}),
-      supabase.from('trainer_tasks').select('*').order('created_at',{ascending:false})
+      supabase.from('trainer_tasks').select('*').order('created_at',{ascending:false}),
+      supabase.from('head_coach_trainer_reports').select('*').order('created_at',{ascending:false}),
+      supabase.from('branch_daily_reports').select('*').order('created_at',{ascending:false})
     ]
     if (!isTrainer) calls.push(supabase.from('profiles').select('id, full_name, email, role, branch_id, branch_name, status, active').order('full_name'))
     const res = await Promise.all(calls)
-    const [c,l,b,p,sr,e,hr,a,rec,sales,au,shifts,requests,plans,tasks,s] = res
-    if(c.error)setNotice(c.error.message); if(p.error)setNotice(p.error.message); if(sr.error)setNotice(sr.error.message); if(e.error)setNotice(e.error.message); if(hr.error)setNotice(hr.error.message); if(a.error)setNotice(a.error.message); if(rec.error)setNotice(rec.error.message); if(sales.error)setNotice(sales.error.message); if(au.error)setNotice(au.error.message); if(shifts.error)setNotice(shifts.error.message); if(requests.error)setNotice(requests.error.message); if(plans.error)setNotice(plans.error.message); if(tasks.error)setNotice(tasks.error.message); if(s?.error)setNotice(s.error.message)
-    setClients(c.data||[]); setLogs(l.data||[]); setBranches(b.data||[]); setPrograms(p.data||[]); setSeniorReports(sr.data||[]); setEvaluations(e.data||[]); setHeadReports(hr.data||[]); setAttendanceLogs(a.data||[]); setReceptionLogs(rec.data||[]); setSalesLeads(sales.data||[]); setAuditLogs(au.data||[]); setCoachShifts(shifts.data||[]); setCoachRequests(requests.data||[]); setTargetPlans(plans.data||[]); setTrainerTasks(tasks.data||[]); setStaff(s?.data||[])
+    const [c,l,b,p,sr,e,hr,a,rec,sales,au,shifts,requests,plans,tasks,htr,bdr,s] = res
+    if(c.error)setNotice(c.error.message); if(p.error)setNotice(p.error.message); if(sr.error)setNotice(sr.error.message); if(e.error)setNotice(e.error.message); if(hr.error)setNotice(hr.error.message); if(a.error)setNotice(a.error.message); if(rec.error)setNotice(rec.error.message); if(sales.error)setNotice(sales.error.message); if(au.error)setNotice(au.error.message); if(shifts.error)setNotice(shifts.error.message); if(requests.error)setNotice(requests.error.message); if(plans.error)setNotice(plans.error.message); if(tasks.error)setNotice(tasks.error.message); if(htr.error)setNotice(htr.error.message); if(bdr.error)setNotice(bdr.error.message); if(s?.error)setNotice(s.error.message)
+    setClients(c.data||[]); setLogs(l.data||[]); setBranches(b.data||[]); setPrograms(p.data||[]); setSeniorReports(sr.data||[]); setEvaluations(e.data||[]); setHeadReports(hr.data||[]); setAttendanceLogs(a.data||[]); setReceptionLogs(rec.data||[]); setSalesLeads(sales.data||[]); setAuditLogs(au.data||[]); setCoachShifts(shifts.data||[]); setCoachRequests(requests.data||[]); setTargetPlans(plans.data||[]); setTrainerTasks(tasks.data||[]); setHeadTrainerReports(htr.data||[]); setBranchDailyReports(bdr.data||[]); setStaff(s?.data||[])
     setLoading(false)
   }
 
@@ -1804,7 +1961,9 @@ function Dashboard({ profile, lang }) {
     {key:'requests', label:t.requests},
     {key:'targetPlan', label:t.targetPlan},
     {key:'tasks', label:t.trainerTasks},
+    {key:'headCoachReports', label:t.headCoachReportsPage},
     {key:'reports', label:t.tabReports},
+    {key:'systemTools', label:t.systemTools},
     {key:'reception', label:t.reception},
     {key:'sales', label:t.sales},
     {key:'staff', label:t.tabStaff}
@@ -1816,6 +1975,7 @@ function Dashboard({ profile, lang }) {
     {key:'requests', label:t.requests},
     {key:'targetPlan', label:t.targetPlan},
     {key:'tasks', label:t.trainerTasks},
+    ...(profile.role==='head_coach' ? [{key:'headCoachReports', label:t.headCoachReportsPage}] : []),
     {key:'inputs', label:t.tabInputs},
     ...(['senior','head_coach'].includes(profile.role) ? [{key:'trainerData', label:t.tabTrainerData}] : []),
     ...(profile.role==='reception' ? [{key:'reception', label:t.reception}] : []),
@@ -1881,6 +2041,10 @@ function Dashboard({ profile, lang }) {
 
     {activeTab === 'tasks' && <TrainerTasksPage profile={profile} staff={staff} tasks={trainerTasks} onSaved={load} lang={lang} canAssign={isControlAdmin} canViewAll={isControlAdmin}/>}
 
+    {activeTab === 'headCoachReports' && (isHeadCoach || isControlAdmin) && <HeadCoachReportsPage profile={profile} staff={staff} branches={branches} trainerReports={headTrainerReports} branchReports={branchDailyReports} onSaved={load} lang={lang} canViewAll={isControlAdmin}/>}
+
+    {activeTab === 'systemTools' && isControlAdmin && <SystemToolsPage profile={profile} branches={branches} lang={lang} onSaved={load} dataBundle={{staff, clients, logs, attendanceLogs, coachShifts, coachRequests, trainerTasks, targetPlans, programs, headTrainerReports, branchDailyReports, receptionLogs, salesLeads}}/>}
+
     {activeTab === 'inputs' && <>
       {(isTrainer || isSenior || isHeadCoach)&&<AttendanceForm profile={profile} onSaved={load} lang={lang}/>}
       {isTrainer&&<DailyLogForm profile={profile} onSaved={load} lang={lang}/>}
@@ -1909,6 +2073,7 @@ function Dashboard({ profile, lang }) {
       {(isAdmin || isSenior) && <Table title={t.seniorReport} rows={visibleSeniorReports} canEdit={false} canDelete={isControlAdmin} onDelete={r=>del('senior_daily_reports',r,r.report_date)} t={t} columns={[...(isAdmin?[{key:'senior_name',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'branch_pressure',label:t.branchPressure},{key:'total_sessions_done',label:t.totalSessionsDone},{key:'free_service_count',label:t.freeService},{key:'problem_description',label:t.problemDescription},{key:'floor_tasks',label:t.floorTasks},{key:'service_notes',label:t.serviceNotes},{key:'client_issues',label:t.clientIssues},{key:'actions_taken',label:t.actionsTaken},{key:'resolved',label:t.resolved},{key:'notes',label:t.notes}]}/>}
       {(isAdmin || isHeadCoach) && <Table title={t.headCoachReport} rows={visibleHeadReports} canEdit={false} canDelete={isControlAdmin} onDelete={r=>del('head_coach_daily_reports',r,r.report_date)} t={t} columns={[...(isAdmin?[{key:'head_coach_name',label:t.trainerEmail}]:[]),{key:'report_date',label:t.date},{key:'total_sessions_done',label:t.totalSessionsDone},{key:'free_service_count',label:t.freeService},{key:'rotation_count',label:t.rotation},{key:'tasks_done',label:t.tasksDone},{key:'follow_ups',label:t.followUps},{key:'trainer_issues',label:t.trainerIssues},{key:'branch_summary',label:t.branchSummary},{key:'notes',label:t.notes}]}/>}
       {(isAdmin || isHeadCoach) && <><div className="table-actions"><ExportButton rows={visibleEvaluations} filename="evaluations.csv" t={t}/></div><Table title={t.evaluationHistory} rows={visibleEvaluations} canEdit={false} canDelete={isControlAdmin} onDelete={r=>del('trainer_evaluations',r,r.evaluation_date)} t={t} columns={[{key:'trainer_name',label:t.trainerEmail},{key:'evaluation_date',label:t.date},{key:'technical_score',label:t.technicalScore},{key:'behavior_score',label:t.behaviorScore},{key:'leadership_score',label:t.leadershipScore},{key:'service_score',label:t.serviceScore},{key:'final_score',label:t.finalScore},{key:'grade',label:t.grade},{key:'recommendation',label:t.recommendation},{key:'evaluator_notes',label:t.evaluatorNotes}]}/></>}
+      {(isAdmin || isHeadCoach) && <HeadCoachReportsPage profile={profile} staff={staff} branches={branches} trainerReports={headTrainerReports} branchReports={branchDailyReports} onSaved={load} lang={lang} canViewAll={isControlAdmin}/>}
       {isAdmin && <AuditLogPanel auditLogs={auditLogs} staff={staff} t={t}/>}
     </>}
 
